@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from service.whisper_api import router_transcription, async_whisper, Models
+from app.whisper_api import router_transcription, async_whisper, Models
 from contextlib import asynccontextmanager
 
 
-# uvicorn service.main:app --reload --host localhost --port 8000
+# uvicorn app.main:app --reload --host localhost --port 8000
 
 
 @asynccontextmanager
