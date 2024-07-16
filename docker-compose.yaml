@@ -13,7 +13,7 @@ services:
       - "6432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - shared-data:/app/shared
+      - shared-data:/shared
     restart: always
     networks:
       - my_network
@@ -30,7 +30,7 @@ services:
     networks:
       - my_network
     volumes:
-      - shared-data:/app/shared
+      - shared-data:/shared
 
   whisper:
     container_name: service_whisper
@@ -44,7 +44,7 @@ services:
     networks:
       - my_network
     volumes:
-      - shared-data:/app/shared
+      - shared-data:/shared
 
 volumes:
   postgres-data:
