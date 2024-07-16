@@ -1,0 +1,55 @@
+version: '3.4'
+
+services:
+  db:
+    container_name: db_postgres
+    image: postgres:15.3-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+    ports:
+      - "6432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - shared-data:/app/shared
+    restart: always
+    networks:
+      - my_network
+
+  app:
+    container_name: app_fast_api
+    build: ./api
+    depends_on:
+      - db
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn app.main:app --host 0.0.0.0 --port 8000'
+    ports:
+      - 8001:8000
+    restart: always
+    networks:
+      - my_network
+    volumes:
+      - shared-data:/app/shared
+
+  whisper:
+    container_name: service_whisper
+    build: ./service
+    depends_on:
+      - app
+    command: bash -c 'pip insatll requirements.txt uvicorn service.main:app --host 0.0.0.0 --port 5000'
+    ports:
+      - 5000:5000
+    restart: always
+    networks:
+      - my_network
+    volumes:
+      - shared-data:/app/shared
+
+volumes:
+  postgres-data:
+  shared-data:
+
+networks:
+  my_network:
+    driver: bridge
