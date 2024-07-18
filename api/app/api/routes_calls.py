@@ -1,15 +1,14 @@
-import io
 from fastapi import APIRouter, HTTPException, Header, Response, UploadFile
-from fastapi.responses import FileResponse, StreamingResponse
-from app.api.jwt.jwt import verify_jwt_token
-from app.database.models import UserStatusesOrm, UserTeamOrm
-from app.api.models import AddresInfo
-from app.repository import Repository
+from .jwt.jwt import verify_jwt_token
+from api.app.repository import Repository
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from .utils import transcribe_audio_async
 import time
 
 
 router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
 
+calls_support_scheduler = AsyncIOScheduler(timezone="UTC")
 
 @router_calls.post("/add_call_info")
 async def call_info_add(file: UploadFile, info: str, phone_number: str, date_time: int, token_authorization: str | None = Header(default=None)):
@@ -40,3 +39,13 @@ async def get_call_record_filestream(user_id: int, record_id: int, token_authori
     if not file_data:
         raise HTTPException(status_code=404, detail="File not found")
     return Response(file_data, media_type="application/octet-stream")
+
+
+@router_calls.get("/order_call_transcription")
+async def order_call_transcription(user_id: int, record_id: int, token_authorization: str | None = Header(default=None)):
+    if not token_authorization:
+        raise HTTPException(status_code=400, detail="uncorrect header")
+    user = await verify_jwt_token(token_authorization)
+    job = calls_support_scheduler.add_job(func=transcribe_audio_async, trigger="interval", seconds=3)
+    calls_support_scheduler.start()
+    return { "transcription_task": job.id, "date_time": int(time.time())}

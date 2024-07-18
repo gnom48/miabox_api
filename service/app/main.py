@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.whisper_api import router_transcription, async_whisper, Models
+from .whisper_api import router_transcription, async_whisper, Models
 from contextlib import asynccontextmanager
 
 

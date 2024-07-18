@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException, Header, Request
-from .models import User, Statistics
-from ..repository import *
-from datetime import datetime
-from .jwt import create_jwt_token, verify_jwt_token
+from fastapi import APIRouter, HTTPException, Header
+from .models import UserKpiLevels
+from api.app.repository import Repository
+from .jwt import verify_jwt_token
 
 
 router_statistics = APIRouter(prefix="/user/statistics", tags=["Статистика"])

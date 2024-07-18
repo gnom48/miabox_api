@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Header
-from app.api.jwt.jwt import verify_jwt_token
-from app.database.models import UserStatusesOrm, UserTeamOrm
-from app.repository import Repository
+from .jwt.jwt import verify_jwt_token
+from api.app.database.models import UserStatusesOrm, UserTeamOrm
+from api.app.repository import Repository
 from .models import Team, UserTeam, UserStatuses
 
 

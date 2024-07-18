@@ -23,9 +23,9 @@ services:
     build: ./api
     depends_on:
       - db
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn app.main:app --host 0.0.0.0 --port 8000'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn api.app.main:app --host 0.0.0.0 --port 8000'
     ports:
-      - 8001:8000
+      - "8001:8000"
     restart: always
     networks:
       - my_network
@@ -35,11 +35,9 @@ services:
   whisper:
     container_name: service_whisper
     build: ./service
-    depends_on:
-      - app
-    command: bash -c 'pip insatll requirements.txt uvicorn service.main:app --host 0.0.0.0 --port 5000'
+    command: bash -c 'uvicorn service.app.main:app --host 0.0.0.0 --port 5000'
     ports:
-      - 5000:5000
+      - "5000:5000"
     restart: always
     networks:
       - my_network

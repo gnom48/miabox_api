@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from enum import Enum
 from datetime import datetime
 from typing import Dict, Optional, Union
-from app.database.models import TeamOrm, UserOrm
+from api.app.database.models import TeamOrm, UserOrm
 
 
 class StatisticPeriods(str, Enum):

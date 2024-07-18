@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Header, Request
-from ..repository import *
+from api.app.repository import *
+# from ..repository import *
 from .models import Note
 from .jwt import verify_jwt_token
 

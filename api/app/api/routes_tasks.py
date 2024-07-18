@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Header, Request
 from .models import Task
 from .jwt import verify_jwt_token
-from ..repository import *
+from api.app.repository import *
 
 
 router_tasks = APIRouter(prefix="/task", tags=["Задачи"])

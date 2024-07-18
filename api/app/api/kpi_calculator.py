@@ -1,4 +1,4 @@
-from app.api.models import UserKpiLevels
+from .models import UserKpiLevels
 
 
 class RealEstateAgentKPI:

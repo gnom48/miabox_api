@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Header, Request
 from .models import User, Statistics
-from ..repository import *
+from api.app.repository import *
 from datetime import datetime
 from .jwt import create_jwt_token, verify_jwt_token
 

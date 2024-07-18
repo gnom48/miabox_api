@@ -1,5 +1,5 @@
 from fastapi import UploadFile
-from app.api.kpi_calculator import RealEstateAgentKPI
+from .api.kpi_calculator import RealEstateAgentKPI
 from .database.orm import new_session
 from sqlalchemy.sql import text
 from .database.models import *
@@ -628,9 +628,7 @@ class Repository:
     async def get_call_record_from_storage(cls, user_id: int, record_id: int) -> bytes | None:
         async with new_session() as session:
             try:
-                call_record = await session.execute(
-                    select(CallsRecordsOrm).where(CallsRecordsOrm.id == record_id)
-                )
+                call_record = await session.execute(select(CallsRecordsOrm).where(CallsRecordsOrm.id == record_id))
                 call_record = call_record.scalars().first()
                 if call_record:
                     return call_record.data
@@ -638,3 +636,16 @@ class Repository:
                     return None
             except:
                 return None
+            
+
+    @classmethod
+    async def update_transcription(cls, user_id: int, record_id: int, transcription: str) -> int | None:
+        async with new_session() as session:
+            try:
+                req = await session.execute(select(UsersCallsOrm).where(UsersCallsOrm.user_id == user_id).where(UsersCallsOrm.user_id == user_id))
+                user_call = req.scalars().first()
+                user_call.transcription = transcription
+                await session.commit()
+                return True
+            except:
+                return False

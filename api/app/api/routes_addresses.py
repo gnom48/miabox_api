@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException, Header
-from app.api.jwt.jwt import verify_jwt_token
-from app.database.models import UserStatusesOrm, UserTeamOrm
-from app.api.models import AddresInfo
-from app.repository import Repository
+from .jwt.jwt import verify_jwt_token
+from api.app.database.models import UserStatusesOrm, UserTeamOrm
+from .models import AddresInfo
+from api.app.repository import Repository
+# from app.repository import Repository
 
 
 router_addresses = APIRouter(prefix="/address", tags=["Адреса"])
