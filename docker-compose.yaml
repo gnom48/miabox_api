@@ -34,13 +34,18 @@ services:
 
   redis:
     image: redis:latest
+    container_name: service_redis
     ports:
       - "6379:6379"
+    networks:
+      - my_network
 
   whisper:
     container_name: service_whisper
     build: ./service
     command: bash -c 'pip install celery redis; celery -A celery worker --loglevel=info --concurrency=1; uvicorn service.app.main:app --host 0.0.0.0 --port 5000'
+    depends_on:
+      - redis
     ports:
       - "5000:5000"
     restart: always
