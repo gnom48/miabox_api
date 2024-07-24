@@ -177,4 +177,7 @@ class UsersCallsOrm(BaseModelOrm):
     info = Column(String, default="")
     date_time = Column(Integer)
     phone_number = Column(String)
+    contact_name = Column(String)
+    length_seconds = Column(Integer)
+    call_type = Column(Integer)
     transcription = Column(String, default="no transcription")

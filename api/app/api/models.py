@@ -170,4 +170,7 @@ class UsersCalls(BaseModel):
     info: str | None
     date_time: int
     phone_number: str
+    contact_name: str
+    length_seconds: int
+    call_type: int
     transcription: str

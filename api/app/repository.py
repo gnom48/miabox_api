@@ -590,7 +590,10 @@ class Repository:
 
 
     @classmethod
-    async def add_call_record_to_storage(cls, user_id: int, file: UploadFile, phone_number: str, info: str, date_time: int) -> int | None:
+    async def add_call_record_to_storage(cls, 
+                                            user_id: int, file: UploadFile, phone_number: str,
+                                            contact_name: str, length_seconds: int, call_type: int,
+                                            info: str, date_time: int) -> int | None:
         async with new_session() as session:
             try:
                 file_to_save = CallsRecordsOrm()
@@ -604,6 +607,9 @@ class Repository:
                 user_call.date_time = date_time
                 user_call.info = info
                 user_call.phone_number = phone_number
+                user_call.contact_name = contact_name
+                user_call.call_type = call_type
+                user_call.length_seconds = length_seconds
                 user_call.transcription = None
                 user_call.record_id = file_to_save.id
                 session.add(user_call)
