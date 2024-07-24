@@ -32,6 +32,11 @@ services:
     volumes:
       - shared-data:/shared
 
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
   whisper:
     container_name: service_whisper
     build: ./service
