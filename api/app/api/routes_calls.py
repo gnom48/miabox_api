@@ -16,12 +16,13 @@ async def call_info_add(file: UploadFile, info: str, phone_number: str, date_tim
     if not token_authorization:
         raise HTTPException(status_code=400, detail="uncorrect header")
     user = await verify_jwt_token(token_authorization)
-    ret_val = await Repository.add_call_record_to_storage(user_id=user.id, file=file, date_time=date_time, info=info, phone_number=phone_number, length_seconds=length_seconds, call_type=call_type, contact_name=contact_name)
     try:
-        with open("/shared/calls/" + file.filename, "wb") as buffer:
+        with open("/shared/calls/" + f"{user.id}_" + file.filename, "wb") as buffer:
             copyfileobj(file.file, buffer)
+        print(f"Принят файл: {file.filename} - {file.size} | {file.content_type}")
     except IOError as e:
         raise HTTPException(status_code=501, detail="file format error")
+    ret_val = await Repository.add_call_record_to_storage(user_id=user.id, file=file, date_time=date_time, info=info, phone_number=phone_number, length_seconds=length_seconds, call_type=call_type, contact_name=contact_name)
     if not ret_val:
         raise HTTPException(status_code=400, detail="addition error")
     return ret_val
