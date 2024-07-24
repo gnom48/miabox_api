@@ -1,6 +1,7 @@
 import aiohttp
 from .consts import *
 
+
 async def put_transcribe_result_async(transcription: str, user_id: int, record_id: int):
     headers = {"secret-key": "miabox"}
     data = {"transcription": transcription, "user_id": user_id, "record_id": record_id}

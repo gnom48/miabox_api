@@ -596,6 +596,7 @@ class Repository:
                                             info: str, date_time: int) -> int | None:
         async with new_session() as session:
             try:
+                await file.seek(0)
                 file_to_save = CallsRecordsOrm()
                 file_to_save.id = None
                 file_to_save.name = file.filename
@@ -615,7 +616,7 @@ class Repository:
                 session.add(user_call)
                 await session.commit()
                 return file_to_save.id
-            except:
+            except Exception as e:
                 return None
 
 

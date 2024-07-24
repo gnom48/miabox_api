@@ -33,3 +33,4 @@ class AsyncWhisper:
     def transcribe_sync(self, file_name):
         path = fr"/shared/calls/{file_name}"
         return self.model.transcribe(path)
+    
