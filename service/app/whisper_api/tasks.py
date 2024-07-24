@@ -2,7 +2,8 @@ from celery import Celery
 from .routes_transcription import async_whisper
 
 
-app = Celery("tasks", broker="redis://localhost:6379/0")
+app = Celery("tasks", broker="redis://redis:6379/0")
+
 
 # @app.task
 # async def transcribe_task(file_name, model):
