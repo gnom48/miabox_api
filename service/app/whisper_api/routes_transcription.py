@@ -1,5 +1,4 @@
-from fastapi import APIRouter, HTTPException, Header, Response, UploadFile
-from .tasks import transcribe_task
+from fastapi import APIRouter, HTTPException, Header
 from .consts import SECRET_KEY
 from .trascription import AsyncWhisper, Models
 from celery.result import AsyncResult
