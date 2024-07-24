@@ -3,10 +3,26 @@ from .tasks import transcribe_task
 from .consts import SECRET_KEY
 from .trascription import AsyncWhisper, Models
 from celery.result import AsyncResult
+from celery import Celery
 
 
 async_whisper: AsyncWhisper = AsyncWhisper()
 router_transcription = APIRouter(prefix="/transcription", tags=["Транскрипция"])
+
+app = Celery("tasks", broker="redis://redis:6379/0")
+
+
+# @app.task
+# async def transcribe_task(file_name, model):
+#     if async_whisper.model_name != model:
+#         await async_whisper.initialize_async(model)
+#     return await async_whisper.transcribe_async(file_name)
+
+@app.task
+def transcribe_task(file_name, model):
+    if async_whisper.model_name != model:
+        async_whisper.initialize_sync(model)
+    return async_whisper.transcribe_sync(file_name)
 
 
 @router_transcription.get("/get_transcription")
