@@ -566,6 +566,29 @@ class Repository:
             except:
                 return None
                 
+    
+    @classmethod
+    async def edit_image_file(cls, file: UploadFile, new_filename: str, to_user_id: int) -> int | None:
+        async with new_session() as session:
+            try:
+                await file.seek(0)
+                image = Image()
+                image.id = None
+                image.name = new_filename
+                image.data = await file.read()
+                new_image_id = await Repository.add_image(image, to_user_id)
+                if new_image_id is not None:
+                    user = await session.get(UserOrm, to_user_id)
+                    old_img = user.image
+                    user.image = new_image_id
+                    await session.commit()
+                    await Repository.delete_image(old_img)
+                    return new_image_id
+                else:
+                    raise Exception
+            except:
+                return None
+                
 
     @classmethod
     async def get_image(cls, user_id: int) -> ImageOrm | None:
@@ -635,15 +658,11 @@ class Repository:
 
 
     @classmethod
-    async def get_call_record_from_storage(cls, user_id: int, record_id: int) -> bytes | None:
+    async def get_call_record(cls, user_id: int, record_id: int) -> CallsRecordsOrm | None:
         async with new_session() as session:
             try:
                 call_record = await session.execute(select(CallsRecordsOrm).where(CallsRecordsOrm.id == record_id))
-                call_record = call_record.scalars().first()
-                if call_record:
-                    return call_record.data
-                else:
-                    return None
+                return call_record.scalars().first()
             except:
                 return None
             

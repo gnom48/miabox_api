@@ -1,5 +1,7 @@
+import os
 from shutil import copyfileobj
 from fastapi import APIRouter, HTTPException, Header, Response, UploadFile
+from fastapi.responses import FileResponse
 from .jwt.jwt import verify_jwt_token
 from api.app.repository import Repository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -21,7 +23,7 @@ async def call_info_add(file: UploadFile, info: str, phone_number: str, date_tim
         with open(rf"/shared/calls/{user.id}_{file.filename}", "wb") as buffer:
             copyfileobj(file.file, buffer)
     except IOError as e:
-        raise HTTPException(status_code=501, detail="file format error")
+        raise HTTPException(status_code=401, detail="file format error")
     ret_val = await Repository.add_call_record_to_storage(user_id=user.id, file=file, new_filename=f"{user.id}_{file.filename}", date_time=date_time, info=info, phone_number=phone_number, length_seconds=length_seconds, call_type=call_type, contact_name=contact_name)
     if not ret_val:
         raise HTTPException(status_code=400, detail="addition error")
@@ -42,10 +44,11 @@ async def get_call_record_filestream(user_id: int, record_id: int, token_authori
     if not token_authorization:
         raise HTTPException(status_code=400, detail="uncorrect header")
     user = await verify_jwt_token(token_authorization)
-    file_data = await Repository.get_call_record_from_storage(user_id=user.id, record_id=record_id)
-    if not file_data:
+    file_info = await Repository.get_call_record(user_id=user.id, record_id=record_id)
+    file_path = rf"/shared/calls/{file_info.name}"
+    if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="File not found")
-    return Response(file_data, media_type="application/octet-stream")
+    return FileResponse(file_path, media_type='application/octet-stream', filename=file_info.name)
 
 
 @router_calls.get("/order_call_transcription")

@@ -1,8 +1,11 @@
-from fastapi import APIRouter, HTTPException, Header, Request
+import os
+from fastapi import APIRouter, HTTPException, Header, Request, Response, UploadFile
 from .models import User, Statistics
 from api.app.repository import *
 from datetime import datetime
 from .jwt import create_jwt_token, verify_jwt_token
+from shutil import copyfileobj
+from fastapi.responses import FileResponse
 
 
 router_users = APIRouter(prefix="/user", tags=["Пользователи"])
@@ -66,6 +69,32 @@ async def set_image_to_user(token_authorization: str | None = Header(default=Non
         raise HTTPException(status_code=400, detail="uncorrect header")
     cur_user = await verify_jwt_token(token_authorization)
     return await Repository.get_image(cur_user.id)
+
+
+@router_users.post("/set_image_file", status_code=200)
+async def set_image_to_user_by_file(file: UploadFile, token_authorization: str | None = Header(default=None)):
+    if not token_authorization:
+        raise HTTPException(status_code=400, detail="uncorrect header")
+    user = await verify_jwt_token(token_authorization)
+    try:
+        await file.seek(0)
+        with open(rf"/shared/images/{user.id}_{file.filename}", "wb") as buffer:
+            copyfileobj(file.file, buffer)
+    except IOError as e:
+        raise HTTPException(status_code=401, detail="file operation error")
+    return await Repository.edit_image_file(file, f"{user.id}_{file.filename}", user.id)
+
+
+@router_users.get("/get_image_file", status_code=200)
+async def set_image_to_user(token_authorization: str | None = Header(default=None)):
+    if not token_authorization:
+        raise HTTPException(status_code=400, detail="uncorrect header")
+    cur_user = await verify_jwt_token(token_authorization)
+    image = await Repository.get_image(cur_user.id)
+    file_path = rf"/shared/images/{image.name}"
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Image not found")
+    return FileResponse(file_path, media_type='application/octet-stream', filename=image.name)
 
 
 @router_users.get("/teames")
