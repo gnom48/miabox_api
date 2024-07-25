@@ -4,6 +4,7 @@ from .jwt.jwt import verify_jwt_token
 from api.app.repository import Repository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from .utils import add_task_transcribe_async, transcribe_audio_async, get_task_status_async, Models
+from api.app.database.consts import SECRET_KEY
 
 
 router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
@@ -66,6 +67,6 @@ async def order_call_transcription(task_id: str, token_authorization: str | None
 
 @router_calls.put("/update_transcription")
 async def update_transcription(transcription: str, user_id: int, record_id: int, secret_key: str | None = Header(default=None)):
-    if not secret_key or secret_key != "miabox": # TODO: вынести в константу
+    if not secret_key or secret_key != SECRET_KEY:
         raise HTTPException(status_code=400, detail="uncorrect header")
     return await Repository.update_transcription(user_id=user_id, record_id=record_id, transcription=transcription)

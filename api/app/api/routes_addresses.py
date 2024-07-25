@@ -34,4 +34,4 @@ async def get_address_info_by_team(token_authorization: str | None = Header(defa
     if not token_authorization:
         raise HTTPException(status_code=400, detail="uncorrect header")
     user = await verify_jwt_token(token_authorization)
-    raise HTTPException(status_code=400, detail="todo: ...")
+    raise HTTPException(status_code=400, detail="Depricated!")
