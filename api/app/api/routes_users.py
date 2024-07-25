@@ -7,6 +7,12 @@ from .jwt import create_jwt_token, verify_jwt_token
 
 router_users = APIRouter(prefix="/user", tags=["Пользователи"])
 
+
+@router_users.get("/config")
+async def get_config():
+    return { "route": "user" }
+
+
 # TODO: вернуть User
 @router_users.post("/registration", status_code=201)
 async def user_registration(user: UserTmp):

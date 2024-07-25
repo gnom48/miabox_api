@@ -32,6 +32,11 @@ async def task_handler():
         task_queue.task_done()
 
 
+@router_transcription.get("/config")
+async def get_config():
+    return { "route": "transcription" }
+
+
 @router_transcription.get("/get_transcription")
 async def get_transcription(file: str, user_id: int, record_id: int, model: str = Models.base, secret_key: str | None = Header(default=None)):
     if not secret_key or secret_key != SECRET_KEY:
