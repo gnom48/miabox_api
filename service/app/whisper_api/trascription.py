@@ -27,8 +27,7 @@ class AsyncWhisper:
     async def transcribe_async(self, file_name):
         loop = asyncio.get_event_loop()
         path = fr"/shared/calls/{file_name}"
-        result = await loop.run_in_executor(None, self.model.transcribe, path)
-        return result
+        return await loop.run_in_executor(None, self.model.transcribe, path)
         
     def transcribe_sync(self, file_name):
         path = fr"/shared/calls/{file_name}"

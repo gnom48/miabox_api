@@ -649,7 +649,7 @@ class Repository:
             
 
     @classmethod
-    async def update_transcription(cls, user_id: int, record_id: int, transcription: str) -> int | None:
+    async def update_transcription(cls, user_id: int, record_id: int, transcription: str) -> bool | None:
         async with new_session() as session:
             try:
                 req = await session.execute(select(UsersCallsOrm).where(UsersCallsOrm.user_id == user_id).where(UsersCallsOrm.user_id == user_id))

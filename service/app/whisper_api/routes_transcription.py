@@ -22,9 +22,11 @@ async def task_handler():
 
         try:
             transcription = await async_whisper.transcribe_async(file)
-            await put_transcribe_result_async(transcription=transcription, user_id=user_id, record_id=record_id)
+            res = await put_transcribe_result_async(transcription=transcription, user_id=user_id, record_id=record_id)
             task_status[task_id]["status"] = TaskStatus.completed
             task_status[task_id]["result"] = transcription["text"] # потом при анализе можно отдавать весь результат
+            if not res:
+                raise Exception("error uploading to main api")
         except Exception as e:
             task_status[task_id]["status"] = TaskStatus.failed
             task_status[task_id]["error"] = str(e)
@@ -45,7 +47,8 @@ async def get_transcription(file: str, user_id: int, record_id: int, model: str 
         raise HTTPException(status_code=404, detail="no file to transcribe")
     if async_whisper.model_name != model:
         await async_whisper.initialize_async(model)
-    return await async_whisper.transcribe_async(file_name=file)
+    res = await async_whisper.transcribe_async(file_name=file)
+    return { "result": res, "details": "Warning! Endpoint is depricated."}
 
 
 @router_transcription.get("/add_task_transcription")

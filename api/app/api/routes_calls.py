@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Header, Response, UploadFile
 from .jwt.jwt import verify_jwt_token
 from api.app.repository import Repository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from .utils import add_task_transcribe_async, transcribe_audio_async, get_task_status_async
+from .utils import add_task_transcribe_async, transcribe_audio_async, get_task_status_async, Models
 
 
 router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
@@ -48,7 +48,7 @@ async def get_call_record_filestream(user_id: int, record_id: int, token_authori
 
 
 @router_calls.get("/order_call_transcription")
-async def order_call_transcription(user_id: int, record_id: int, model: str = "base", token_authorization: str | None = Header(default=None)):
+async def order_call_transcription(user_id: int, record_id: int, model: str = Models.base, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=400, detail="uncorrect header")
     user = await verify_jwt_token(token_authorization)
