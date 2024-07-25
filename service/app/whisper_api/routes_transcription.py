@@ -49,7 +49,7 @@ async def get_transcription(file: str, user_id: int, record_id: int, model: str 
 
 
 @router_transcription.get("/add_task_transcription")
-async def get_transcription(file: str, user_id: int, record_id: int, model: str = Models.base, secret_key: str | None = Header(default=None)):
+async def add_task_transcription(file: str, user_id: int, record_id: int, model: str = Models.base, secret_key: str | None = Header(default=None)):
     if not secret_key or secret_key != SECRET_KEY:
         raise HTTPException(status_code=400, detail="uncorrect header")
     if file == "" or file is None:
