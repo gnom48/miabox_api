@@ -301,7 +301,8 @@ class Repository:
     async def clear_day_statistics(cls):
         async with new_session() as session:
             try:
-                day_select = await session.execute(select(WeekStatisticsOrm)).scalars().all()
+                res = await session.execute(select(WeekStatisticsOrm))
+                day_select = res.scalars().all()
                 for item in day_select:
                     item.flyers = 0
                     item.calls = 0
@@ -323,7 +324,8 @@ class Repository:
     async def clear_week_statistics(cls):
         async with new_session() as session:
             try:
-                week_select = await session.execute(select(WeekStatisticsOrm)).scalars().all()
+                res = await session.execute(select(WeekStatisticsOrm))
+                week_select = res.scalars().all()
                 for item in week_select:
                     item.flyers = 0
                     item.calls = 0
@@ -345,7 +347,8 @@ class Repository:
     async def clear_month_statistics(cls): 
         async with new_session() as session:
             try:
-                month_select = await session.execute(select(MonthStatisticsOrm)).scalars().all()
+                res = await session.execute(select(MonthStatisticsOrm))
+                month_select = res.scalars().all()
                 for item in month_select:
                     cur_user_record = await session.get(LastMonthStatisticsWithKpiOrm, item.user_id)
                     cur_user_record.flyers = item.flyers
@@ -591,7 +594,7 @@ class Repository:
 
     @classmethod
     async def add_call_record_to_storage(cls, 
-                                            user_id: int, file: UploadFile, phone_number: str,
+                                            user_id: int, file: UploadFile, new_filename: str, phone_number: str,
                                             contact_name: str, length_seconds: int, call_type: int,
                                             info: str, date_time: int) -> int | None:
         async with new_session() as session:
@@ -599,7 +602,7 @@ class Repository:
                 await file.seek(0)
                 file_to_save = CallsRecordsOrm()
                 file_to_save.id = None
-                file_to_save.name = file.filename
+                file_to_save.name = new_filename
                 file_to_save.data = await file.read()
                 session.add(file_to_save)
                 await session.flush()
@@ -656,3 +659,14 @@ class Repository:
                 return True
             except:
                 return False
+            
+
+    @classmethod
+    async def get_filename(cls, user_id: int, record_id: int) -> str | None:
+        async with new_session() as session:
+            try:
+                req = await session.execute(select(CallsRecordsOrm).where(CallsRecordsOrm.id == record_id))
+                call = req.scalars().first()
+                return call.name
+            except:
+                return None
