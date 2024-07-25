@@ -1,2 +1,2 @@
 SECRET_KEY = "miabox"
-MAIN_API_URL = "http://fast_api_app:8001/"
+MAIN_API_URL = "http://app_fast_api:8001/"
