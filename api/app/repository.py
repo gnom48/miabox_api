@@ -391,7 +391,7 @@ class Repository:
     # -------------------------- teams --------------------------
 
 
-    @classmethod
+    @staticmethod
     def __hide_password(u: UserOrm) -> UserOrm:
         u.password = "***"
         return u
