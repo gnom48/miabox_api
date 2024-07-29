@@ -30,7 +30,7 @@ class ImageOrm(BaseModelOrm):
     __tablename__ = 'images'
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String)
-    data = Column(LargeBinary)
+    data = Column(LargeBinary, nullable=True)
 
 
 class UserOrm(BaseModelOrm):

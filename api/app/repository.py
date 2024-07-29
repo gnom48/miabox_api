@@ -562,7 +562,8 @@ class Repository:
                 to_user.image = image_id
                 await session.commit()
                 return image_id
-            except:
+            except Exception as e:
+                print(f"Ошибка добавления картинки: {e}")
                 return None
             
             
@@ -602,8 +603,10 @@ class Repository:
                     await Repository.delete_image(old_img)
                     return new_image_id
                 else:
-                    raise Exception
-            except:
+                    print(f"Ошибка записи картинки на диск: {e}")
+                    return None
+            except Exception as e:
+                print(f"Ошибка загрузки картинки: {e}")
                 return None
                 
 
