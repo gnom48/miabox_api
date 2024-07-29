@@ -11,9 +11,9 @@ from fastapi.responses import FileResponse
 router_users = APIRouter(prefix="/user", tags=["Пользователи"])
 
 
-@router_users.get("/config")
-async def get_config():
-    return { "route": "user" }
+@router_users.get("/config", status_code=200)
+async def server_config_get():
+    return { "postgres" : await Repository.get_config(), "api_datetime" : datetime.now() }
 
 
 # TODO: вернуть User
@@ -95,13 +95,3 @@ async def set_image_to_user(token_authorization: str | None = Header(default=Non
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Image not found")
     return FileResponse(file_path, media_type='application/octet-stream', filename=image.name)
-
-
-@router_users.get("/teames")
-async def user_teames(token_authorization: str | None = Header(default=None)):
-    ...
-
-
-@router_users.get("/config", status_code=200)
-async def server_config_get():
-    return { "postgres" : await Repository.get_config(), "api_datetime" : datetime.now() }

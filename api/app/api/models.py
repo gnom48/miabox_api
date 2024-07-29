@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from enum import Enum
 from datetime import datetime
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Any
 from api.app.database.models import TeamOrm, UserOrm
 
 
@@ -123,19 +123,6 @@ class AddresInfo(BaseModel):
     date_time: int
 
 
-class UserWithStats:
-    def __init__(self, user: UserOrm, statistics: Dict[StatisticPeriods, Union[None, StatisticsOrm]], role: UserStatuses):
-        self.user = user
-        self.statistics = statistics
-        self.role = role
-
-
-class TeamWithInfo:
-    def __init__(self, team: TeamOrm, members: list[UserWithStats]):
-        self.team = team
-        self.members = members
-
-
 class UserKpiLevels(str, Enum):
     TRAINEE = "Стажер"
     SPECIALIST = "Специалист"
@@ -174,3 +161,18 @@ class UsersCalls(BaseModel):
     length_seconds: int
     call_type: int
     transcription: str
+
+
+class UserWithStats:
+    def __init__(self, user: UserOrm, statistics: Dict[StatisticPeriods, Union[None, StatisticsOrm]], addresses: list[Any], calls: list[Any], role: UserStatuses):
+        self.user = user
+        self.statistics = statistics
+        self.addresses = addresses
+        self.calls = calls
+        self.role = role
+
+
+class TeamWithInfo:
+    def __init__(self, team: TeamOrm, members: list[UserWithStats]):
+        self.team = team
+        self.members = members

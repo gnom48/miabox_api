@@ -301,8 +301,9 @@ class Repository:
     async def clear_day_statistics(cls):
         async with new_session() as session:
             try:
-                res = await session.execute(select(WeekStatisticsOrm))
-                day_select = res.scalars().all()
+                res = await session.execute(select(DayStatisticsOrm))
+                day_select = list(res.scalars().all())
+                print(day_select)
                 for item in day_select:
                     item.flyers = 0
                     item.calls = 0
@@ -315,6 +316,7 @@ class Repository:
                     item.others = 0
                     await session.flush()
                 await session.commit()
+                print("Обнуление ежедневной статистики")
             except Exception as e:
                 print(f"Ошибка ежедневной работы: {e}")
                 return
@@ -325,7 +327,7 @@ class Repository:
         async with new_session() as session:
             try:
                 res = await session.execute(select(WeekStatisticsOrm))
-                week_select = res.scalars().all()
+                week_select = list(res.scalars().all())
                 for item in week_select:
                     item.flyers = 0
                     item.calls = 0
@@ -338,6 +340,7 @@ class Repository:
                     item.others = 0
                     await session.flush()
                 await session.commit()
+                print("Обнуление еженедельной статистики")
             except Exception as e:
                 print(f"Ошибка еженедельной работы: {e}")
                 return
@@ -348,7 +351,7 @@ class Repository:
         async with new_session() as session:
             try:
                 res = await session.execute(select(MonthStatisticsOrm))
-                month_select = res.scalars().all()
+                month_select = list(res.scalars().all())
                 for item in month_select:
                     cur_user_record = await session.get(LastMonthStatisticsWithKpiOrm, item.user_id)
                     cur_user_record.flyers = item.flyers
@@ -364,6 +367,7 @@ class Repository:
                     cur_user_record.salary_percentage = calc.calculate_kpi()
                     await session.flush()
                 await session.commit()
+                print("Сбор для kpi")
             except Exception as e:
                 print(f"Ошибка ежемесячной работы: {e}")
 
@@ -379,11 +383,18 @@ class Repository:
                     item.analytics = 0
                     item.others = 0
                 await session.commit()
+                print("Обнуление ежемесячной статистики")
             except Exception as e:
                 print(f"Ошибка ежемесячной работы: {e}")
                 return
             
     # -------------------------- teams --------------------------
+
+
+    @classmethod
+    def __hide_password(u: UserOrm) -> UserOrm:
+        u.password = "***"
+        return u
 
     @classmethod
     async def get_all_teams_by_user_id(cls, user_id: int) -> list[TeamWithInfo]:
@@ -396,10 +407,15 @@ class Repository:
                 for t in teams_user:
                     team = await session.get(TeamOrm, t.team_id)
                     team_with_info = TeamWithInfo(team=team, members=[])
-                    query__ = select(UserTeamOrm).where(UserTeamOrm.team_id == team.id)
-                    r__ = await session.execute(query__)
-                    team_users__ = list(r__.scalars().all())
-                    team_with_info.members = [UserWithStats(user=await session.get(UserOrm, i.user_id), statistics={j : await Repository.get_statistics_by_period(period=j, user_id=i.user_id) for j in [StatisticPeriods.DAY_STATISTICS_PERIOD, StatisticPeriods.WEEK_STATISTICS_PERIOD, StatisticPeriods.MONTH_STATISTICS_PERIOD]}, role=i.role.name) for i in team_users__]
+                    query_userteam = select(UserTeamOrm).where(UserTeamOrm.team_id == team.id)
+                    r_userteam = await session.execute(query_userteam)
+                    team_users__ = list(r_userteam.scalars().all())
+                    team_with_info.members = [UserWithStats(
+                        user=Repository.__hide_password(await session.get(UserOrm, i.user_id)), # FIXME: протестить - вызывает недоверие
+                        statistics={j : await Repository.get_statistics_by_period(period=j, user_id=i.user_id) for j in [StatisticPeriods.DAY_STATISTICS_PERIOD, StatisticPeriods.WEEK_STATISTICS_PERIOD, StatisticPeriods.MONTH_STATISTICS_PERIOD]}, 
+                        addresses=(await session.execute(select(AddresInfoOrm).where(AddresInfoOrm.user_id == i.user_id))).scalars().all(),
+                        calls=(await session.execute(select(UsersCallsOrm).where(UsersCallsOrm.user_id == i.user_id))).scalars().all(),
+                        role=i.role.name) for i in team_users__]
                     res_teams.append(team_with_info)
                 return res_teams
             except:
