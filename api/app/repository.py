@@ -418,7 +418,8 @@ class Repository:
                         role=i.role.name) for i in team_users__]
                     res_teams.append(team_with_info)
                 return res_teams
-            except:
+            except Exception as e:
+                print(e)
                 return None
 
 
