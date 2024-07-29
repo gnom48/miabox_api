@@ -85,7 +85,7 @@ async def set_image_to_user_by_file(file: UploadFile, token_authorization: str |
     res = await Repository.edit_image_file(file, f"{user.id}_{file.filename}", user.id)
     if res is not None:
         return res
-    raise HTTPException(status_code=401, detail="db operation error")
+    raise HTTPException(status_code=402, detail="db operation error")
 
 
 @router_users.get("/get_image_file", status_code=200)

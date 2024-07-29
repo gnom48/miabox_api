@@ -590,10 +590,7 @@ class Repository:
         async with new_session() as session:
             try:
                 await file.seek(0)
-                image = Image()
-                image.id = None
-                image.name = new_filename
-                image.data = await file.read()
+                image = Image(id=0, name=new_filename, data=await file.read())
                 new_image_id = await Repository.add_image(image, to_user_id)
                 if new_image_id is not None:
                     user = await session.get(UserOrm, to_user_id)
