@@ -301,21 +301,24 @@ class Repository:
     async def clear_day_statistics(cls):
         async with new_session() as session:
             try:
-                res = await session.execute(select(DayStatisticsOrm))
-                day_select = list(res.scalars().all())
-                print(day_select)
-                for item in day_select:
-                    item.flyers = 0
-                    item.calls = 0
-                    item.shows = 0
-                    item.meets = 0
-                    item.deals = 0
-                    item.deposits = 0
-                    item.searches = 0
-                    item.analytics = 0
-                    item.others = 0
-                    # await session.flush()
-                    await session.commit()
+                query = update(DayStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
+                res = await session.execute(query)
+                print(res)
+                # res = await session.execute(select(DayStatisticsOrm))
+                # day_select = list(res.scalars().all())
+                # print(day_select)
+                # for item in day_select:
+                #     item.flyers = 0
+                #     item.calls = 0
+                #     item.shows = 0
+                #     item.meets = 0
+                #     item.deals = 0
+                #     item.deposits = 0
+                #     item.searches = 0
+                #     item.analytics = 0
+                #     item.others = 0
+                #     # await session.flush()
+                #     await session.commit()
                 print("Обнуление ежедневной статистики")
             except Exception as e:
                 print(f"Ошибка ежедневной работы: {e}")
