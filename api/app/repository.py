@@ -553,8 +553,6 @@ class Repository:
     async def add_image(cls, image: Image, to_user_id: int) -> int | None:
         async with new_session() as session:
             try:
-                print(image)
-                print(image.model_dump())
                 image_to_save = ImageOrm(**image.model_dump())
                 image_to_save.id = None
                 session.add(image_to_save)
@@ -593,16 +591,14 @@ class Repository:
         async with new_session() as session:
             try:
                 await file.seek(0)
-                image = Image(id=0, name=new_filename, data=await file.read())
-                print(image)
+                image = Image(id=0, name=new_filename, data=None)
                 new_image_id = await Repository.add_image(image, to_user_id)
-                print(new_image_id)
                 if new_image_id is not None:
                     user = await session.get(UserOrm, to_user_id)
                     old_img = user.image
                     user.image = new_image_id
                     await session.commit()
-                    await Repository.delete_image(old_img)
+                    # await Repository.delete_image(old_img)
                     return new_image_id
                 else:
                     print(f"Ошибка записи картинки на диск: {e}")
