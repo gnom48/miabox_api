@@ -303,23 +303,7 @@ class Repository:
             try:
                 query = update(DayStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
                 res = await session.execute(query)
-                print(res)
-                # res = await session.execute(select(DayStatisticsOrm))
-                # day_select = list(res.scalars().all())
-                # print(day_select)
-                # for item in day_select:
-                #     item.flyers = 0
-                #     item.calls = 0
-                #     item.shows = 0
-                #     item.meets = 0
-                #     item.deals = 0
-                #     item.deposits = 0
-                #     item.searches = 0
-                #     item.analytics = 0
-                #     item.others = 0
-                #     # await session.flush()
-                #     await session.commit()
-                print("Обнуление ежедневной статистики")
+                print(f"Обнуление ежедневной статистики {res.scalar_one()}")
             except Exception as e:
                 print(f"Ошибка ежедневной работы: {e}")
                 return
@@ -329,21 +313,9 @@ class Repository:
     async def clear_week_statistics(cls):
         async with new_session() as session:
             try:
-                res = await session.execute(select(WeekStatisticsOrm))
-                week_select = list(res.scalars().all())
-                for item in week_select:
-                    item.flyers = 0
-                    item.calls = 0
-                    item.shows = 0
-                    item.meets = 0
-                    item.deals = 0
-                    item.deposits = 0
-                    item.searches = 0
-                    item.analytics = 0
-                    item.others = 0
-                    # await session.flush()
-                    await session.commit()
-                print("Обнуление еженедельной статистики")
+                query = update(WeekStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
+                res = await session.execute(query)
+                print(f"Обнуление еженедельной статистики {res.scalar_one()}")
             except Exception as e:
                 print(f"Ошибка еженедельной работы: {e}")
                 return
@@ -368,25 +340,16 @@ class Repository:
                     cur_user_record.others = item.others
                     calc = RealEstateAgentKPI(cur_user_record.user_level, item.deals, 0, 0, item.calls, item.meets, item.flyers, item.shows)
                     cur_user_record.salary_percentage = calc.calculate_kpi()
-                    # await session.flush()
                     await session.commit()
                 print("Сбор для kpi")
             except Exception as e:
                 print(f"Ошибка ежемесячной работы: {e}")
 
             try:
-                for item in month_select:
-                    item.flyers = 0
-                    item.calls = 0
-                    item.shows = 0
-                    item.meets = 0
-                    item.deals = 0
-                    item.deposits = 0
-                    item.searches = 0
-                    item.analytics = 0
-                    item.others = 0
-                    await session.commit()
-                print("Обнуление ежемесячной статистики")
+                query = update(MonthStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
+                res = await session.execute(query)
+                print(f"Обнуление ежемесячной статистики {res.scalar_one()}")
+                await session.commit()
             except Exception as e:
                 print(f"Ошибка ежемесячной работы: {e}")
                 return
