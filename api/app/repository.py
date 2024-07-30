@@ -314,8 +314,8 @@ class Repository:
                     item.searches = 0
                     item.analytics = 0
                     item.others = 0
-                    await session.flush()
-                await session.commit()
+                    # await session.flush()
+                    await session.commit()
                 print("Обнуление ежедневной статистики")
             except Exception as e:
                 print(f"Ошибка ежедневной работы: {e}")
@@ -338,8 +338,8 @@ class Repository:
                     item.searches = 0
                     item.analytics = 0
                     item.others = 0
-                    await session.flush()
-                await session.commit()
+                    # await session.flush()
+                    await session.commit()
                 print("Обнуление еженедельной статистики")
             except Exception as e:
                 print(f"Ошибка еженедельной работы: {e}")
@@ -365,8 +365,8 @@ class Repository:
                     cur_user_record.others = item.others
                     calc = RealEstateAgentKPI(cur_user_record.user_level, item.deals, 0, 0, item.calls, item.meets, item.flyers, item.shows)
                     cur_user_record.salary_percentage = calc.calculate_kpi()
-                    await session.flush()
-                await session.commit()
+                    # await session.flush()
+                    await session.commit()
                 print("Сбор для kpi")
             except Exception as e:
                 print(f"Ошибка ежемесячной работы: {e}")
@@ -382,7 +382,7 @@ class Repository:
                     item.searches = 0
                     item.analytics = 0
                     item.others = 0
-                await session.commit()
+                    await session.commit()
                 print("Обнуление ежемесячной статистики")
             except Exception as e:
                 print(f"Ошибка ежемесячной работы: {e}")
@@ -557,7 +557,7 @@ class Repository:
                 image_to_save.id = None
                 session.add(image_to_save)
                 await session.flush()
-                await session.commit() # FIXME: временно
+                # await session.commit() # FIXME: временно
                 image_id = image_to_save.id
                 to_user = await session.get(UserOrm, to_user_id)
                 to_user.image = image_id
@@ -566,25 +566,7 @@ class Repository:
             except Exception as e:
                 print(f"Ошибка добавления картинки: {e}")
                 return None
-            
-            
-    @classmethod
-    async def edit_image(cls, image: Image, to_user_id: int) -> int | None:
-        async with new_session() as session:
-            try:
-                new_image_id = await Repository.add_image(image, to_user_id)
-                if new_image_id is not None:
-                    user = await session.get(UserOrm, to_user_id)
-                    old_img = user.image
-                    user.image = new_image_id
-                    await session.commit()
-                    await Repository.delete_image(old_img)
-                    return new_image_id
-                else:
-                    raise Exception
-            except:
-                return None
-                
+
     
     @classmethod
     async def edit_image_file(cls, file: UploadFile, new_filename: str, to_user_id: int) -> int | None:
@@ -598,7 +580,7 @@ class Repository:
                     old_img = user.image
                     user.image = new_image_id
                     await session.commit()
-                    # await Repository.delete_image(old_img)
+                    # await Repository.delete_image(old_img) # здесь была проблема, но почему не понятно
                     return new_image_id
                 else:
                     print(f"Ошибка записи картинки на диск: {e}")

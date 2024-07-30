@@ -16,9 +16,8 @@ async def server_config_get():
     return { "postgres" : await Repository.get_config(), "api_datetime" : datetime.now() }
 
 
-# TODO: вернуть User
 @router_users.post("/registration", status_code=201)
-async def user_registration(user: UserTmp):
+async def user_registration(user: User):
     res = await Repository.registrate_user(user)
     if not res:
         raise HTTPException(status_code=400, detail="registration error")
@@ -41,9 +40,8 @@ async def user_authorization(req: Request, token_authorization: str | None = Hea
     return await verify_jwt_token(token_authorization)
 
 
-# TODO: вернуть User
 @router_users.put("/edit",status_code=200)
-async def user_edit(user: UserTmp, token_authorization: str | None = Header(default=None)):
+async def user_edit(user: User, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=400, detail="uncorrect header")
     cur_user = await verify_jwt_token(token_authorization)
@@ -53,22 +51,6 @@ async def user_edit(user: UserTmp, token_authorization: str | None = Header(defa
     if not res:
         raise HTTPException(status_code=400, detail="edit error")
     return res
-
-
-@router_users.post("/set_image", status_code=200)
-async def set_image_to_user(image: Image, token_authorization: str | None = Header(default=None)):
-    if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
-    cur_user = await verify_jwt_token(token_authorization)
-    return await Repository.edit_image(image, cur_user.id)
-
-
-@router_users.get("/get_image", status_code=200)
-async def set_image_to_user(token_authorization: str | None = Header(default=None)):
-    if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
-    cur_user = await verify_jwt_token(token_authorization)
-    return await Repository.get_image(cur_user.id)
 
 
 @router_users.post("/set_image_file", status_code=200)
