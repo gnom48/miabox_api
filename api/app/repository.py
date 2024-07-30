@@ -553,10 +553,13 @@ class Repository:
     async def add_image(cls, image: Image, to_user_id: int) -> int | None:
         async with new_session() as session:
             try:
+                print(image)
+                print(image.model_dump())
                 image_to_save = ImageOrm(**image.model_dump())
                 image_to_save.id = None
                 session.add(image_to_save)
                 await session.flush()
+                await session.commit() # FIXME: временно
                 image_id = image_to_save.id
                 to_user = await session.get(UserOrm, to_user_id)
                 to_user.image = image_id
@@ -591,7 +594,9 @@ class Repository:
             try:
                 await file.seek(0)
                 image = Image(id=0, name=new_filename, data=await file.read())
+                print(image)
                 new_image_id = await Repository.add_image(image, to_user_id)
+                print(new_image_id)
                 if new_image_id is not None:
                     user = await session.get(UserOrm, to_user_id)
                     old_img = user.image
