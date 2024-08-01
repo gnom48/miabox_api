@@ -42,19 +42,19 @@ async def get_config():
 @router_transcription.get("/get_transcription")
 async def get_transcription(file: str, user_id: int, record_id: int, model: str = Models.base, secret_key: str | None = Header(default=None)):
     if not secret_key or secret_key != SECRET_KEY:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     if file == "" or file is None:
         raise HTTPException(status_code=404, detail="no file to transcribe")
     if async_whisper.model_name != model:
         await async_whisper.initialize_async(model)
     res = await async_whisper.transcribe_async(file_name=file)
-    return { "result": res, "details": "Warning! Endpoint is depricated."}
+    return { "result": res, "details": "Warning! Endpoint is deprecated."}
 
 
 @router_transcription.get("/add_task_transcription")
 async def add_task_transcription(file: str, user_id: int, record_id: int, model: str = Models.base, secret_key: str | None = Header(default=None)):
     if not secret_key or secret_key != SECRET_KEY:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     if file == "" or file is None:
         raise HTTPException(status_code=404, detail="no file to transcribe")
     if async_whisper.model_name != model:
@@ -68,7 +68,14 @@ async def add_task_transcription(file: str, user_id: int, record_id: int, model:
 @router_transcription.get("/get_task_status")
 async def get_task_status(task_id: str, secret_key: str | None = Header(default=None)):
     if not secret_key or secret_key != SECRET_KEY:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     if task_id not in task_status:
         raise HTTPException(status_code=404, detail="Task not found")
     return JSONResponse(content=task_status[task_id])
+
+
+@router_transcription.get("/check_tasks")
+async def check_tasks(secret_key: str | None = Header(default=None)):
+    if not secret_key or secret_key != SECRET_KEY:
+        raise HTTPException(status_code=400, detail="incorrect header")
+    return task_status

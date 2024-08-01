@@ -302,8 +302,9 @@ class Repository:
         async with new_session() as session:
             try:
                 query = update(DayStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
-                res = await session.execute(query)
-                print(f"Обнуление ежедневной статистики {res.scalar_one()}")
+                await session.execute(query)
+                await session.commit()
+                print(f"Обнуление ежедневной статистики")
             except Exception as e:
                 print(f"Ошибка ежедневной работы: {e}")
                 return
@@ -314,8 +315,9 @@ class Repository:
         async with new_session() as session:
             try:
                 query = update(WeekStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
-                res = await session.execute(query)
-                print(f"Обнуление еженедельной статистики {res.scalar_one()}")
+                await session.execute(query)
+                await session.commit()
+                print(f"Обнуление еженедельной статистики")
             except Exception as e:
                 print(f"Ошибка еженедельной работы: {e}")
                 return
@@ -347,8 +349,8 @@ class Repository:
 
             try:
                 query = update(MonthStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
-                res = await session.execute(query)
-                print(f"Обнуление ежемесячной статистики {res.scalar_one()}")
+                await session.execute(query)
+                print(f"Обнуление ежемесячной статистики")
                 await session.commit()
             except Exception as e:
                 print(f"Ошибка ежемесячной работы: {e}")

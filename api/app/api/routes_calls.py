@@ -16,7 +16,7 @@ calls_support_scheduler = AsyncIOScheduler(timezone="UTC")
 @router_calls.post("/add_call_info")
 async def call_info_add(file: UploadFile, info: str, phone_number: str, date_time: int, contact_name: str, length_seconds: int, call_type: int, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     user = await verify_jwt_token(token_authorization)
     try:
         await file.seek(0)
@@ -33,7 +33,7 @@ async def call_info_add(file: UploadFile, info: str, phone_number: str, date_tim
 @router_calls.get("/get_all_calls")
 async def get_all_calls(user_id: int, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     user = await verify_jwt_token(token_authorization)
     ret_val = await Repository.get_all_info_user_calls(user_id=user_id)
     return ret_val
@@ -42,7 +42,7 @@ async def get_all_calls(user_id: int, token_authorization: str | None = Header(d
 @router_calls.get("/get_call_record_file")
 async def get_call_record_filestream(user_id: int, record_id: int, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     user = await verify_jwt_token(token_authorization)
     file_info = await Repository.get_call_record(user_id=user.id, record_id=record_id)
     file_path = rf"/shared/calls/{file_info.name}"
@@ -54,7 +54,7 @@ async def get_call_record_filestream(user_id: int, record_id: int, token_authori
 @router_calls.get("/order_call_transcription")
 async def order_call_transcription(user_id: int, record_id: int, model: str = Models.base, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     user = await verify_jwt_token(token_authorization)
     filename = await Repository.get_filename(user_id, record_id)
     return await add_task_transcribe_async(filename, user_id, record_id, model)
@@ -63,7 +63,7 @@ async def order_call_transcription(user_id: int, record_id: int, model: str = Mo
 @router_calls.get("/get_order_transcription_status")
 async def order_call_transcription(task_id: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     user = await verify_jwt_token(token_authorization)
     return await get_task_status_async(task_id)
 
@@ -71,5 +71,5 @@ async def order_call_transcription(task_id: str, token_authorization: str | None
 @router_calls.put("/update_transcription")
 async def update_transcription(transcription: str, user_id: int, record_id: int, secret_key: str | None = Header(default=None)):
     if not secret_key or secret_key != SECRET_KEY:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     return await Repository.update_transcription(user_id=user_id, record_id=record_id, transcription=transcription)

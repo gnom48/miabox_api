@@ -36,17 +36,17 @@ async def user_authorization(login: str, password: str):
 @router_users.get("/info", status_code=200)
 async def user_authorization(req: Request, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     return await verify_jwt_token(token_authorization)
 
 
 @router_users.put("/edit",status_code=200)
 async def user_edit(user: User, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     cur_user = await verify_jwt_token(token_authorization)
     if user.id != cur_user.id:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     res = await Repository.edit_user(user)
     if not res:
         raise HTTPException(status_code=400, detail="edit error")
@@ -56,7 +56,7 @@ async def user_edit(user: User, token_authorization: str | None = Header(default
 @router_users.post("/set_image_file", status_code=200)
 async def set_image_to_user_by_file(file: UploadFile, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     user = await verify_jwt_token(token_authorization)
     try:
         await file.seek(0)
@@ -73,7 +73,7 @@ async def set_image_to_user_by_file(file: UploadFile, token_authorization: str |
 @router_users.get("/get_image_file", status_code=200)
 async def set_image_to_user(token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     cur_user = await verify_jwt_token(token_authorization)
     image = await Repository.get_image(cur_user.id)
     file_path = rf"/shared/images/{image.name}"

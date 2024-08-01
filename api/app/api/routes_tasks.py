@@ -9,7 +9,7 @@ router_tasks = APIRouter(prefix="/task", tags=["Задачи"])
 @router_tasks.get("/all", status_code=200)
 async def task_all(token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     user = await verify_jwt_token(token_authorization)
     return await Repository.get_all_tasks_by_user_id(user.id)
     
@@ -17,7 +17,7 @@ async def task_all(token_authorization: str | None = Header(default=None)):
 @router_tasks.post("/add", status_code=201)
 async def task_add(req: Request, task: Task, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     user = await verify_jwt_token(token_authorization)
     if not user:
         raise HTTPException(status_code=404, detail="not found user")
@@ -30,7 +30,7 @@ async def task_add(req: Request, task: Task, token_authorization: str | None = H
 @router_tasks.delete("/delete", status_code=200)
 async def task_delete(req: Request, task_id: int, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
-        raise HTTPException(status_code=400, detail="uncorrect header")
+        raise HTTPException(status_code=400, detail="incorrect header")
     user = await verify_jwt_token(token_authorization)
     if not user:
         raise HTTPException(status_code=404, detail="not found user")
