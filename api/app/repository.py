@@ -544,11 +544,13 @@ class Repository:
                 image = Image(id=0, name=new_filename, data=bytearray(0))
                 new_image_id = await Repository.add_image(image, to_user_id)
                 if new_image_id is not None:
+                    print(f"{new_filename} - {new_image_id}")
                     user = await session.get(UserOrm, to_user_id)
                     old_img = user.image
+                    print(f"{old_img}")
                     user.image = new_image_id
                     await session.commit()
-                    await Repository.delete_image(old_img)
+                    # await Repository.delete_image(old_img)
                     return new_image_id
                 else:
                     print(f"Ошибка записи картинки на диск: {e}")
