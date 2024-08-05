@@ -628,7 +628,9 @@ class Repository:
     async def get_all_user_call_records(cls, user_id: int) -> list[CallsRecordsOrm] | None:
         async with new_session() as session:
             try:
-                query = select(CallsRecordsOrm).where(CallsRecordsOrm.user_id == user_id)
+                calls: list[UsersCallsOrm] = await Repository.get_all_info_user_calls()
+                records = [call.record_id for call in calls]
+                query = select(CallsRecordsOrm).where(CallsRecordsOrm.id in records)
                 r = await session.execute(query)
                 return list(r.scalars().all())
             except:

@@ -40,7 +40,7 @@ async def get_all_calls(user_id: int, token_authorization: str | None = Header(d
 
 
 @router_calls.get("/get_all_records_info")
-async def get_all_calls(user_id: int, token_authorization: str | None = Header(default=None)):
+async def get_all_records_info(user_id: int, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
