@@ -629,10 +629,8 @@ class Repository:
         async with new_session() as session:
             try:
                 calls: list[UsersCallsOrm] = await Repository.get_all_info_user_calls(user_id)
-                print(calls)
                 records = [call.record_id for call in calls]
-                print(records)
-                query = select(CallsRecordsOrm).where(CallsRecordsOrm.id in records)
+                query = select(CallsRecordsOrm).where(records.count(CallsRecordsOrm.id) >= 1)
                 r = await session.execute(query)
                 return list(r.scalars().all())
             except:
