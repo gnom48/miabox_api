@@ -379,10 +379,11 @@ class Repository:
                     r_userteam = await session.execute(query_userteam)
                     team_users__ = list(r_userteam.scalars().all())
                     team_with_info.members = [UserWithStats(
-                        user=Repository.__hide_password(await session.get(UserOrm, i.user_id)), # FIXME: протестить - вызывает недоверие
+                        user=Repository.__hide_password(await session.get(UserOrm, i.user_id)),
                         statistics={j : await Repository.get_statistics_by_period(period=j, user_id=i.user_id) for j in [StatisticPeriods.DAY_STATISTICS_PERIOD, StatisticPeriods.WEEK_STATISTICS_PERIOD, StatisticPeriods.MONTH_STATISTICS_PERIOD]}, 
                         addresses=(await session.execute(select(AddresInfoOrm).where(AddresInfoOrm.user_id == i.user_id))).scalars().all(),
                         calls=(await session.execute(select(UsersCallsOrm).where(UsersCallsOrm.user_id == i.user_id))).scalars().all(),
+                        kpi=await session.get(LastMonthStatisticsWithKpiOrm, i.user_id),
                         role=i.role.name) for i in team_users__]
                     res_teams.append(team_with_info)
                 return res_teams
@@ -525,7 +526,6 @@ class Repository:
                 image_to_save.id = None
                 session.add(image_to_save)
                 await session.flush()
-                # await session.commit() # FIXME: временно
                 image_id = image_to_save.id
                 to_user = await session.get(UserOrm, to_user_id)
                 to_user.image = image_id
@@ -548,7 +548,7 @@ class Repository:
                     old_img = user.image
                     user.image = new_image_id
                     await session.commit()
-                    # await Repository.delete_image(old_img) # здесь была проблема, но почему не понятно
+                    await Repository.delete_image(old_img)
                     return new_image_id
                 else:
                     print(f"Ошибка записи картинки на диск: {e}")

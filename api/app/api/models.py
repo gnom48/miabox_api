@@ -164,12 +164,13 @@ class UsersCalls(BaseModel):
 
 
 class UserWithStats:
-    def __init__(self, user: UserOrm, statistics: Dict[StatisticPeriods, Union[None, StatisticsOrm]], addresses: list[Any], calls: list[Any], role: UserStatuses):
+    def __init__(self, user: UserOrm, statistics: Dict[StatisticPeriods, Union[None, StatisticsOrm]], addresses: list[Any], calls: list[Any], role: UserStatuses, kpi: LastMonthStatisticsWithKpi):
         self.user = user
         self.statistics = statistics
         self.addresses = addresses
         self.calls = calls
         self.role = role
+        self.kpi = kpi
 
 
 class TeamWithInfo:

@@ -4,9 +4,6 @@ from .whisper_api import router_transcription, async_whisper, Models, task_handl
 from contextlib import asynccontextmanager
 
 
-# uvicorn app.main:app --reload --host localhost --port 8000
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Старт")
