@@ -528,6 +528,7 @@ class Repository:
                 await session.flush()
                 image_id = image_to_save.id
                 to_user = await session.get(UserOrm, to_user_id)
+                await Repository.delete_image(to_user.image)
                 to_user.image = image_id
                 await session.commit()
                 return image_id
@@ -544,13 +545,9 @@ class Repository:
                 image = Image(id=0, name=new_filename, data=bytearray(0))
                 new_image_id = await Repository.add_image(image, to_user_id)
                 if new_image_id is not None:
-                    print(f"{new_filename} - {new_image_id}")
                     user = await session.get(UserOrm, to_user_id)
-                    old_img = user.image
-                    print(f"{old_img}")
                     user.image = new_image_id
                     await session.commit()
-                    # await Repository.delete_image(old_img)
                     return new_image_id
                 else:
                     print(f"Ошибка записи картинки на диск: {e}")
@@ -621,6 +618,17 @@ class Repository:
         async with new_session() as session:
             try:
                 query = select(UsersCallsOrm).where(UsersCallsOrm.user_id == user_id)
+                r = await session.execute(query)
+                return list(r.scalars().all())
+            except:
+                return None
+                
+                
+    @classmethod
+    async def get_all_user_call_records(cls, user_id: int) -> list[CallsRecordsOrm] | None:
+        async with new_session() as session:
+            try:
+                query = select(CallsRecordsOrm).where(CallsRecordsOrm.user_id == user_id)
                 r = await session.execute(query)
                 return list(r.scalars().all())
             except:

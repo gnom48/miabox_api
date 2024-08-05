@@ -39,6 +39,15 @@ async def get_all_calls(user_id: int, token_authorization: str | None = Header(d
     return ret_val
 
 
+@router_calls.get("/get_all_records_info")
+async def get_all_calls(user_id: int, token_authorization: str | None = Header(default=None)):
+    if not token_authorization:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    user = await verify_jwt_token(token_authorization)
+    ret_val = await Repository.get_all_user_call_records(user_id=user_id)
+    return ret_val
+
+
 @router_calls.get("/get_call_record_file")
 async def get_call_record_filestream(user_id: int, record_id: int, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
