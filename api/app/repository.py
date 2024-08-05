@@ -630,9 +630,18 @@ class Repository:
             try:
                 calls: list[UsersCallsOrm] = await Repository.get_all_info_user_calls(user_id)
                 records = [call.record_id for call in calls]
-                query = select(CallsRecordsOrm).where(records.count(CallsRecordsOrm.id) >= 1)
+                query = select(CallsRecordsOrm)
+                print(records)
                 r = await session.execute(query)
-                return list(r.scalars().all())
+                call_records = list(r.scalars().all())
+                ret_val = []
+                print(call_records)
+                for i in call_records:
+                    print(i)
+                    if i.id in records:
+                        print(f"append {i}")
+                        ret_val.append(i)
+                return ret_val
             except:
                 return None
 
