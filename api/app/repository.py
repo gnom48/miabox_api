@@ -610,6 +610,7 @@ class Repository:
                 await session.commit()
                 return file_to_save.id
             except Exception as e:
+                print(f"-------------------- add_call_record_to_storage error {e}------------------------------")
                 return None
 
 
@@ -631,15 +632,11 @@ class Repository:
                 calls: list[UsersCallsOrm] = await Repository.get_all_info_user_calls(user_id)
                 records = [call.record_id for call in calls]
                 query = select(CallsRecordsOrm)
-                print(records)
                 r = await session.execute(query)
                 call_records = list(r.scalars().all())
                 ret_val = []
-                print(call_records)
                 for i in call_records:
-                    print(i)
                     if i.id in records:
-                        print(f"append {i}")
                         ret_val.append(i)
                 return ret_val
             except:

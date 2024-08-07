@@ -15,6 +15,7 @@ calls_support_scheduler = AsyncIOScheduler(timezone="UTC")
 
 @router_calls.post("/add_call_info")
 async def call_info_add(file: UploadFile, info: str, phone_number: str, date_time: int, contact_name: str, length_seconds: int, call_type: int, token_authorization: str | None = Header(default=None)):
+    print("-------------------- add_call_info ------------------------------")
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -22,9 +23,12 @@ async def call_info_add(file: UploadFile, info: str, phone_number: str, date_tim
         await file.seek(0)
         with open(rf"/shared/calls/{file.filename}", "wb") as buffer:
             copyfileobj(file.file, buffer)
+        print("-------------------- file uploaded ------------------------------")
     except IOError as e:
+        print(f"-------------------- file error {e}------------------------------")
         raise HTTPException(status_code=401, detail="file format error")
     ret_val = await Repository.add_call_record_to_storage(user_id=user.id, file=file, new_filename=file.filename, date_time=date_time, info=info, phone_number=phone_number, length_seconds=length_seconds, call_type=call_type, contact_name=contact_name)
+    print(f"-------------------- add_call_record_to_storage ret_val {ret_val}------------------------------")
     if not ret_val:
         raise HTTPException(status_code=400, detail="addition error")
     return ret_val
@@ -49,7 +53,7 @@ async def get_all_records_info(user_id: int, token_authorization: str | None = H
 
 
 @router_calls.get("/get_call_record_file")
-async def get_call_record_filestream(user_id: int, record_id: int, token_authorization: str | None = Header(default=None)):
+async def get_call_record_file(user_id: int, record_id: int, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -61,7 +65,7 @@ async def get_call_record_filestream(user_id: int, record_id: int, token_authori
 
 
 @router_calls.get("/get_call_record_filestream")
-async def get_audio_file(user_id: int, record_id: int, token_authorization: str | None = Header(default=None)):
+async def get_audio_filestream(user_id: int, record_id: int, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
