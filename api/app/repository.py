@@ -593,7 +593,7 @@ class Repository:
                 file_to_save = CallsRecordsOrm()
                 file_to_save.id = None
                 file_to_save.name = new_filename
-                file_to_save.data = await file.read()
+                file_to_save.data = bytearray(0) # await file.read()
                 session.add(file_to_save)
                 await session.flush()
                 user_call = UsersCallsOrm()
@@ -610,7 +610,6 @@ class Repository:
                 await session.commit()
                 return file_to_save.id
             except Exception as e:
-                print(f"-------------------- add_call_record_to_storage error {e}------------------------------")
                 return None
 
 
