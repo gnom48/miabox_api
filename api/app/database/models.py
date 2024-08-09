@@ -39,7 +39,7 @@ class UserOrm(BaseModelOrm):
     login = Column(String, unique=True)
     password: Mapped[str]
     type: Mapped[UserTypesOrm]
-    photo: Mapped[str]
+    email: Mapped[str]
     reg_date: Mapped[int]
     name = Column(String, default="Пользователь")
     gender: Mapped[str | None]

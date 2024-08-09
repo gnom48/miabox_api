@@ -71,7 +71,7 @@ class Repository:
                 old_user.password = data.password
                 old_user.name = data.name
                 old_user.phone = data.phone
-                old_user.photo = data.photo
+                old_user.email = data.email
                 await session.flush()
             except:
                 return False
