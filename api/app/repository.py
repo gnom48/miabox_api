@@ -1,5 +1,5 @@
 from fastapi import UploadFile
-from .api.kpi_calculator import RealEstateAgentKPI
+from .api.kpi_calculator import KpiCalculator
 from .database.orm import new_session
 from sqlalchemy.sql import text
 from .database.models import *
@@ -51,9 +51,16 @@ class Repository:
             week_stats.user_id = new_user.id
             month_stats = MonthStatisticsOrm()
             month_stats.user_id = new_user.id
+            summary = SummaryStatisticsWithLevelOrm()
+            summary.user_id = new_user.id
+            summary.deals = 0
+            coefs = Repository.get_user_level_by_deals_count(0)
+            summary.user_level = coefs[0]
+            summary.base_percent = coefs[0]
             session.add(day_stats)
             session.add(week_stats)
             session.add(month_stats)
+            session.add(summary)
 
             await session.commit()
             return new_user_id
@@ -208,6 +215,17 @@ class Repository:
             
 
     # -------------------------- statistics --------------------------
+
+    @classmethod
+    def get_user_level_by_deals_count(deals_count: int, top_flag: bool = False) -> tuple:
+        if top_flag and deals_count >= 21:
+            return (UserKpiLevelsOrm.TOP, 50)
+        elif deals_count <= 3:
+            return (UserKpiLevelsOrm.TRAINEE, 40)
+        elif deals_count >= 3 and deals_count <= 20:
+            return (UserKpiLevelsOrm.SPECIALIST, 43)
+        elif deals_count > 21:
+            return (UserKpiLevelsOrm.EXPERT, 45)
     
 
     @classmethod
@@ -238,6 +256,11 @@ class Repository:
                         day_statistic_to_edit.deals += addvalue
                         week_statistic_to_edit.deals += addvalue
                         month_statistic_to_edit.deals += addvalue
+                        summary = await session.get(SummaryStatisticsWithLevelOrm, user_id)
+                        summary.deals = summary.deals + addvalue
+                        coefs = Repository.get_user_level_by_deals_count(summary.deals)
+                        summary.user_level = coefs[0]
+                        summary.base_percent = coefs[1]
                     case WorkTasksTypesOrm.DEPOSIT.value:
                         day_statistic_to_edit.deposits += addvalue
                         week_statistic_to_edit.deposits += addvalue
@@ -282,6 +305,18 @@ class Repository:
         async with new_session() as session:
             try:
                 return await session.get(LastMonthStatisticsWithKpiOrm, user_id)
+            except:
+                return None
+                
+    
+    @classmethod
+    async def get_current_kpi(cls, user: UserOrm) -> dict:
+        async with new_session() as session:
+            try:
+                data = await session.get(MonthStatisticsOrm, user.id)
+                coefs = await session.get(SummaryStatisticsWithLevelOrm, user.id)
+                kpi_calc = KpiCalculator(coefs.user_level, data.deals, 0, 0, data.calls, data.meets, data.flyers, data.analytics, 0, user.type)
+                return { "kpi": kpi_calc.calculate_kpi(), "level": coefs.user_level.value, "deals": coefs.deals }
             except:
                 return None
             
@@ -331,6 +366,7 @@ class Repository:
                 month_select = list(res.scalars().all())
                 for item in month_select:
                     cur_user_record = await session.get(LastMonthStatisticsWithKpiOrm, item.user_id)
+                    cur_user = await session.get(UserOrm, item.user_id)
                     cur_user_record.flyers = item.flyers
                     cur_user_record.calls = item.calls
                     cur_user_record.shows = item.shows
@@ -340,7 +376,7 @@ class Repository:
                     cur_user_record.searches = item.searches
                     cur_user_record.analytics = item.analytics
                     cur_user_record.others = item.others
-                    calc = RealEstateAgentKPI(cur_user_record.user_level, item.deals, 0, 0, item.calls, item.meets, item.flyers, item.shows)
+                    calc = KpiCalculator(cur_user_record.user_level, item.deals, 0, 0, item.calls, item.meets, item.flyers, item.shows, 0, cur_user.type)
                     cur_user_record.salary_percentage = calc.calculate_kpi()
                     await session.commit()
                 print("Сбор для kpi")

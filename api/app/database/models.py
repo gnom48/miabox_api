@@ -163,6 +163,14 @@ class LastMonthStatisticsWithKpiOrm(BaseModelOrm):
     salary_percentage = Column(Float, default=0.0)
 
 
+class SummaryStatisticsWithLevelOrm(BaseModelOrm):
+    __tablename__ = "summary_statistics_with_level"
+    user_id: Mapped[int] = mapped_column(ForeignKey(UserOrm.id, ondelete="CASCADE"), primary_key=True)
+    deals = Column(Integer, default=0)
+    base_percent = Column(Integer, default=0)
+    user_level: Mapped[UserKpiLevelsOrm]
+
+
 class CallsRecordsOrm(BaseModelOrm):
     __tablename__ = 'calls_records'
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

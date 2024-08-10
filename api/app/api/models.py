@@ -145,6 +145,13 @@ class LastMonthStatisticsWithKpi(BaseModel):
     salary_percentage: float
 
 
+class SummaryStatisticsWithLevel(BaseModel):
+    user_id: int
+    deals: int
+    base_percent: int
+    user_level: UserKpiLevels
+
+
 class CallsRecords(BaseModel):
     id: int
     name: str
