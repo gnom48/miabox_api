@@ -19,7 +19,7 @@ class KpiCalculator:
     # TODO: переписать 
     def calculate_kpi(self) -> float:
         if self.rielter_type == UserTypesOrm.PRIVATE:
-            if self.level == UserKpiLevels.TRAINEE:
+            if self.level == UserKpiLevelsOrm.TRAINEE:
                 base_percent = 0.4
                 bonus_percent = 0.005 if self.exclusive_contracts else 0.0025
                 if self.deals > 3:
@@ -28,7 +28,7 @@ class KpiCalculator:
                     return 0.0
                 return base_percent + bonus_percent * self.deals
 
-            elif self.level == UserKpiLevels.SPECIALIST:
+            elif self.level == UserKpiLevelsOrm.SPECIALIST:
                 base_percent = 0.4
                 bonus_percent = 0.005 if self.exclusive_contracts else 0.0025
                 if self.deals > 20:
@@ -45,7 +45,7 @@ class KpiCalculator:
                     extra_percent += 0.01
                 return base_percent + bonus_percent * self.deals + extra_percent
 
-            elif self.level == UserKpiLevels.EXPERT:
+            elif self.level == UserKpiLevelsOrm.EXPERT:
                 base_percent = 0.45
                 bonus_percent = 0.005 if self.exclusive_contracts else 0.0025
                 if self.deals <= 20:
@@ -62,7 +62,7 @@ class KpiCalculator:
                     extra_percent += 0.01
                 return base_percent + bonus_percent * self.deals + extra_percent
 
-            elif self.level == UserKpiLevels.TOP:
+            elif self.level == UserKpiLevelsOrm.TOP:
                 base_percent = 0.5
                 bonus_percent = 0.005 if self.exclusive_contracts else 0.0025
                 if self.deals <= 20:

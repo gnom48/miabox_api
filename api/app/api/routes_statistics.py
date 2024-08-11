@@ -23,8 +23,6 @@ async def user_statistics_get_with_kpi(token_authorization: str | None = Header(
     user = await verify_jwt_token(token_authorization)
     last_month_kpi = await Repository.get_statistics_with_kpi(user.id)
     current_month_kpi = await Repository.get_current_kpi(user)
-    print(last_month_kpi)
-    print(current_month_kpi)
     return { "last_month_kpi": last_month_kpi, "current_month_kpi": current_month_kpi["kpi"], "level": current_month_kpi["level"], "summary_deals": current_month_kpi["deals"] }
 
 
