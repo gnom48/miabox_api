@@ -155,7 +155,7 @@ class SummaryStatisticsWithLevel(BaseModel):
 class CallsRecords(BaseModel):
     id: int
     name: str
-    data: bytes
+    data: bytes | None
 
 
 class UsersCalls(BaseModel):
