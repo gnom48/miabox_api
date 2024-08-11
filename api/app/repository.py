@@ -316,8 +316,10 @@ class Repository:
                 data = await session.get(MonthStatisticsOrm, user.id)
                 coefs = await session.get(SummaryStatisticsWithLevelOrm, user.id)
                 kpi_calc = KpiCalculator(coefs.user_level, data.deals, 0, 0, data.calls, data.meets, data.flyers, data.analytics, 0, user.type)
+                print({ "kpi": kpi_calc.calculate_kpi(), "level": coefs.user_level.value, "deals": coefs.deals })
                 return { "kpi": kpi_calc.calculate_kpi(), "level": coefs.user_level.value, "deals": coefs.deals }
-            except:
+            except Exception as e:
+                print(e)
                 return None
             
                 
