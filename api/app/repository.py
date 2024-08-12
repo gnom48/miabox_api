@@ -217,7 +217,7 @@ class Repository:
     # -------------------------- statistics --------------------------
 
     @classmethod
-    def get_user_level_by_deals_count(deals_count: int, top_flag: bool = False) -> tuple:
+    def get_user_level_by_deals_count(cls, deals_count: int, top_flag: bool = False) -> tuple:
         if top_flag and deals_count >= 21:
             return (UserKpiLevelsOrm.TOP, 50)
         elif deals_count <= 3:
@@ -258,7 +258,7 @@ class Repository:
                         month_statistic_to_edit.deals += addvalue
                         summary = await session.get(SummaryStatisticsWithLevelOrm, user_id)
                         summary.deals = summary.deals + addvalue
-                        coefs = Repository.get_user_level_by_deals_count(summary.deals)
+                        coefs = Repository.get_user_level_by_deals_count(int(summary.deals))
                         summary.user_level = coefs[0]
                         summary.base_percent = coefs[1]
                     case WorkTasksTypesOrm.DEPOSIT.value:
