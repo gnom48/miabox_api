@@ -52,6 +52,14 @@ async def team_leave(team_id: int, token_authorization: str | None = Header(defa
     return await Repository.leave_team(user_id=user.id, team_id=team_id)
 
 
+@router_teams.put("/move_team_role")
+async def move_team_role(team_id: int, user_id: int, role: UserStatuses, token_authorization: str | None = Header(default=None)):
+    if not token_authorization:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    user = await verify_jwt_token(token_authorization)
+    return await Repository.move_team_user_role(user_id=user.id, team_id=team_id, role=role)
+
+
 @router_teams.get("/my_teams")
 async def my_teams(token_authorization: str | None = Header(default=None)):
     if not token_authorization:

@@ -483,6 +483,27 @@ class Repository:
                 return True
             except:
                 return False
+                
+    
+    @classmethod
+    async def move_team_user_role(cls, team_id: int, user_id: int, role: UserStatuses) -> bool:
+        async with new_session() as session:
+            try:
+                role_orm = UserStatusesOrm.OWNER
+                if role == UserStatuses.USER:
+                    role_orm = UserStatusesOrm.USER
+                query = (
+                    update(UserTeamOrm)
+                    .where(UserTeamOrm.team_id == team_id)
+                    .where(UserTeamOrm.user_id == user_id)
+                    .values(role=role_orm)
+                )
+                await session.execute(query)
+                await session.commit()
+                return True
+            except Exception as e:
+                print(f"move_team_user_role error: {e}")
+                return False
 
 
     @classmethod
