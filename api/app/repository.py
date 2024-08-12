@@ -56,7 +56,7 @@ class Repository:
             summary.deals = 0
             coefs = Repository.get_user_level_by_deals_count(0)
             summary.user_level = coefs[0]
-            summary.base_percent = coefs[0]
+            summary.base_percent = coefs[1]
             session.add(day_stats)
             session.add(week_stats)
             session.add(month_stats)
