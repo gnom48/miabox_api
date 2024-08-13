@@ -46,19 +46,6 @@ class User(BaseModel):
     birthday: Optional[int]
     phone: Optional[str]
     image: Optional[int]
-    
-    
-class UserTmp(BaseModel):
-    id: int
-    login: str
-    password: str
-    type: UserTypes
-    photo: str
-    reg_date: int
-    name: str
-    gender: Optional[str]
-    birthday: Optional[int]
-    phone: Optional[str]
 
 
 class Note(BaseModel):

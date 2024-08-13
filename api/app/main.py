@@ -11,9 +11,9 @@ main_scheduler = AsyncIOScheduler(timezone="UTC")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    main_scheduler.add_job(func=Repository.clear_day_statistics, trigger=CronTrigger(hour=23-3, minute=30))
-    main_scheduler.add_job(func=Repository.clear_week_statistics, trigger='cron', day_of_week='mon', hour=23-3, minute=5)
-    main_scheduler.add_job(func=Repository.clear_month_statistics, trigger='cron', day='last', hour=23-3, minute=0)
+    main_scheduler.add_job(func=Repository.clear_day_statistics, trigger=CronTrigger(hour=3-3, minute=0))
+    main_scheduler.add_job(func=Repository.clear_week_statistics, trigger='cron', day_of_week='sun', hour=3-3, minute=5)
+    main_scheduler.add_job(func=Repository.clear_month_statistics, trigger='cron', day='last', hour=3-3, minute=10)
     main_scheduler.start()
     print("Планировщики запущены")
     yield
