@@ -628,6 +628,8 @@ class Repository:
     async def delete_image(cls, image_id: int) -> bool:
         async with new_session() as session:
             try:
+                if image_id == 1:
+                    return True
                 image_to_delete = await session.get(ImageOrm, image_id)
                 await session.delete(image_to_delete)
                 await session.commit()
