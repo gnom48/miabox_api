@@ -15,11 +15,11 @@ async def task_all(token_authorization: str | None = Header(default=None)):
 
 
 @router_tasks.get("/completed", status_code=200)
-async def task_all(token_authorization: str | None = Header(default=None)):
+async def task_all(user_id: int, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
-    return await Repository.get_all_tasks_by_user_id(user.id, True)
+    return await Repository.get_all_tasks_by_user_id(user_id, True)
     
 
 @router_tasks.post("/add", status_code=201)

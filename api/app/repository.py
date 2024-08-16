@@ -209,8 +209,9 @@ class Repository:
         async with new_session() as session:
             try:
                 task_to_del = await session.get(TaskOrm, id)
-                # await session.delete(task_to_del)
                 task_to_del.is_completed = True
+                if task_to_del.work_type != WorkTasksTypesOrm.OTHER:
+                    await session.delete(task_to_del)
                 await session.commit()
                 return True
             except:
@@ -656,12 +657,13 @@ class Repository:
 
     @classmethod
     async def add_call_record_to_storage(cls, 
-                                            user_id: int, file: UploadFile, new_filename: str, phone_number: str,
+                                            user_id: int, file: UploadFile | None, new_filename: str, phone_number: str,
                                             contact_name: str, length_seconds: int, call_type: int,
                                             info: str, date_time: int) -> int | None:
         async with new_session() as session:
             try:
-                await file.seek(0)
+                if file is not None:
+                    await file.seek(0)
                 file_to_save = CallsRecordsOrm()
                 file_to_save.id = None
                 file_to_save.name = new_filename

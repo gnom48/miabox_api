@@ -25,7 +25,7 @@ async def user_statistics_get_with_kpi(token_authorization: str | None = Header(
     current_month_kpi = await Repository.get_current_kpi(user)
     if current_month_kpi is None:
         return { "last_month_kpi": last_month_kpi, "current_month_kpi": None, "level": None, "summary_deals": None }
-    return { "last_month_kpi": last_month_kpi, "current_month_kpi": current_month_kpi["kpi"], "level": current_month_kpi["level"], "summary_deals": current_month_kpi["deals"] }
+    return { "last_month_kpi": last_month_kpi, "current_month_kpi": current_month_kpi["kpi"], "level": current_month_kpi["level"], "summary_deals_rent": current_month_kpi["deals_rent"], "summary_deals_sale": current_month_kpi["deals_sale"] }
 
 
 @router_statistics.put("/update", status_code=200)
