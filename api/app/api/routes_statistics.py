@@ -21,11 +21,10 @@ async def user_statistics_get_with_kpi(token_authorization: str | None = Header(
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
-    print(" \n\n------------------ \n\n")
     last_month_kpi = await Repository.get_statistics_with_kpi(user.id)
     current_month_kpi = await Repository.get_current_kpi(user)
-    print({ "last_month_kpi": last_month_kpi, "current_month_kpi": current_month_kpi })
-    print(" \n\n------------------ \n\n")
+    if current_month_kpi is None:
+        return { "last_month_kpi": last_month_kpi, "current_month_kpi": None, "level": None, "summary_deals": None }
     return { "last_month_kpi": last_month_kpi, "current_month_kpi": current_month_kpi["kpi"], "level": current_month_kpi["level"], "summary_deals": current_month_kpi["deals"] }
 
 

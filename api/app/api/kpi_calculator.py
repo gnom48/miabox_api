@@ -3,9 +3,11 @@ from api.app.database import UserKpiLevelsOrm, UserTypesOrm
 
 
 class KpiCalculator:
-    def __init__(self, level: UserKpiLevelsOrm, deals: int, exclusive_contracts: int, regular_contracts: int, cold_calls: int, meetings: int, flyers: int, shows: int, leed_crm: int, rielter_type: UserTypesOrm = UserTypesOrm.PRIVATE):
+    def __init__(self, level: UserKpiLevelsOrm, deals_rent: int, deals_sale: int, exclusive_contracts: int, regular_contracts: int, cold_calls: int, meetings: int, flyers: int, shows: int, leed_crm: int, rielter_type: UserTypesOrm):
         self.level = level
-        self.deals = deals
+        self.deals = deals_rent + deals_sale
+        self.deals_rent = deals_rent
+        self.deals_sale = deals_sale
         self.rielter_type = rielter_type
         self.exclusive_contracts = exclusive_contracts
         self.regular_contracts = regular_contracts

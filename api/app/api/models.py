@@ -21,7 +21,8 @@ class WorkTasksTypes(str, Enum):
     CALLS = "Обзвон"
     SHOW = "Показ объекта"
     MEET = "Встреча по объекту"
-    DEAL = "Сделка"
+    DEAL_RENT = "Сделка по аренде"
+    DEAL_SALE = "Сделка по продаже"
     DEPOSIT = "Получение задатка"
     SEARCH = "Поиск объектов"
     ANALYTICS = "Аналитика рынка"
@@ -65,6 +66,7 @@ class Task(BaseModel):
     duration_seconds: int
     user_id: int
     notification_id: int
+    is_completed: bool
 
 
 class Team(BaseModel):
@@ -89,13 +91,14 @@ class Statistics(BaseModel):
     data: int
 
 
-class StatisticsOrm(BaseModel):
+class StatisticsViaOrm(BaseModel):
     user_id: int
     flyers: int
     calls: int
     shows: int
     meets: int
-    deals: int
+    deals_rent: int
+    deals_sale: int
     deposits: int
     searches: int
     analytics: int
@@ -123,7 +126,8 @@ class LastMonthStatisticsWithKpi(BaseModel):
     calls: int 
     shows: int 
     meets: int 
-    deals: int 
+    deals_rent: int
+    deals_sale: int
     deposits: int 
     searches: int 
     analytics: int 
@@ -134,7 +138,8 @@ class LastMonthStatisticsWithKpi(BaseModel):
 
 class SummaryStatisticsWithLevel(BaseModel):
     user_id: int
-    deals: int
+    deals_rent: int
+    deals_sale: int
     base_percent: int
     user_level: UserKpiLevels
 
@@ -158,7 +163,7 @@ class UsersCalls(BaseModel):
 
 
 class UserWithStats:
-    def __init__(self, user: UserOrm, statistics: Dict[StatisticPeriods, Union[None, StatisticsOrm]], addresses: list[Any], calls: list[Any], role: UserStatuses, kpi: LastMonthStatisticsWithKpi):
+    def __init__(self, user: UserOrm, statistics: Dict[StatisticPeriods, Union[None, StatisticsViaOrm]], addresses: list[Any], calls: list[Any], role: UserStatuses, kpi: LastMonthStatisticsWithKpi):
         self.user = user
         self.statistics = statistics
         self.addresses = addresses

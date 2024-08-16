@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import ForeignKey, Column, Integer, LargeBinary, String, Float
+from sqlalchemy import ForeignKey, Column, Integer, LargeBinary, String, Float, Boolean
 from datetime import datetime
 from enum import Enum
 from typing import Annotated
@@ -19,7 +19,8 @@ class WorkTasksTypesOrm(Enum):
     CALLS = "Обзвон"
     SHOW = "Показ объекта"
     MEET = "Встреча по объекту"
-    DEAL = "Сделка"
+    DEAL_RENT = "Сделка по аренде"
+    DEAL_SALE = "Сделка по продаже"
     DEPOSIT = "Получение задатка"
     SEARCH = "Поиск объектов"
     ANALYTICS = "Аналитика рынка"
@@ -67,6 +68,7 @@ class TaskOrm(BaseModelOrm):
     duration_seconds: Mapped[int]
     user_id: Mapped[int] = mapped_column(ForeignKey(UserOrm.id, ondelete="CASCADE"))
     notification_id: Mapped[int]
+    is_completed = Column(Boolean, default=False)
     
 
 class TeamOrm(BaseModelOrm):
@@ -95,7 +97,8 @@ class DayStatisticsOrm(BaseModelOrm):
     calls = Column(Integer, default=0)
     shows = Column(Integer, default=0)
     meets = Column(Integer, default=0)
-    deals = Column(Integer, default=0)
+    deals_rent = Column(Integer, default=0)
+    deals_sale = Column(Integer, default=0)
     deposits = Column(Integer, default=0)
     searches = Column(Integer, default=0)
     analytics = Column(Integer, default=0)
@@ -109,7 +112,8 @@ class WeekStatisticsOrm(BaseModelOrm):
     calls = Column(Integer, default=0)
     shows = Column(Integer, default=0)
     meets = Column(Integer, default=0)
-    deals = Column(Integer, default=0)
+    deals_rent = Column(Integer, default=0)
+    deals_sale = Column(Integer, default=0)
     deposits = Column(Integer, default=0)
     searches = Column(Integer, default=0)
     analytics = Column(Integer, default=0)
@@ -123,7 +127,8 @@ class MonthStatisticsOrm(BaseModelOrm):
     calls = Column(Integer, default=0)
     shows = Column(Integer, default=0)
     meets = Column(Integer, default=0)
-    deals = Column(Integer, default=0)
+    deals_rent = Column(Integer, default=0)
+    deals_sale = Column(Integer, default=0)
     deposits = Column(Integer, default=0)
     searches = Column(Integer, default=0)
     analytics = Column(Integer, default=0)
@@ -154,7 +159,8 @@ class LastMonthStatisticsWithKpiOrm(BaseModelOrm):
     calls = Column(Integer, default=0)
     shows = Column(Integer, default=0)
     meets = Column(Integer, default=0)
-    deals = Column(Integer, default=0)
+    deals_rent = Column(Integer, default=0)
+    deals_sale = Column(Integer, default=0)
     deposits = Column(Integer, default=0)
     searches = Column(Integer, default=0)
     analytics = Column(Integer, default=0)
@@ -166,7 +172,8 @@ class LastMonthStatisticsWithKpiOrm(BaseModelOrm):
 class SummaryStatisticsWithLevelOrm(BaseModelOrm):
     __tablename__ = "summary_statistics_with_level"
     user_id: Mapped[int] = mapped_column(ForeignKey(UserOrm.id, ondelete="CASCADE"), primary_key=True)
-    deals = Column(Integer, default=0)
+    deals_rent = Column(Integer, default=0)
+    deals_sale = Column(Integer, default=0)
     base_percent = Column(Integer, default=0)
     user_level: Mapped[UserKpiLevelsOrm]
 

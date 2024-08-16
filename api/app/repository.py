@@ -53,7 +53,8 @@ class Repository:
             month_stats.user_id = new_user.id
             summary = SummaryStatisticsWithLevelOrm()
             summary.user_id = new_user.id
-            summary.deals = 0
+            summary.deals_rent = 0
+            summary.deals_sale = 0
             coefs = Repository.get_user_level_by_deals_count(0)
             summary.user_level = coefs[0]
             summary.base_percent = coefs[1]
@@ -97,10 +98,10 @@ class Repository:
                 
                 
     @classmethod
-    async def get_user_statistics(cls, id: int) -> StatisticsOrm:
+    async def get_user_statistics(cls, id: int) -> StatisticsViaOrm:
         async with new_session() as session:
             try:
-                res = await session.get(StatisticsOrm, id)
+                res = await session.get(StatisticsViaOrm, id)
                 return res
             except:
                 return None
@@ -176,10 +177,10 @@ class Repository:
 
                 
     @classmethod
-    async def get_all_tasks_by_user_id(cls, user_id: int) -> list[TaskOrm]:
+    async def get_all_tasks_by_user_id(cls, user_id: int, completed: bool) -> list[TaskOrm]:
         async with new_session() as session:
             try:
-                query = select(TaskOrm).where(TaskOrm.user_id == user_id)
+                query = select(TaskOrm).where(TaskOrm.user_id == user_id).where(TaskOrm.is_completed == completed)
                 r = await session.execute(query)
                 return r.scalars().all()
             except:
@@ -193,6 +194,7 @@ class Repository:
                 new_task = TaskOrm(**data.model_dump())
                 new_task.id = None
                 new_task.work_type = data.work_type.name
+                new_task.is_completed = False
                 session.add(new_task)
                 await session.flush()
                 task_id = new_task.id
@@ -207,7 +209,8 @@ class Repository:
         async with new_session() as session:
             try:
                 task_to_del = await session.get(TaskOrm, id)
-                await session.delete(task_to_del)
+                # await session.delete(task_to_del)
+                task_to_del.is_completed = True
                 await session.commit()
                 return True
             except:
@@ -252,13 +255,22 @@ class Repository:
                         day_statistic_to_edit.meets += addvalue
                         week_statistic_to_edit.meets += addvalue
                         month_statistic_to_edit.meets += addvalue
-                    case WorkTasksTypesOrm.DEAL.value:
-                        day_statistic_to_edit.deals += addvalue
-                        week_statistic_to_edit.deals += addvalue
-                        month_statistic_to_edit.deals += addvalue
+                    case WorkTasksTypesOrm.DEAL_RENT.value:
+                        day_statistic_to_edit.deals_rent += addvalue
+                        week_statistic_to_edit.deals_rent += addvalue
+                        month_statistic_to_edit.deals_rent += addvalue
                         summary = await session.get(SummaryStatisticsWithLevelOrm, user_id)
-                        summary.deals = summary.deals + addvalue
-                        coefs = Repository.get_user_level_by_deals_count(int(summary.deals))
+                        summary.deals_rent = summary.deals_rent + addvalue
+                        coefs = Repository.get_user_level_by_deals_count(int(summary.deals_sale) + int(summary.deals_rent))
+                        summary.user_level = coefs[0]
+                        summary.base_percent = coefs[1]
+                    case WorkTasksTypesOrm.DEAL_SALE.value:
+                        day_statistic_to_edit.deals_sale += addvalue
+                        week_statistic_to_edit.deals_sale += addvalue
+                        month_statistic_to_edit.deals_sale += addvalue
+                        summary = await session.get(SummaryStatisticsWithLevelOrm, user_id)
+                        summary.deals_sale = summary.deals_sale + addvalue
+                        coefs = Repository.get_user_level_by_deals_count(int(summary.deals_sale) + int(summary.deals_rent))
                         summary.user_level = coefs[0]
                         summary.base_percent = coefs[1]
                     case WorkTasksTypesOrm.DEPOSIT.value:
@@ -284,7 +296,7 @@ class Repository:
             
     
     @classmethod
-    async def get_statistics_by_period(cls, user_id: int, period: str) -> StatisticsOrm:
+    async def get_statistics_by_period(cls, user_id: int, period: str) -> StatisticsViaOrm:
         async with new_session() as session:
             try:
                 match period:
@@ -315,17 +327,14 @@ class Repository:
             try:
                 data = await session.get(MonthStatisticsOrm, user.id)
                 coefs = await session.get(SummaryStatisticsWithLevelOrm, user.id)
-                print(f"data = {data}")
-                print(f"coefs = {coefs}")
-                kpi_calc = KpiCalculator(coefs.user_level, data.deals, 0, 0, data.calls, data.meets, data.flyers, data.analytics, 0, user.type)
-                print({ "kpi": kpi_calc.calculate_kpi(), "level": coefs.user_level.value, "deals": coefs.deals })
-                return { "kpi": kpi_calc.calculate_kpi(), "level": coefs.user_level.value, "deals": coefs.deals }
+                kpi_calc = KpiCalculator(coefs.user_level, data.deals_rent, data.deals_sale, 0, 0, data.calls, data.meets, data.flyers, data.analytics, 0, user.type)
+                return { "kpi": kpi_calc.calculate_kpi(), "level": coefs.user_level.value, "deals_rent": coefs.deals_rent, "deals_sale": coefs.deals_sale }
             except Exception as e:
                 return None
             
                 
     @classmethod
-    async def update_kpi_level(cls, user_id: int, level: UserKpiLevels) -> StatisticsOrm:
+    async def update_kpi_level(cls, user_id: int, level: UserKpiLevels) -> StatisticsViaOrm:
         async with new_session() as session:
             try:
                 var = await session.get(LastMonthStatisticsWithKpiOrm, user_id)
@@ -339,7 +348,7 @@ class Repository:
     async def clear_day_statistics(cls):
         async with new_session() as session:
             try:
-                query = update(DayStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
+                query = update(DayStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals_rent = 0, deals_sale = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
                 await session.execute(query)
                 await session.commit()
                 print(f"Обнуление ежедневной статистики")
@@ -352,7 +361,7 @@ class Repository:
     async def clear_week_statistics(cls):
         async with new_session() as session:
             try:
-                query = update(WeekStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
+                query = update(WeekStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals_rent = 0, deals_sale = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
                 await session.execute(query)
                 await session.commit()
                 print(f"Обнуление еженедельной статистики")
@@ -374,12 +383,13 @@ class Repository:
                     cur_user_record.calls = item.calls
                     cur_user_record.shows = item.shows
                     cur_user_record.meets = item.meets
-                    cur_user_record.deals = item.deals
+                    cur_user_record.deals_rent = item.deals_rent
+                    cur_user_record.deals_sale = item.deals_sale
                     cur_user_record.deposits = item.deposits
                     cur_user_record.searches = item.searches
                     cur_user_record.analytics = item.analytics
                     cur_user_record.others = item.others
-                    calc = KpiCalculator(cur_user_record.user_level, item.deals, 0, 0, item.calls, item.meets, item.flyers, item.shows, 0, cur_user.type)
+                    calc = KpiCalculator(cur_user_record.user_level, item.deals_rent, item.deals_sale, 0, 0, item.calls, item.meets, item.flyers, item.shows, 0, cur_user.type)
                     cur_user_record.salary_percentage = calc.calculate_kpi()
                     await session.commit()
                 print("Сбор для kpi")
@@ -387,7 +397,7 @@ class Repository:
                 print(f"Ошибка ежемесячной работы: {e}")
 
             try:
-                query = update(MonthStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
+                query = update(MonthStatisticsOrm).values(flyers=0, calls=0, shows=0, meets=0, deals_rent=0, deals_sale=0, deposits=0, searches=0, analytics=0, others=0)
                 await session.execute(query)
                 print(f"Обнуление ежемесячной статистики")
                 await session.commit()
