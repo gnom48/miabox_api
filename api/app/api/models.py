@@ -49,6 +49,11 @@ class User(BaseModel):
     image: Optional[int]
 
 
+class AuthData(BaseModel):
+    login: str
+    password: str
+
+
 class Note(BaseModel):
     id: int
     title: str
