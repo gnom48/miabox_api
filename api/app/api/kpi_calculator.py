@@ -30,7 +30,7 @@ class KpiCalculator:
 
             elif self.level == UserKpiLevelsOrm.SPECIALIST:
                 bonus_percent = 0.5 * self.exclusive_contracts + 0.25 * self.regular_contracts
-                if self.cold_calls < 90.0 or self.meetings < 40.0 or self.flyers < 1000.0 or self.leed_crm < 0.9:
+                if self.cold_calls < 90.0 or self.meetings < 40.0 or self.flyers < 1000.0:
                     return self.min_percent
                 extra_deals = max(0, self.deals - 1)
                 extra_percent = extra_deals * 2.5
@@ -44,7 +44,7 @@ class KpiCalculator:
 
             elif self.level == UserKpiLevelsOrm.EXPERT:
                 bonus_percent = 0.5 * self.exclusive_contracts + 0.25 * self.regular_contracts
-                if self.cold_calls < 60.0 or self.meetings < 30.0 or self.flyers < 500.0 or self.shows < 80.0 or self.leed_crm < 0.9:
+                if self.cold_calls < 60.0 or self.meetings < 30.0 or self.flyers < 500.0:
                     return self.min_percent
                 extra_deals = max(0, self.deals - 1)
                 extra_percent = extra_deals * 2.5
@@ -58,7 +58,7 @@ class KpiCalculator:
 
             elif self.level == UserKpiLevelsOrm.TOP:
                 bonus_percent = 0.5 * self.exclusive_contracts + 0.25 * self.regular_contracts
-                if self.cold_calls < 50.0 or self.meetings < 20.0 or self.flyers < 500.0 or self.shows < 80.0 or self.leed_crm < 0.9:
+                if self.cold_calls < 50.0 or self.meetings < 20.0 or self.flyers < 500.0:
                     return self.min_percent
                 extra_deals = max(0, self.deals - 1)
                 extra_percent = extra_deals * 2.5
