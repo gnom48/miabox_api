@@ -174,7 +174,7 @@ class SummaryStatisticsWithLevelOrm(BaseModelOrm):
     user_id: Mapped[int] = mapped_column(ForeignKey(UserOrm.id, ondelete="CASCADE"), primary_key=True)
     deals_rent = Column(Integer, default=0)
     deals_sale = Column(Integer, default=0)
-    base_percent = Column(Integer, default=0)
+    base_percent = Column(Float, default=0)
     user_level: Mapped[UserKpiLevelsOrm]
 
 

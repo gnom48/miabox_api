@@ -145,7 +145,7 @@ class SummaryStatisticsWithLevel(BaseModel):
     user_id: int
     deals_rent: int
     deals_sale: int
-    base_percent: int
+    base_percent: float
     user_level: UserKpiLevels
 
 
