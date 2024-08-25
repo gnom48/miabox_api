@@ -328,7 +328,7 @@ class Repository:
             try:
                 data = await session.get(MonthStatisticsOrm, user.id)
                 coefs = await session.get(SummaryStatisticsWithLevelOrm, user.id)
-                kpi_calc = KpiCalculator(coefs.user_level, data.deals_rent, data.deals_sale, 0, 0, data.calls, data.meets, data.flyers, data.analytics, 0, user.type)
+                kpi_calc = KpiCalculator(coefs.base_percent, coefs.user_level, data.deals_rent, data.deals_sale, 0, 0, data.calls, data.meets, data.flyers, data.analytics, 0, user.type)
                 return { "kpi": kpi_calc.calculate_kpi(), "level": coefs.user_level.value, "deals_rent": coefs.deals_rent, "deals_sale": coefs.deals_sale }
             except Exception as e:
                 return None
@@ -390,7 +390,8 @@ class Repository:
                     cur_user_record.searches = item.searches
                     cur_user_record.analytics = item.analytics
                     cur_user_record.others = item.others
-                    calc = KpiCalculator(cur_user_record.user_level, item.deals_rent, item.deals_sale, 0, 0, item.calls, item.meets, item.flyers, item.shows, 0, cur_user.type)
+                    coefs = await session.get(SummaryStatisticsWithLevelOrm, item.user_id)
+                    calc = KpiCalculator(coefs.base_percent, cur_user_record.user_level, item.deals_rent, item.deals_sale, 0, 0, item.calls, item.meets, item.flyers, item.shows, 0, cur_user.type)
                     cur_user_record.salary_percentage = calc.calculate_kpi()
                     await session.commit()
                 print("Сбор для kpi")
