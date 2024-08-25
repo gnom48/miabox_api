@@ -14,7 +14,7 @@ router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
 calls_support_scheduler = AsyncIOScheduler(timezone="UTC")
 
 @router_calls.post("/add_call_info")
-async def call_info_add(file: UploadFile | None, info: str, phone_number: str, date_time: int, contact_name: str, length_seconds: int, call_type: int, token_authorization: str | None = Header(default=None)):
+async def call_info_add(info: str, phone_number: str, date_time: int, contact_name: str, length_seconds: int, call_type: int, file: UploadFile = None, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
