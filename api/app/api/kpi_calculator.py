@@ -1,9 +1,8 @@
-from .models import UserKpiLevels
 from api.app.database import UserKpiLevelsOrm, UserTypesOrm
 
 
 class KpiCalculator:
-    def __init__(self, base_percent: float, level: UserKpiLevelsOrm, deals_rent: int, deals_sale: int, exclusive_contracts: int, regular_contracts: int, cold_calls: int, meetings: int, flyers: int, shows: int, leed_crm: int, rielter_type: UserTypesOrm):
+    def __init__(self, base_percent: float, level: UserKpiLevelsOrm, deals_rent: int, deals_sale: int, regular_contracts: int, exclusive_contracts: int, cold_calls: int, meetings: int, flyers: int, shows: int, leed_crm: int, rielter_type: UserTypesOrm):
         self.base_percent = base_percent
         self.level = level
         self.deals = deals_rent + deals_sale

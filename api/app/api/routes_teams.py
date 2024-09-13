@@ -20,7 +20,7 @@ async def team_add(team: Team, token_authorization: str | None = Header(default=
 
 
 @router_teams.delete("/delete")
-async def team_delete(team_id: int, token_authorization: str | None = Header(default=None)):
+async def team_delete(team_id: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -28,7 +28,7 @@ async def team_delete(team_id: int, token_authorization: str | None = Header(def
 
 
 @router_teams.post("/join")
-async def team_join(team_id: int, joined_by: int, token_authorization: str | None = Header(default=None)):
+async def team_join(team_id: str, joined_by: int, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -45,7 +45,7 @@ async def team_join(team_id: int, joined_by: int, token_authorization: str | Non
 
 
 @router_teams.put("/leave")
-async def team_leave(team_id: int, token_authorization: str | None = Header(default=None)):
+async def team_leave(team_id: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -53,7 +53,7 @@ async def team_leave(team_id: int, token_authorization: str | None = Header(defa
 
 
 @router_teams.put("/move_team_role")
-async def move_team_role(team_id: int, user_id: int, role: UserStatuses, token_authorization: str | None = Header(default=None)):
+async def move_team_role(team_id: str, user_id: str, role: UserStatuses, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)

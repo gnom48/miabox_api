@@ -15,7 +15,7 @@ async def task_all(token_authorization: str | None = Header(default=None)):
 
 
 @router_tasks.get("/completed", status_code=200)
-async def task_all(user_id: int, token_authorization: str | None = Header(default=None)):
+async def task_all(user_id: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -36,7 +36,7 @@ async def task_add(req: Request, task: Task, token_authorization: str | None = H
 
 
 @router_tasks.delete("/delete", status_code=200)
-async def task_delete(req: Request, task_id: int, token_authorization: str | None = Header(default=None)):
+async def task_delete(req: Request, task_id: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)

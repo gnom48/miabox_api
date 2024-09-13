@@ -20,7 +20,7 @@ async def address_info_add(address_info: AddresInfo, token_authorization: str | 
 
 
 @router_addresses.get("/get_address_info_by_user_id")
-async def get_address_info_by_user_id(user_id: int, date_start: int | None = None, date_end: int | None = None, token_authorization: str | None = Header(default=None)):
+async def get_address_info_by_user_id(user_id: str, date_start: int | None = None, date_end: int | None = None, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)

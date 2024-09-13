@@ -34,7 +34,7 @@ async def call_info_add(info: str, phone_number: str, date_time: int, contact_na
 
 
 @router_calls.get("/get_all_calls")
-async def get_all_calls(user_id: int, token_authorization: str | None = Header(default=None)):
+async def get_all_calls(user_id: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -43,7 +43,7 @@ async def get_all_calls(user_id: int, token_authorization: str | None = Header(d
 
 
 @router_calls.get("/get_all_records_info")
-async def get_all_records_info(user_id: int, token_authorization: str | None = Header(default=None)):
+async def get_all_records_info(user_id: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -52,7 +52,7 @@ async def get_all_records_info(user_id: int, token_authorization: str | None = H
 
 
 @router_calls.get("/get_call_record_file")
-async def get_call_record_file(user_id: int, record_id: int, token_authorization: str | None = Header(default=None)):
+async def get_call_record_file(user_id: str, record_id: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -64,7 +64,7 @@ async def get_call_record_file(user_id: int, record_id: int, token_authorization
 
 
 @router_calls.get("/order_call_transcription")
-async def order_call_transcription(user_id: int, record_id: int, model: str = Models.base, token_authorization: str | None = Header(default=None)):
+async def order_call_transcription(user_id: str, record_id: str, model: str = Models.base, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -81,7 +81,7 @@ async def order_call_transcription(task_id: str, token_authorization: str | None
 
 
 @router_calls.put("/update_transcription")
-async def update_transcription(transcription: str, user_id: int, record_id: int, secret_key: str | None = Header(default=None)):
+async def update_transcription(transcription: str, user_id: str, record_id: str, secret_key: str | None = Header(default=None)):
     if not secret_key or secret_key != SECRET_KEY:
         raise HTTPException(status_code=401, detail="Unauthorized")
     return await Repository.update_transcription(user_id=user_id, record_id=record_id, transcription=transcription)

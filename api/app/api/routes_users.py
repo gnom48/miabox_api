@@ -80,7 +80,7 @@ async def set_image_to_user_by_file(file: UploadFile, token_authorization: str |
 
 
 @router_users.get("/get_image_file", status_code=200)
-async def set_image_to_user(user_id: int, token_authorization: str | None = Header(default=None)):
+async def set_image_to_user(user_id: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     image = await Repository.get_image(user_id)

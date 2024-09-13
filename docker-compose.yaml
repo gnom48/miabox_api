@@ -23,7 +23,7 @@ services:
     build: ./api
     depends_on:
       - db
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn api.app.main:app --host 0.0.0.0 --port 8000'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn api.app.main:app --host 0.0.0.0 --port 8000 --reload'
     ports:
       - "8001:8000"
     restart: always
@@ -35,7 +35,7 @@ services:
   whisper:
     container_name: service_whisper
     build: ./service
-    command: bash -c 'uvicorn service.app.main:app --host 0.0.0.0 --port 5000'
+    command: bash -c 'uvicorn service.app.main:app --host 0.0.0.0 --port 5000 --reload'
     ports:
       - "5000:5000"
     restart: always

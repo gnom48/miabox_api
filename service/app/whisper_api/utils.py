@@ -2,7 +2,7 @@ import aiohttp
 from .consts import *
 
 
-async def put_transcribe_result_async(transcription: str, user_id: int, record_id: int):
+async def put_transcribe_result_async(transcription: str, user_id: str, record_id: str):
     headers = {"secret-key": SECRET_KEY}
     data = {"transcription": transcription["text"], "user_id": user_id, "record_id": record_id}
     async with aiohttp.ClientSession() as session:

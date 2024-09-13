@@ -30,7 +30,7 @@ async def note_add(req: Request, note: Note, token_authorization: str | None = H
 
 
 @router_notes.delete("/delete", status_code=200)
-async def note_delete(req: Request, note_id: int, token_authorization: str | None = Header(default=None)):
+async def note_delete(req: Request, note_id: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)

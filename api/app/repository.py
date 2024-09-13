@@ -88,7 +88,7 @@ class Repository:
         
 
     @classmethod
-    async def get_user_by_id(cls, id: int) -> UserOrm:
+    async def get_user_by_id(cls, id: str) -> UserOrm:
         async with new_session() as session:
             try:
                 res = await session.get(UserOrm, id)
@@ -98,7 +98,7 @@ class Repository:
                 
                 
     @classmethod
-    async def get_user_statistics(cls, id: int) -> StatisticsViaOrm:
+    async def get_user_statistics(cls, id: str) -> StatisticsViaOrm:
         async with new_session() as session:
             try:
                 res = await session.get(StatisticsViaOrm, id)
@@ -122,7 +122,7 @@ class Repository:
 
                 
     @classmethod
-    async def get_all_notes_by_user_id(cls, user_id: int) -> list[NoteOrm]:
+    async def get_all_notes_by_user_id(cls, user_id: str) -> list[NoteOrm]:
         async with new_session() as session:
             try:
                 query = select(NoteOrm).where(NoteOrm.user_id == user_id)
@@ -133,7 +133,7 @@ class Repository:
 
 
     @classmethod
-    async def add_note(cls, data: Note) -> int:
+    async def add_note(cls, data: Note) -> str:
         async with new_session() as session:
             try:
                 new_note = NoteOrm(**data.model_dump())
@@ -148,7 +148,7 @@ class Repository:
 
 
     @classmethod
-    async def del_note(cls, id: int) -> bool:
+    async def del_note(cls, id: str) -> bool:
         async with new_session() as session:
             try:
                 note_to_del = await session.get(NoteOrm, id)
@@ -177,7 +177,7 @@ class Repository:
 
                 
     @classmethod
-    async def get_all_tasks_by_user_id(cls, user_id: int, completed: bool) -> list[TaskOrm]:
+    async def get_all_tasks_by_user_id(cls, user_id: str, completed: bool) -> list[TaskOrm]:
         async with new_session() as session:
             try:
                 query = select(TaskOrm).where(TaskOrm.user_id == user_id).where(TaskOrm.is_completed == completed)
@@ -188,7 +188,7 @@ class Repository:
 
 
     @classmethod
-    async def add_task(cls, data: Task) -> int:
+    async def add_task(cls, data: Task) -> str:
         async with new_session() as session:
             try:
                 new_task = TaskOrm(**data.model_dump())
@@ -205,7 +205,7 @@ class Repository:
 
 
     @classmethod
-    async def del_task(cls, id: int) -> bool:
+    async def del_task(cls, id: str) -> bool:
         async with new_session() as session:
             try:
                 task_to_del = await session.get(TaskOrm, id)
@@ -233,7 +233,7 @@ class Repository:
     
 
     @classmethod
-    async def update_statistics(cls, user_id: int, statistic: str, addvalue: int) -> bool:
+    async def update_statistics(cls, user_id: str, statistic: str, addvalue: int) -> bool:
         async with new_session() as session:
             try:
                 day_statistic_to_edit: DayStatisticsOrm = await session.get(DayStatisticsOrm, user_id)
@@ -286,7 +286,17 @@ class Repository:
                         day_statistic_to_edit.analytics += addvalue
                         week_statistic_to_edit.analytics += addvalue
                         month_statistic_to_edit.analytics += addvalue
-                    case _:
+                    case WorkTasksTypesOrm.REGULAR_CONTRACT.value:
+                        day_statistic_to_edit.regular_contracts += addvalue
+                        week_statistic_to_edit.regular_contracts += addvalue
+                        month_statistic_to_edit.regular_contracts += addvalue
+                        month_statistic_to_edit.regular_contracts += addvalue
+                    case WorkTasksTypesOrm.EXCLUSIVE_CONTRACT.value:
+                        day_statistic_to_edit.exclusive_contracts += addvalue
+                        week_statistic_to_edit.exclusive_contracts += addvalue
+                        month_statistic_to_edit.exclusive_contracts += addvalue
+                        month_statistic_to_edit.exclusive_contracts += addvalue
+                    case WorkTasksTypesOrm.OTHER.value:
                         day_statistic_to_edit.others += addvalue
                         week_statistic_to_edit.others += addvalue
                         month_statistic_to_edit.others += addvalue
@@ -297,7 +307,7 @@ class Repository:
             
     
     @classmethod
-    async def get_statistics_by_period(cls, user_id: int, period: str) -> StatisticsViaOrm:
+    async def get_statistics_by_period(cls, user_id: str, period: str) -> StatisticsViaOrm:
         async with new_session() as session:
             try:
                 match period:
@@ -314,7 +324,7 @@ class Repository:
                 
                 
     @classmethod
-    async def get_statistics_with_kpi(cls, user_id: int) -> LastMonthStatisticsWithKpiOrm:
+    async def get_statistics_with_kpi(cls, user_id: str) -> LastMonthStatisticsWithKpiOrm:
         async with new_session() as session:
             try:
                 return await session.get(LastMonthStatisticsWithKpiOrm, user_id)
@@ -328,14 +338,14 @@ class Repository:
             try:
                 data = await session.get(MonthStatisticsOrm, user.id)
                 coefs = await session.get(SummaryStatisticsWithLevelOrm, user.id)
-                kpi_calc = KpiCalculator(coefs.base_percent, coefs.user_level, data.deals_rent, data.deals_sale, 0, 0, data.calls, data.meets, data.flyers, data.analytics, 0, user.type)
+                kpi_calc = KpiCalculator(coefs.base_percent, coefs.user_level, data.deals_rent, data.deals_sale, data.regular_contracts, data.exclusive_contracts, data.calls, data.meets, data.flyers, data.analytics, 0, user.type)
                 return { "kpi": kpi_calc.calculate_kpi(), "level": coefs.user_level.value, "deals_rent": coefs.deals_rent, "deals_sale": coefs.deals_sale }
             except Exception as e:
                 return None
             
                 
     @classmethod
-    async def update_kpi_level(cls, user_id: int, level: UserKpiLevels) -> StatisticsViaOrm:
+    async def update_kpi_level(cls, user_id: str, level: UserKpiLevels) -> StatisticsViaOrm:
         async with new_session() as session:
             try:
                 var = await session.get(LastMonthStatisticsWithKpiOrm, user_id)
@@ -349,7 +359,7 @@ class Repository:
     async def clear_day_statistics(cls):
         async with new_session() as session:
             try:
-                query = update(DayStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals_rent = 0, deals_sale = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
+                query = update(DayStatisticsOrm).values(flyers=0, calls=0, shows=0, meets=0, deals_rent=0, deals_sale = 0, deposits = 0, searches = 0, analytics = 0, others = 0, regular_contracts=0, exclusive_contracts=0)
                 await session.execute(query)
                 await session.commit()
                 print(f"Обнуление ежедневной статистики")
@@ -362,7 +372,7 @@ class Repository:
     async def clear_week_statistics(cls):
         async with new_session() as session:
             try:
-                query = update(WeekStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals_rent = 0, deals_sale = 0, deposits = 0, searches = 0, analytics = 0, others = 0)
+                query = update(WeekStatisticsOrm).values(flyers = 0, calls = 0, shows = 0, meets = 0, deals_rent = 0, deals_sale = 0, deposits = 0, searches = 0, analytics = 0, others = 0, regular_contracts=0, exclusive_contracts=0)
                 await session.execute(query)
                 await session.commit()
                 print(f"Обнуление еженедельной статистики")
@@ -390,8 +400,10 @@ class Repository:
                     cur_user_record.searches = item.searches
                     cur_user_record.analytics = item.analytics
                     cur_user_record.others = item.others
+                    cur_user_record.regular_contracts = item.regular_contracts
+                    cur_user_record.exclusive_contracts = item.exclusive_contracts
                     coefs = await session.get(SummaryStatisticsWithLevelOrm, item.user_id)
-                    calc = KpiCalculator(coefs.base_percent, cur_user_record.user_level, item.deals_rent, item.deals_sale, 0, 0, item.calls, item.meets, item.flyers, item.shows, 0, cur_user.type)
+                    calc = KpiCalculator(coefs.base_percent, cur_user_record.user_level, item.deals_rent, item.deals_sale, item.regular_contracts, item.exclusive_contracts, item.calls, item.meets, item.flyers, item.shows, 0, cur_user.type)
                     cur_user_record.salary_percentage = calc.calculate_kpi()
                     await session.commit()
                 print("Сбор для kpi")
@@ -399,7 +411,7 @@ class Repository:
                 print(f"Ошибка ежемесячной работы: {e}")
 
             try:
-                query = update(MonthStatisticsOrm).values(flyers=0, calls=0, shows=0, meets=0, deals_rent=0, deals_sale=0, deposits=0, searches=0, analytics=0, others=0)
+                query = update(MonthStatisticsOrm).values(flyers=0, calls=0, shows=0, meets=0, deals_rent=0, deals_sale=0, deposits=0, searches=0, analytics=0, others=0, regular_contracts=0, exclusive_contracts=0)
                 await session.execute(query)
                 print(f"Обнуление ежемесячной статистики")
                 await session.commit()
@@ -416,7 +428,7 @@ class Repository:
         return u
 
     @classmethod
-    async def get_all_teams_by_user_id(cls, user_id: int) -> list[TeamWithInfo]:
+    async def get_all_teams_by_user_id(cls, user_id: str) -> list[TeamWithInfo]:
         async with new_session() as session:
             try:
                 query = select(UserTeamOrm).where(UserTeamOrm.user_id == user_id)
@@ -444,7 +456,7 @@ class Repository:
 
 
     @classmethod
-    async def add_team(cls, data: Team, user_id: int) -> int:
+    async def add_team(cls, data: Team, user_id: str) -> str:
         async with new_session() as session:
             try:
                 new_team = TeamOrm(**data.model_dump())
@@ -466,7 +478,7 @@ class Repository:
 
 
     @classmethod
-    async def del_team(cls, id: int) -> bool:
+    async def del_team(cls, id: str) -> bool:
         async with new_session() as session:
             try:
                 team_to_del = await session.get(TeamOrm, id)
@@ -501,7 +513,7 @@ class Repository:
                 
     
     @classmethod
-    async def move_team_user_role(cls, team_id: int, user_id: int, role: UserStatuses) -> bool:
+    async def move_team_user_role(cls, team_id: str, user_id: str, role: UserStatuses) -> bool:
         async with new_session() as session:
             try:
                 role_orm = UserStatusesOrm.OWNER
@@ -522,7 +534,7 @@ class Repository:
 
 
     @classmethod
-    async def leave_team(cls, user_id: int, team_id: int) -> bool:
+    async def leave_team(cls, user_id: str, team_id: str) -> bool:
         async with new_session() as session:
             try:
                 query = select(UserTeamOrm).where(UserTeamOrm.user_id == user_id).where(UserTeamOrm.team_id == team_id)
@@ -554,7 +566,7 @@ class Repository:
 
 
     @classmethod
-    async def get_address_info_by_user_id(cls, user_id: int, date_start: int | None = None, date_end: int | None = None) -> list[AddresInfoOrm]:
+    async def get_address_info_by_user_id(cls, user_id: str, date_start: int | None = None, date_end: int | None = None) -> list[AddresInfoOrm]:
         async with new_session() as session:
             try:
                 query = None
@@ -569,29 +581,11 @@ class Repository:
                 return None
 
 
-    @classmethod
-    async def get_address_info_for_team(cls, team_id: int) -> dict | None:
-        async with new_session() as session:
-            try:
-                query_users = select(UserTeamOrm).where(UserTeamOrm.team_id == team_id)
-                r = await session.execute(query_users)
-                teams_user = list(r.scalars().all())
-                user_addreses_by_team: dict = {}
-                for ut in teams_user:
-                    query_addresses = select(AddresInfoOrm).where(AddresInfoOrm.user_id == ut.user_id)
-                    r = await session.execute(query_addresses)
-                    addresses = r.scalars().all()
-                    user_addreses_by_team[ut.user_id] = list(addresses)
-                return user_addreses_by_team
-            except:
-                return None
-
-
     # -------------------------- images --------------------------
 
 
     @classmethod
-    async def add_image(cls, image: Image, to_user_id: int) -> int | None:
+    async def add_image(cls, image: Image, to_user_id: str) -> str | None:
         async with new_session() as session:
             try:
                 image_to_save = ImageOrm(**image.model_dump())
@@ -610,7 +604,7 @@ class Repository:
 
     
     @classmethod
-    async def edit_image_file(cls, file: UploadFile, new_filename: str, to_user_id: int) -> int | None:
+    async def edit_image_file(cls, file: UploadFile, new_filename: str, to_user_id: str) -> str | None:
         async with new_session() as session:
             try:
                 await file.seek(0)
@@ -630,7 +624,7 @@ class Repository:
                 
 
     @classmethod
-    async def get_image(cls, user_id: int) -> ImageOrm | None:
+    async def get_image(cls, user_id: str) -> ImageOrm | None:
         async with new_session() as session:
             try:
                 user = await session.get(UserOrm, user_id)
@@ -640,7 +634,7 @@ class Repository:
                 
     
     @classmethod
-    async def delete_image(cls, image_id: int) -> bool:
+    async def delete_image(cls, image_id: str) -> bool:
         async with new_session() as session:
             try:
                 if image_id == 1:
@@ -658,9 +652,9 @@ class Repository:
 
     @classmethod
     async def add_call_record_to_storage(cls, 
-                                            user_id: int, file: UploadFile | None, new_filename: str, phone_number: str,
+                                            user_id: str, file: UploadFile | None, new_filename: str, phone_number: str,
                                             contact_name: str, length_seconds: int, call_type: int,
-                                            info: str, date_time: int) -> int | None:
+                                            info: str, date_time: int) -> str | None:
         async with new_session() as session:
             try:
                 if file is not None:
@@ -689,7 +683,7 @@ class Repository:
 
 
     @classmethod
-    async def get_all_info_user_calls(cls, user_id: int) -> list[UsersCallsOrm] | None:
+    async def get_all_info_user_calls(cls, user_id: str) -> list[UsersCallsOrm] | None:
         async with new_session() as session:
             try:
                 query = select(UsersCallsOrm).where(UsersCallsOrm.user_id == user_id)
@@ -700,7 +694,7 @@ class Repository:
                 
                 
     @classmethod
-    async def get_all_user_call_records(cls, user_id: int) -> list[CallsRecordsOrm] | None:
+    async def get_all_user_call_records(cls, user_id: str) -> list[CallsRecordsOrm] | None:
         async with new_session() as session:
             try:
                 calls: list[UsersCallsOrm] = await Repository.get_all_info_user_calls(user_id)
@@ -718,7 +712,7 @@ class Repository:
 
 
     @classmethod
-    async def get_call_record(cls, user_id: int, record_id: int) -> CallsRecordsOrm | None:
+    async def get_call_record(cls, user_id: str, record_id: str) -> CallsRecordsOrm | None:
         async with new_session() as session:
             try:
                 call_record = await session.execute(select(CallsRecordsOrm).where(CallsRecordsOrm.id == record_id))
@@ -728,7 +722,7 @@ class Repository:
             
 
     @classmethod
-    async def update_transcription(cls, user_id: int, record_id: int, transcription: str) -> bool | None:
+    async def update_transcription(cls, user_id: str, record_id: str, transcription: str) -> bool | None:
         async with new_session() as session:
             try:
                 req = await session.execute(select(UsersCallsOrm).where(UsersCallsOrm.user_id == user_id).where(UsersCallsOrm.record_id == record_id))
@@ -741,7 +735,7 @@ class Repository:
             
 
     @classmethod
-    async def get_filename(cls, user_id: int, record_id: int) -> str | None:
+    async def get_filename(cls, user_id: str, record_id: str) -> str | None:
         async with new_session() as session:
             try:
                 req = await session.execute(select(CallsRecordsOrm).where(CallsRecordsOrm.id == record_id))
