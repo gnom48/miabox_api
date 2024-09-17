@@ -85,7 +85,7 @@ class Repository:
                 return False
             await session.commit()
             return True
-        
+
 
     @classmethod
     async def get_user_by_id(cls, id: str) -> UserOrm:
@@ -95,8 +95,8 @@ class Repository:
                 return res
             except:
                 return None
-                
-                
+
+
     @classmethod
     async def get_user_statistics(cls, id: str) -> StatisticsViaOrm:
         async with new_session() as session:
@@ -137,7 +137,8 @@ class Repository:
         async with new_session() as session:
             try:
                 new_note = NoteOrm(**data.model_dump())
-                new_note.id = None
+                if new_note.id == "":
+                    new_note.id = None
                 session.add(new_note)
                 await session.flush()
                 note_id = new_note.id
@@ -192,7 +193,8 @@ class Repository:
         async with new_session() as session:
             try:
                 new_task = TaskOrm(**data.model_dump())
-                new_task.id = None
+                if new_task.id == "":
+                    new_task.id = None
                 new_task.work_type = data.work_type.name
                 new_task.is_completed = False
                 session.add(new_task)
@@ -460,7 +462,8 @@ class Repository:
         async with new_session() as session:
             try:
                 new_team = TeamOrm(**data.model_dump())
-                new_team.id = None
+                if new_team.id == "":
+                    new_team.id = None
                 session.add(new_team)
                 await session.flush()
                 team_id = new_team.id
@@ -555,7 +558,8 @@ class Repository:
         async with new_session() as session:
             try:
                 addres_info_orm = AddresInfoOrm(**data.model_dump())
-                addres_info_orm.record_id = None
+                if addres_info_orm.record_id == "":
+                    addres_info_orm.record_id = None
                 session.add(addres_info_orm)
                 await session.flush()
                 record_id = addres_info_orm.record_id
@@ -589,7 +593,8 @@ class Repository:
         async with new_session() as session:
             try:
                 image_to_save = ImageOrm(**image.model_dump())
-                image_to_save.id = None
+                if image_to_save.id == "":
+                    image_to_save.id = None
                 session.add(image_to_save)
                 await session.flush()
                 image_id = image_to_save.id
@@ -654,13 +659,16 @@ class Repository:
     async def add_call_record_to_storage(cls, 
                                             user_id: str, file: UploadFile | None, new_filename: str, phone_number: str,
                                             contact_name: str, length_seconds: int, call_type: int,
-                                            info: str, date_time: int) -> str | None:
+                                            info: str, date_time: int, record_id: str | None) -> str | None:
         async with new_session() as session:
             try:
                 if file is not None:
                     await file.seek(0)
                 file_to_save = CallsRecordsOrm()
-                file_to_save.id = None
+                if record_id == "" or record_id == None:
+                    file_to_save.id = None
+                else:
+                    file_to_save.id = record_id
                 file_to_save.name = new_filename
                 file_to_save.data = None # await file.read()
                 session.add(file_to_save)
