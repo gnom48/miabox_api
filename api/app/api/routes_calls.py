@@ -14,7 +14,7 @@ router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
 calls_support_scheduler = AsyncIOScheduler(timezone="UTC")
 
 @router_calls.post("/add_call_info")
-async def call_info_add(info: str, phone_number: str, date_time: int, contact_name: str, length_seconds: int, call_type: int, file: UploadFile = None, token_authorization: str | None = Header(default=None)):
+async def call_info_add(info: str, phone_number: str, date_time: int, contact_name: str, length_seconds: int, call_type: int, file: UploadFile | None = None, record_id: str | None = None, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
@@ -27,7 +27,7 @@ async def call_info_add(info: str, phone_number: str, date_time: int, contact_na
                 copyfileobj(file.file, buffer)
         except IOError as e:
             raise HTTPException(status_code=401, detail="file format error")
-    ret_val = await Repository.add_call_record_to_storage(user_id=user.id, file=file, new_filename=filename, date_time=date_time, info=info, phone_number=phone_number, length_seconds=length_seconds, call_type=call_type, contact_name=contact_name)
+    ret_val = await Repository.add_call_record_to_storage(user_id=user.id, file=file, new_filename=filename, date_time=date_time, info=info, phone_number=phone_number, length_seconds=length_seconds, call_type=call_type, contact_name=contact_name, record_id=record_id)
     if not ret_val:
         raise HTTPException(status_code=400, detail="addition error")
     return ret_val
