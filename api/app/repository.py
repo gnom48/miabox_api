@@ -599,6 +599,9 @@ class Repository:
                 await session.flush()
                 image_id = image_to_save.id
                 to_user = await session.get(UserOrm, to_user_id)
+                to_user.image = None
+                await session.commit()
+
                 await Repository.delete_image(to_user.image)
                 to_user.image = image_id
                 await session.commit()

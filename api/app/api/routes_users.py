@@ -24,15 +24,6 @@ async def user_registration(user: User):
     return res
 
 
-@router_users.get("/authorization", status_code=200)
-async def user_authorization(login: str, password: str):
-    current_user = await Repository.get_user_by_login(login, password)
-    if current_user:
-        return create_jwt_token(current_user)
-    else:
-        raise HTTPException(status_code=401, detail="authorization error")
-
-
 @router_users.post("/authorization_secure", status_code=200)
 async def authorization_secure(auth_data: AuthData):
     current_user = await Repository.get_user_by_login(auth_data.login, auth_data.password)
@@ -72,8 +63,8 @@ async def set_image_to_user_by_file(file: UploadFile, token_authorization: str |
         with open(rf"/shared/images/{file.filename}", "wb") as buffer:
             copyfileobj(file.file, buffer)
     except IOError as e:
-        raise HTTPException(status_code=401, detail="file operation error")
-    res = await Repository.edit_image_file(file, f"{file.filename}", user.id)
+        raise HTTPException(status_code=403, detail="file operation error")
+    res = await Repository.edit_image_file(file, file.filename, user.id)
     if res is not None:
         return res
     raise HTTPException(status_code=402, detail="db operation error")
