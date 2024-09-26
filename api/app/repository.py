@@ -621,7 +621,7 @@ class Repository:
             try:
                 await file.seek(0)
                 print("начало работы с image")
-                image = Image(id=None, name=new_filename, data=bytearray(0))
+                image = Image(id="", name=new_filename, data=bytearray(0))
                 print(image)
                 new_image_id = await Repository.add_image(image, to_user_id)
                 print(new_image_id)
