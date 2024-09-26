@@ -592,19 +592,23 @@ class Repository:
     async def add_image(cls, image: Image, to_user_id: str) -> str | None:
         async with new_session() as session:
             try:
+                print("начало добавления image")
                 image_to_save = ImageOrm(**image.model_dump())
                 if image_to_save.id == "":
                     image_to_save.id = None
+                print(image_to_save.id)
                 session.add(image_to_save)
                 await session.flush()
                 image_id = image_to_save.id
                 to_user = await session.get(UserOrm, to_user_id)
-                to_user.image = None
+                to_user.image = "1"
+                print(to_user)
                 await session.commit()
 
                 await Repository.delete_image(to_user.image)
                 to_user.image = image_id
                 await session.commit()
+                print(to_user)
                 return image_id
             except Exception as e:
                 print(f"Ошибка добавления картинки: {e}")
@@ -616,16 +620,12 @@ class Repository:
         async with new_session() as session:
             try:
                 await file.seek(0)
-                image = Image(id="", name=new_filename, data=bytearray(0))
+                print("начало работы с image")
+                image = Image(id=None, name=new_filename, data=bytearray(0))
+                print(image)
                 new_image_id = await Repository.add_image(image, to_user_id)
-                if new_image_id is not None:
-                    user = await session.get(UserOrm, to_user_id)
-                    user.image = new_image_id
-                    await session.commit()
-                    return new_image_id
-                else:
-                    print(f"Ошибка записи картинки на диск: {e}")
-                    return None
+                print(new_image_id)
+                return new_image_id
             except Exception as e:
                 print(f"Ошибка загрузки картинки: {e}")
                 return None
@@ -645,7 +645,7 @@ class Repository:
     async def delete_image(cls, image_id: str) -> bool:
         async with new_session() as session:
             try:
-                if image_id == 1:
+                if image_id == "1":
                     return True
                 image_to_delete = await session.get(ImageOrm, image_id)
                 await session.delete(image_to_delete)
