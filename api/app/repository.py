@@ -14,7 +14,7 @@ class Repository:
     # -------------------------- config --------------------------
 
     @classmethod
-    async def get_config(cls) -> str:
+    async def get_config(cls) -> tuple:
         async with new_session() as session:
             try:
                 req = text("SELECT version() AS db_version;")
@@ -26,6 +26,18 @@ class Repository:
                 return (version, ntime)
             except:
                 return None
+            
+
+    @classmethod
+    async def get_supported_version(cls) -> int:
+        async with new_session() as session:
+            try:
+                req = text("SELECT supported_version FROM versions;")
+                result = await session.execute(req)
+                version = result.scalars().first()
+                return int(version)
+            except:
+                return 0
 
     # -------------------------- users --------------------------
 
@@ -559,14 +571,12 @@ class Repository:
             try:
                 address_info_orm = AddresInfoOrm(**data.model_dump())
                 address_info_orm.record_id = data.record_id
-                print(address_info_orm.record_id)
                 if address_info_orm.record_id == "":
                     address_info_orm.record_id = None
                 session.add(address_info_orm)
                 await session.flush()
                 record_id = address_info_orm.record_id
                 await session.commit()
-                print(record_id)
                 return record_id
             except:
                 return None

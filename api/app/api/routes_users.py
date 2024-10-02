@@ -25,14 +25,15 @@ async def user_registration(user: User):
 
 
 @router_users.post("/authorization_secure", status_code=200)
-async def authorization_secure(auth_data: AuthData):
+async def authorization_secure(auth_data: AuthData, response: Response):
     current_user = await Repository.get_user_by_login(auth_data.login, auth_data.password)
     if current_user:
+        response.headers["supported_version"] = await Repository.get_supported_version()
         return create_jwt_token(current_user)
     else:
         raise HTTPException(status_code=401, detail="authorization error")
-    
-    
+
+
 @router_users.get("/info", status_code=200)
 async def user_authorization(req: Request, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
