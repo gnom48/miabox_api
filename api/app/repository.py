@@ -557,13 +557,15 @@ class Repository:
     async def add_address_info(cls, data: AddresInfo) -> bool:
         async with new_session() as session:
             try:
-                addres_info_orm = AddresInfoOrm(**data.model_dump())
-                if addres_info_orm.record_id == "":
-                    addres_info_orm.record_id = None
-                session.add(addres_info_orm)
+                address_info_orm = AddresInfoOrm(**data.model_dump())
+                print(address_info_orm.record_id)
+                if address_info_orm.record_id == "":
+                    address_info_orm.record_id = None
+                session.add(address_info_orm)
                 await session.flush()
-                record_id = addres_info_orm.record_id
+                record_id = address_info_orm.record_id
                 await session.commit()
+                print(record_id)
                 return record_id
             except:
                 return None
@@ -592,23 +594,19 @@ class Repository:
     async def add_image(cls, image: Image, to_user_id: str) -> str | None:
         async with new_session() as session:
             try:
-                print("начало добавления image")
                 image_to_save = ImageOrm(**image.model_dump())
                 if image_to_save.id == "":
                     image_to_save.id = None
-                print(image_to_save.id)
                 session.add(image_to_save)
                 await session.flush()
                 image_id = image_to_save.id
                 to_user = await session.get(UserOrm, to_user_id)
                 to_user.image = "1"
-                print(to_user)
                 await session.commit()
 
                 await Repository.delete_image(to_user.image)
                 to_user.image = image_id
                 await session.commit()
-                print(to_user)
                 return image_id
             except Exception as e:
                 print(f"Ошибка добавления картинки: {e}")
@@ -620,11 +618,8 @@ class Repository:
         async with new_session() as session:
             try:
                 await file.seek(0)
-                print("начало работы с image")
                 image = Image(id="", name=new_filename, data=bytearray(0))
-                print(image)
                 new_image_id = await Repository.add_image(image, to_user_id)
-                print(new_image_id)
                 return new_image_id
             except Exception as e:
                 print(f"Ошибка загрузки картинки: {e}")
