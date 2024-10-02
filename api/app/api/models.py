@@ -115,6 +115,7 @@ class StatisticsViaOrm(BaseModel):
 
 
 class AddresInfo(BaseModel):
+    record_id: str
     user_id: str
     address: str
     lat: float

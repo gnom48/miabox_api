@@ -558,6 +558,7 @@ class Repository:
         async with new_session() as session:
             try:
                 address_info_orm = AddresInfoOrm(**data.model_dump())
+                address_info_orm.record_id = data.record_id
                 print(address_info_orm.record_id)
                 if address_info_orm.record_id == "":
                     address_info_orm.record_id = None
