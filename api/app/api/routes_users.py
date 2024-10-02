@@ -28,7 +28,7 @@ async def user_registration(user: User):
 async def authorization_secure(auth_data: AuthData, response: Response):
     current_user = await Repository.get_user_by_login(auth_data.login, auth_data.password)
     if current_user:
-        response.headers["supported_version"] = await Repository.get_supported_version()
+        response.headers["supported_version"] = str(await Repository.get_supported_version())
         return create_jwt_token(current_user)
     else:
         raise HTTPException(status_code=401, detail="authorization error")
