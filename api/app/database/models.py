@@ -9,8 +9,8 @@ class BaseModelOrm(DeclarativeBase):
 
 
 class UserTypesOrm(Enum):
-    COMMERCIAL = "Риелтер коммерческой недвижимости"
-    PRIVATE = "Риелтер частной недвижимости"
+    COMMERCIAL = "Риелтор коммерческой недвижимости"
+    PRIVATE = "Риелтор частной недвижимости"
     
     
 class WorkTasksTypesOrm(Enum):

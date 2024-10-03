@@ -12,8 +12,8 @@ class StatisticPeriods(str, Enum):
 
 
 class UserTypes(str, Enum):
-    COMMERCIAL = "Риелтер коммерческой недвижимости"
-    PRIVATE = "Риелтер частной недвижимости"
+    COMMERCIAL = "Риелтор коммерческой недвижимости"
+    PRIVATE = "Риелтор частной недвижимости"
 
 
 class WorkTasksTypes(str, Enum):
