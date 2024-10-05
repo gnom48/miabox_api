@@ -23,9 +23,11 @@ services:
     build: ./api
     depends_on:
       - db
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn api.app.main:app --host 0.0.0.0 --port 8000 --reload'
+    # command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn api.app.main:app --host 0.0.0.0 --port 8000 --reload'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn api.app.main:app --host 0.0.0.0 --port 443 --ssl-keyfile api/certificates/key.pem --ssl-certfile api/certificates/cert.pem --reload'
     ports:
-      - "8001:8000"
+      # - "8001:8000"
+      - "9443:443"
     restart: always
     networks:
       - my_network
