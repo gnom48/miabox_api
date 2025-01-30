@@ -1,55 +1,143 @@
-version: '3.4'
+name: miabox-server
 
 services:
-  db:
-    container_name: db_postgres
+  postgres:
+    container_name: postgres-db
     image: postgres:15.3-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "6432:5432"
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - shared-data:/shared
-    restart: always
+    restart: unless-stopped
     networks:
-      - my_network
+      - network-bridge
 
-  app:
-    container_name: app_fast_api
-    build: ./api
-    depends_on:
-      - db
-    # command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn api.app.main:app --host 0.0.0.0 --port 8000 --reload'
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn api.app.main:app --host 0.0.0.0 --port 443 --ssl-keyfile api/certificates/key.pem --ssl-certfile api/certificates/cert.pem --reload'
+  auth:
+    container_name: auth-service
+    build: ./auth
     ports:
-      # - "8001:8000"
-      - "9443:443"
-    restart: always
-    networks:
-      - my_network
+      - "${AUTH_PORT}:${AUTH_PORT}"  
     volumes:
       - shared-data:/shared
+    restart: unless-stopped
+    networks:
+      - network-bridge
+    depends_on:
+      postgres:
+        conditions: service_healthy
+
+  api:
+    container_name: api-service
+    build: ./api
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    restart: unless-stopped
+    networks:
+      - network-bridge
+    volumes:
+      - shared-data:/shared
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${API_PORT}/user/config" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      postgres:
+        conditions: service_healthy
 
   whisper:
-    container_name: service_whisper
-    build: ./service
-    command: bash -c 'uvicorn service.app.main:app --host 0.0.0.0 --port 5000 --reload'
+    container_name: whisper-service
+    build: ./whisper
     ports:
-      - "5000:5000"
-    restart: always
+      - "${WHISPER_PORT}:${WHISPER_PORT}"
+    restart: unless-stopped
     networks:
-      - my_network
+      - network-bridge
     volumes:
       - shared-data:/shared
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${WHISPER_PORT}/transcription/config" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
+
+  minio:
+    container_name: minio-storage
+    image: minio/minio
+    ports:
+      - "${MINIO_API_PORT}:${MINIO_API_PORT}"
+      - "${MINIO_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server --console-address ":${MINIO_CONSOLE_PORT}" /data
+    networks:
+      - network-bridge
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${MINIO_API_PORT}/minio/health/live" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - minio-data:/data:z
+      - shared-data:/shared
+
+  redis:
+    image: redis:latest
+    container_name: redis-service
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_USER: ${REDIS_USER}
+      REDIS_USER_PASSWORD: ${REDIS_USER_PASSWORD}
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    command: >
+      sh -c '
+        mkdir -p /usr/local/etc/redis &&
+        echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
+        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
+        echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
+        echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+      '
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 volumes:
   postgres-data:
   shared-data:
+  minio-data:
+  redis-data:
 
 networks:
-  my_network:
+  network-bridge:
     driver: bridge
