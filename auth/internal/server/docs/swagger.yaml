@@ -1,0 +1,276 @@
+basePath: /
+definitions:
+  server.createAccountRequestBody:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+    type: object
+  server.signInRequestBody:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  server.signUpRequestBody:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  server.updateAccountRequestBody:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: Account API (Account microservice) documentation. Jтвечает за авторизацию
+    и данные о пользователях. Все остальные сервисы зависят от него, ведьименно он
+    выпускает JWT токен и проводит интроспекцию.
+  title: Account
+  version: "1.0"
+paths:
+  /api/Accounts:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all accounts
+      parameters:
+      - description: Start index
+        in: query
+        name: from
+        type: integer
+      - description: Number of records
+        in: query
+        name: count
+        type: integer
+      - description: Authorization header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get all accounts
+      tags:
+      - Accounts
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account by admin
+      parameters:
+      - description: Account Creation Data
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/server.createAccountRequestBody'
+      - description: Authorization header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Create a new account
+      tags:
+      - Accounts
+  /api/Accounts/{id}:
+    delete:
+      description: Soft delete a user account by ID
+      parameters:
+      - description: User Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Authorization header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses: {}
+      summary: Soft delete an account by ID
+      tags:
+      - Accounts
+    put:
+      consumes:
+      - application/json
+      description: Update a user account by Id
+      parameters:
+      - description: User Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Account Details
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/server.createAccountRequestBody'
+      - description: Authorization header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Update account by Id
+      tags:
+      - Accounts
+  /api/Accounts/Me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the current account's data
+      parameters:
+      - description: Authorization header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get current account
+      tags:
+      - Accounts
+  /api/Accounts/Update:
+    put:
+      consumes:
+      - application/json
+      description: Update the current account's information
+      parameters:
+      - description: Account Update Data
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/server.updateAccountRequestBody'
+      - description: Authorization header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Update account
+      tags:
+      - Accounts
+  /api/Authentication/Refresh:
+    get:
+      consumes:
+      - application/json
+      description: Refresh token pair by creation token
+      parameters:
+      - description: Authorization header (creation token)
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Refresh
+      tags:
+      - Authentication
+  /api/Authentication/SignIn:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user based on their username and password and generates
+        tokens
+      parameters:
+      - description: User Credentials
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/server.signInRequestBody'
+      produces:
+      - application/json
+      responses: {}
+      summary: Sign in a user
+      tags:
+      - Authentication
+  /api/Authentication/SignOut:
+    head:
+      consumes:
+      - application/json
+      description: Delete token pair by creation token
+      parameters:
+      - description: Authorization header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: SignOut
+      tags:
+      - Authentication
+  /api/Authentication/SignUp:
+    post:
+      consumes:
+      - application/json
+      description: SignUp
+      parameters:
+      - description: User Credentials
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/server.signUpRequestBody'
+      produces:
+      - application/json
+      responses: {}
+      summary: SignUp
+      tags:
+      - Authentication
+  /api/Authentication/Validate:
+    get:
+      consumes:
+      - application/json
+      description: Validate regular token
+      parameters:
+      - description: Authorization header
+        in: query
+        name: AccessToken
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Validate
+      tags:
+      - Authentication
+schemes:
+- http
+swagger: "2.0"
