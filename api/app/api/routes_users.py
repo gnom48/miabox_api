@@ -13,7 +13,10 @@ router_users = APIRouter(prefix="/user", tags=["Пользователи"])
 
 @router_users.get("/config", status_code=200)
 async def server_config_get():
-    return { "postgres" : await Repository.get_config(), "api_datetime" : datetime.now() }
+    config = await Repository.get_config()
+    if config is None:
+        raise HTTPException(status_code=500, detail="db is not availible") 
+    return { "postgres" : config, "api_datetime" : datetime.now() }
 
 
 @router_users.post("/registration", status_code=201)

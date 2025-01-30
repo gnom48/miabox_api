@@ -1,0 +1,6 @@
+[db]
+CONNRCTION_STR = "postgresql+asyncpg://postgres:postgres@db:5432/postgres"
+
+[ip]
+WHISPER_API_URL = "http://whisper-service:8083/"
+SECRET_KEY = "miabox"

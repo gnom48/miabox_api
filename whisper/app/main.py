@@ -1,6 +1,6 @@
 import asyncio
 from fastapi import FastAPI
-from .whisper_api import router_transcription, async_whisper, Models, task_handler
+from .api import router_transcription, async_whisper, Models, task_handler
 from contextlib import asynccontextmanager
 
 

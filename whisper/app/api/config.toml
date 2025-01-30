@@ -1,0 +1,3 @@
+[ip]
+API_URL = "http://api-service:8000/"
+SECRET_KEY = "miabox"
