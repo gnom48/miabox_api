@@ -178,8 +178,8 @@ class Repository:
             try:
                 note_to_edit = await session.get(NoteOrm, data.id)
                 note_to_edit.title = data.title
-                note_to_edit.desc = data.desc
-                note_to_edit.date_time = data.date_time
+                note_to_edit.description = data.desc
+                note_to_edit.created_at = data.date_time
                 await session.commit()
                 return True
             except:
@@ -224,7 +224,7 @@ class Repository:
             try:
                 task_to_del = await session.get(TaskOrm, id)
                 task_to_del.is_completed = True
-                if task_to_del.work_type != WorkTasksTypesOrm.OTHER:
+                if task_to_del.work_type != WorkTypesOrm.OTHER:
                     await session.delete(task_to_del)
                 await session.commit()
                 return True
@@ -237,13 +237,13 @@ class Repository:
     @classmethod
     def get_user_level_by_deals_count(cls, deals_count: int, top_flag: bool = False) -> tuple:
         if top_flag and deals_count >= 21:
-            return (UserKpiLevelsOrm.TOP, 50)
+            return (KpiLevelsOrm.TOP, 50)
         elif deals_count <= 3:
-            return (UserKpiLevelsOrm.TRAINEE, 40)
+            return (KpiLevelsOrm.TRAINEE, 40)
         elif deals_count >= 3 and deals_count <= 20:
-            return (UserKpiLevelsOrm.SPECIALIST, 43)
+            return (KpiLevelsOrm.SPECIALIST, 43)
         elif deals_count > 21:
-            return (UserKpiLevelsOrm.EXPERT, 45)
+            return (KpiLevelsOrm.EXPERT, 45)
     
 
     @classmethod
@@ -254,23 +254,23 @@ class Repository:
                 week_statistic_to_edit: WeekStatisticsOrm = await session.get(WeekStatisticsOrm, user_id)
                 month_statistic_to_edit: MonthStatisticsOrm = await session.get(MonthStatisticsOrm, user_id)
                 match statistic:
-                    case WorkTasksTypesOrm.FLYERS.value:
+                    case WorkTypesOrm.FLYERS.value:
                         day_statistic_to_edit.flyers += addvalue
                         week_statistic_to_edit.flyers += addvalue
                         month_statistic_to_edit.flyers += addvalue
-                    case WorkTasksTypesOrm.CALLS.value:
+                    case WorkTypesOrm.CALLS.value:
                         day_statistic_to_edit.calls += addvalue
                         week_statistic_to_edit.calls += addvalue
                         month_statistic_to_edit.calls += addvalue
-                    case WorkTasksTypesOrm.SHOW.value:
+                    case WorkTypesOrm.SHOW.value:
                         day_statistic_to_edit.shows += addvalue
                         week_statistic_to_edit.shows += addvalue
                         month_statistic_to_edit.shows += addvalue
-                    case WorkTasksTypesOrm.MEET.value:
+                    case WorkTypesOrm.MEET.value:
                         day_statistic_to_edit.meets += addvalue
                         week_statistic_to_edit.meets += addvalue
                         month_statistic_to_edit.meets += addvalue
-                    case WorkTasksTypesOrm.DEAL_RENT.value:
+                    case WorkTypesOrm.DEAL_RENT.value:
                         day_statistic_to_edit.deals_rent += addvalue
                         week_statistic_to_edit.deals_rent += addvalue
                         month_statistic_to_edit.deals_rent += addvalue
@@ -279,7 +279,7 @@ class Repository:
                         coefs = Repository.get_user_level_by_deals_count(int(summary.deals_sale) + int(summary.deals_rent))
                         summary.user_level = coefs[0]
                         summary.base_percent = coefs[1]
-                    case WorkTasksTypesOrm.DEAL_SALE.value:
+                    case WorkTypesOrm.DEAL_SALE.value:
                         day_statistic_to_edit.deals_sale += addvalue
                         week_statistic_to_edit.deals_sale += addvalue
                         month_statistic_to_edit.deals_sale += addvalue
@@ -288,29 +288,29 @@ class Repository:
                         coefs = Repository.get_user_level_by_deals_count(int(summary.deals_sale) + int(summary.deals_rent))
                         summary.user_level = coefs[0]
                         summary.base_percent = coefs[1]
-                    case WorkTasksTypesOrm.DEPOSIT.value:
+                    case WorkTypesOrm.DEPOSIT.value:
                         day_statistic_to_edit.deposits += addvalue
                         week_statistic_to_edit.deposits += addvalue
                         month_statistic_to_edit.deposits += addvalue
-                    case WorkTasksTypesOrm.SEARCH.value:
+                    case WorkTypesOrm.SEARCH.value:
                         day_statistic_to_edit.searches += addvalue
                         week_statistic_to_edit.searches += addvalue
                         month_statistic_to_edit.searches += addvalue
-                    case WorkTasksTypesOrm.ANALYTICS.value:
+                    case WorkTypesOrm.ANALYTICS.value:
                         day_statistic_to_edit.analytics += addvalue
                         week_statistic_to_edit.analytics += addvalue
                         month_statistic_to_edit.analytics += addvalue
-                    case WorkTasksTypesOrm.REGULAR_CONTRACT.value:
+                    case WorkTypesOrm.REGULAR_CONTRACT.value:
                         day_statistic_to_edit.regular_contracts += addvalue
                         week_statistic_to_edit.regular_contracts += addvalue
                         month_statistic_to_edit.regular_contracts += addvalue
                         month_statistic_to_edit.regular_contracts += addvalue
-                    case WorkTasksTypesOrm.EXCLUSIVE_CONTRACT.value:
+                    case WorkTypesOrm.EXCLUSIVE_CONTRACT.value:
                         day_statistic_to_edit.exclusive_contracts += addvalue
                         week_statistic_to_edit.exclusive_contracts += addvalue
                         month_statistic_to_edit.exclusive_contracts += addvalue
                         month_statistic_to_edit.exclusive_contracts += addvalue
-                    case WorkTasksTypesOrm.OTHER.value:
+                    case WorkTypesOrm.OTHER.value:
                         day_statistic_to_edit.others += addvalue
                         week_statistic_to_edit.others += addvalue
                         month_statistic_to_edit.others += addvalue
@@ -363,7 +363,7 @@ class Repository:
         async with new_session() as session:
             try:
                 var = await session.get(LastMonthStatisticsWithKpiOrm, user_id)
-                var.user_level = UserKpiLevelsOrm[level.name]
+                var.user_level = KpiLevelsOrm[level.name]
                 await session.commit()
             except:
                 return None
@@ -459,7 +459,7 @@ class Repository:
                         user=Repository.__hide_password(await session.get(UserOrm, i.user_id)),
                         statistics={j : await Repository.get_statistics_by_period(period=j, user_id=i.user_id) for j in [StatisticPeriods.DAY_STATISTICS_PERIOD, StatisticPeriods.WEEK_STATISTICS_PERIOD, StatisticPeriods.MONTH_STATISTICS_PERIOD]}, 
                         addresses=(await session.execute(select(AddresInfoOrm).where(AddresInfoOrm.user_id == i.user_id))).scalars().all(),
-                        calls=(await session.execute(select(UsersCallsOrm).where(UsersCallsOrm.user_id == i.user_id))).scalars().all(),
+                        calls=(await session.execute(select(СallOrm).where(СallOrm.user_id == i.user_id))).scalars().all(),
                         kpi=await session.get(LastMonthStatisticsWithKpiOrm, i.user_id),
                         role=i.role.name) for i in team_users__]
                     res_teams.append(team_with_info)
@@ -682,7 +682,7 @@ class Repository:
                 file_to_save.data = None # await file.read()
                 session.add(file_to_save)
                 await session.flush()
-                user_call = UsersCallsOrm()
+                user_call = СallOrm()
                 user_call.user_id = user_id
                 user_call.date_time = date_time
                 user_call.info = info
@@ -700,10 +700,10 @@ class Repository:
 
 
     @classmethod
-    async def get_all_info_user_calls(cls, user_id: str) -> list[UsersCallsOrm] | None:
+    async def get_all_info_user_calls(cls, user_id: str) -> list[СallOrm] | None:
         async with new_session() as session:
             try:
-                query = select(UsersCallsOrm).where(UsersCallsOrm.user_id == user_id)
+                query = select(СallOrm).where(СallOrm.user_id == user_id)
                 r = await session.execute(query)
                 return list(r.scalars().all())
             except:
@@ -714,7 +714,7 @@ class Repository:
     async def get_all_user_call_records(cls, user_id: str) -> list[CallsRecordsOrm] | None:
         async with new_session() as session:
             try:
-                calls: list[UsersCallsOrm] = await Repository.get_all_info_user_calls(user_id)
+                calls: list[СallOrm] = await Repository.get_all_info_user_calls(user_id)
                 records = [call.record_id for call in calls]
                 query = select(CallsRecordsOrm)
                 r = await session.execute(query)
@@ -742,7 +742,7 @@ class Repository:
     async def update_transcription(cls, user_id: str, record_id: str, transcription: str) -> bool | None:
         async with new_session() as session:
             try:
-                req = await session.execute(select(UsersCallsOrm).where(UsersCallsOrm.user_id == user_id).where(UsersCallsOrm.record_id == record_id))
+                req = await session.execute(select(СallOrm).where(СallOrm.user_id == user_id).where(СallOrm.record_id == record_id))
                 user_call = req.scalars().first()
                 user_call.transcription = transcription
                 await session.commit()

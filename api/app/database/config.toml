@@ -1,5 +1,5 @@
 [db]
-CONNRCTION_STR = "postgresql+asyncpg://postgres:postgres@db:5432/postgres"
+CONNRCTION_STR = "postgresql+asyncpg://postgres:fbM849INe17RPxy@db:5432/postgres"
 
 [ip]
 WHISPER_API_URL = "http://whisper-service:8083/"

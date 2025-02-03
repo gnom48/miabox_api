@@ -1,17 +1,19 @@
 package models
 
-import (
-	"time"
+type AuthPrivileges string
+
+const (
+	USER  AuthPrivileges = "Пользователь"
+	ADMIN AuthPrivileges = "Администратор"
 )
 
-type User struct {
-	Id        string    `json:"id"`
-	LastName  string    `json:"last_name"`
-	FirstName string    `json:"first_name"`
-	Username  string    `json:"username"`
-	Password  string    `json:"password,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
-	IsActive  bool      `json:"is_active"`
+type UserCredentials struct {
+	Id         string         `json:"id"`
+	Login      string         `json:"login"`
+	Password   string         `json:"password,omitempty"`
+	Privileges AuthPrivileges `json:"privileges"`
+	CreatedAt  int64          `json:"created_at"`
+	IsActive   bool           `json:"is_active"`
 }
 
 type Token struct {
@@ -19,14 +21,4 @@ type Token struct {
 	UserId    string `json:"user_id"`
 	Token     string `json:"token"`
 	IsRegular bool   `json:"is_regular"`
-}
-
-type Role struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type UserRole struct {
-	UserId string `json:"user_id"`
-	RoleId string `json:"role_id"`
 }

@@ -340,35 +340,15 @@ const docTemplate = `{
     },
     "definitions": {
         "server.createAccountRequestBody": {
-            "type": "object",
-            "properties": {
-                "first_name": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "server.signInRequestBody": {
             "type": "object",
             "properties": {
-                "password": {
+                "login": {
                     "type": "string"
                 },
-                "username": {
+                "password": {
                     "type": "string"
                 }
             }
@@ -376,16 +356,10 @@ const docTemplate = `{
         "server.signUpRequestBody": {
             "type": "object",
             "properties": {
-                "first_name": {
-                    "type": "string"
-                },
-                "last_name": {
+                "login": {
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }
@@ -393,10 +367,7 @@ const docTemplate = `{
         "server.updateAccountRequestBody": {
             "type": "object",
             "properties": {
-                "first_name": {
-                    "type": "string"
-                },
-                "last_name": {
+                "login": {
                     "type": "string"
                 },
                 "password": {

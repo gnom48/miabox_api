@@ -10,8 +10,8 @@ import (
 )
 
 type TokenSigner interface {
-	GenerateRegularToken(*models.User) (string, string, error)
-	GenerateCreationToken(*models.User) (string, string, error)
+	GenerateRegularToken(*models.UserCredentials) (string, string, error)
+	GenerateCreationToken(*models.UserCredentials) (string, string, error)
 	ValidateCreationToken(string) (*CreationClaims, error)
 	ValidateRegularToken(string) (*RegularClaims, error)
 }
@@ -25,7 +25,7 @@ type RegularClaims struct {
 
 type CreationClaims struct {
 	UserId   string `json:"user_id"`
-	Username string `json:"username"`
+	Login    string `json:"login"`
 	Password string `json:"password"`
 	jwt.StandardClaims
 }
@@ -33,7 +33,7 @@ type CreationClaims struct {
 const regularTokenType string = "regular"
 const creationTokenType string = "creation"
 
-func (t *TokenSign) GenerateRegularToken(user *models.User) (string, string, error) {
+func (t *TokenSign) GenerateRegularToken(user *models.UserCredentials) (string, string, error) {
 	tokenId, _ := models.GenerateUuid32()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &RegularClaims{
 		UserId: user.Id,
@@ -51,11 +51,11 @@ func (t *TokenSign) GenerateRegularToken(user *models.User) (string, string, err
 	return tokenString, tokenId, nil
 }
 
-func (t *TokenSign) GenerateCreationToken(user *models.User) (string, string, error) {
+func (t *TokenSign) GenerateCreationToken(user *models.UserCredentials) (string, string, error) {
 	tokenId, _ := models.GenerateUuid32()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &CreationClaims{
 		UserId:   user.Id,
-		Username: user.Username,
+		Login:    user.Login,
 		Password: user.Password,
 		StandardClaims: jwt.StandardClaims{
 			ID:        tokenId,

@@ -10,8 +10,7 @@ import (
 )
 
 type aboutMeResponseBody struct {
-	User  models.User   `json:"user"`
-	Roles []models.Role `json:"roles"`
+	User models.UserCredentials `json:"user"`
 }
 
 // @Summary Get current account
@@ -23,28 +22,21 @@ type aboutMeResponseBody struct {
 // @Param Authorization header string true "Authorization header"
 func (s *ApiServer) HandleGetCurrentAccount() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, ok := r.Context().Value(UserContextKey).(models.User)
+		user, ok := r.Context().Value(UserContextKey).(models.UserCredentials)
 		if !ok {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
 			return
 		}
-		roles, ok := r.Context().Value(RoleContextKey).([]models.Role)
-		if !ok {
-			s.ErrorRespond(w, r, http.StatusForbidden, fmt.Errorf("Access denied"))
-			return
-		}
 
 		s.Respond(w, r, http.StatusOK, aboutMeResponseBody{
-			User:  user,
-			Roles: roles,
+			User: user,
 		})
 	}
 }
 
 type updateAccountRequestBody struct {
-	LastName  string `json:"last_name"`
-	FirstName string `json:"first_name"`
-	Password  string `json:"password"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
 }
 
 // @Summary Update account
@@ -57,7 +49,7 @@ type updateAccountRequestBody struct {
 // @Param Authorization header string true "Authorization header"
 func (s *ApiServer) HandleUpdateAccount() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, ok := r.Context().Value(UserContextKey).(models.User)
+		user, ok := r.Context().Value(UserContextKey).(models.UserCredentials)
 		if !ok {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
 			return
@@ -69,8 +61,7 @@ func (s *ApiServer) HandleUpdateAccount() http.HandlerFunc {
 			return
 		}
 
-		user.LastName = requestBody.LastName
-		user.FirstName = requestBody.FirstName
+		user.Login = requestBody.Login
 		user.Password = requestBody.Password
 
 		defer s.storage.Close()
@@ -84,11 +75,9 @@ func (s *ApiServer) HandleUpdateAccount() http.HandlerFunc {
 }
 
 type createAccountRequestBody struct {
-	LastName  string   `json:"last_name"`
-	FirstName string   `json:"first_name"`
-	Username  string   `json:"username"`
-	Password  string   `json:"password"`
-	Roles     []string `json:"roles"`
+	Login      string                `json:"login"`
+	Password   string                `json:"password"`
+	Privileges models.AuthPrivileges `json:"privileges"`
 }
 
 // @Summary Create a new account
@@ -101,20 +90,14 @@ type createAccountRequestBody struct {
 // @Param Authorization header string true "Authorization header"
 func (s *ApiServer) HandleCreateAccount() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, ok := r.Context().Value(UserContextKey).(models.User)
+		user, ok := r.Context().Value(UserContextKey).(models.UserCredentials)
 		if !ok {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
 			return
 		}
-		roles, ok := r.Context().Value(RoleContextKey).([]models.Role)
-		if !ok {
+		if user.Privileges != models.ADMIN {
 			s.ErrorRespond(w, r, http.StatusForbidden, fmt.Errorf("Access forbidden"))
 			return
-		} else {
-			if !IsUserInRole(roles, "0") {
-				s.ErrorRespond(w, r, http.StatusForbidden, fmt.Errorf("Access only for admin"))
-				return
-			}
 		}
 
 		requestBody := &createAccountRequestBody{}
@@ -123,11 +106,10 @@ func (s *ApiServer) HandleCreateAccount() http.HandlerFunc {
 			return
 		}
 
-		newUser := &models.User{
-			LastName:  requestBody.LastName,
-			FirstName: requestBody.FirstName,
-			Username:  requestBody.Username,
-			Password:  requestBody.Password,
+		newUser := &models.UserCredentials{
+			Login:      requestBody.Login,
+			Privileges: requestBody.Privileges,
+			Password:   requestBody.Password,
 		}
 
 		defer s.storage.Close()
@@ -135,25 +117,17 @@ func (s *ApiServer) HandleCreateAccount() http.HandlerFunc {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, err)
 			return
 		} else {
-			currentErrors := make([]string, 0)
-			for _, roleName := range requestBody.Roles {
-				if e := s.storage.Repository().AddUserRole(returning.Id, roleName); e != nil {
-					currentErrors = append(currentErrors, e.Error())
-				}
-			}
 			s.Respond(w, r, http.StatusCreated, struct {
-				NewUserId string   `json:"new_user_id"`
-				Errors    []string `json:"errors"`
+				NewUserId string `json:"new_user_id"`
 			}{
 				NewUserId: returning.Id,
-				Errors:    currentErrors,
 			})
 		}
 	}
 }
 
 type getAllAccountsResponseBody struct {
-	Accounts []models.User `json:"accounts"`
+	Accounts []models.UserCredentials `json:"accounts"`
 }
 
 // @Summary Get all accounts
@@ -167,20 +141,14 @@ type getAllAccountsResponseBody struct {
 // @Param Authorization header string true "Authorization header"
 func (s *ApiServer) HandleGetAllAccounts() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, ok := r.Context().Value(UserContextKey).(models.User)
+		user, ok := r.Context().Value(UserContextKey).(models.UserCredentials)
 		if !ok {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
 			return
 		}
-		roles, ok := r.Context().Value(RoleContextKey).([]models.Role)
-		if !ok {
+		if user.Privileges != models.ADMIN {
 			s.ErrorRespond(w, r, http.StatusForbidden, fmt.Errorf("Access forbidden"))
 			return
-		} else {
-			if !IsUserInRole(roles, "0") {
-				s.ErrorRespond(w, r, http.StatusForbidden, fmt.Errorf("Access only for admin"))
-				return
-			}
 		}
 
 		fromParam := r.URL.Query().Get("from")
@@ -220,20 +188,14 @@ func (s *ApiServer) HandleGetAllAccounts() http.HandlerFunc {
 // @Param Authorization header string true "Authorization header"
 func (s *ApiServer) HandleUpdateAccountById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, ok := r.Context().Value(UserContextKey).(models.User)
+		user, ok := r.Context().Value(UserContextKey).(models.UserCredentials)
 		if !ok {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
 			return
 		}
-		roles, ok := r.Context().Value(RoleContextKey).([]models.Role)
-		if !ok {
+		if user.Privileges != models.ADMIN {
 			s.ErrorRespond(w, r, http.StatusForbidden, fmt.Errorf("Access forbidden"))
 			return
-		} else {
-			if !IsUserInRole(roles, "0") {
-				s.ErrorRespond(w, r, http.StatusForbidden, fmt.Errorf("Access only for admin"))
-				return
-			}
 		}
 
 		id := r.URL.Path[len("/api/Accounts/"):]
@@ -243,35 +205,22 @@ func (s *ApiServer) HandleUpdateAccountById() http.HandlerFunc {
 			return
 		}
 
-		editableUser := models.User{
-			Id:        id,
-			LastName:  requestBody.LastName,
-			FirstName: requestBody.FirstName,
-			Username:  requestBody.Username,
-			Password:  requestBody.Password,
+		editableUser := models.UserCredentials{
+			Id:         id,
+			Login:      requestBody.Login,
+			Privileges: requestBody.Privileges,
+			Password:   requestBody.Password,
+			IsActive:   true,
 		}
 
 		defer s.storage.Close()
 		if err := s.storage.Repository().UpdateUser(&editableUser); err != nil {
 			s.ErrorRespond(w, r, http.StatusInternalServerError, err)
 		} else {
-			currentErrors := make([]string, 0)
-			_, e := s.storage.Repository().DeleteAllUserRoles(editableUser.Id)
-			if e != nil {
-				currentErrors = append(currentErrors, e.Error())
-			}
-			for _, r := range requestBody.Roles {
-				if e := s.storage.Repository().AddUserRole(id, r); e != nil {
-					currentErrors = append(currentErrors, e.Error())
-				}
-			}
-
 			s.Respond(w, r, http.StatusMultiStatus, struct {
-				UserId string   `json:"user_id"`
-				Errors []string `json:"errors"`
+				UserId string `json:"user_id"`
 			}{
 				UserId: editableUser.Id,
-				Errors: currentErrors,
 			})
 		}
 	}
@@ -285,20 +234,14 @@ func (s *ApiServer) HandleUpdateAccountById() http.HandlerFunc {
 // @Param Authorization header string true "Authorization header"
 func (s *ApiServer) HandleSoftDeleteAccountById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, ok := r.Context().Value(UserContextKey).(models.User)
+		user, ok := r.Context().Value(UserContextKey).(models.UserCredentials)
 		if !ok {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
 			return
 		}
-		roles, ok := r.Context().Value(RoleContextKey).([]models.Role)
-		if !ok {
+		if user.Privileges != models.ADMIN {
 			s.ErrorRespond(w, r, http.StatusForbidden, fmt.Errorf("Access forbidden"))
 			return
-		} else {
-			if !IsUserInRole(roles, "0") {
-				s.ErrorRespond(w, r, http.StatusForbidden, fmt.Errorf("Access only for admin"))
-				return
-			}
 		}
 
 		id := r.URL.Path[len("/api/Accounts/"):]

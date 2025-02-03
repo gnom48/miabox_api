@@ -8,14 +8,14 @@ type Repository struct {
 	storage *Storage
 }
 
-func (r *Repository) AddUser(user *models.User) (*models.User, error) {
+func (r *Repository) AddUser(user *models.UserCredentials) (*models.UserCredentials, error) {
 	hashed_password_base64 := EncryptString(user.Password)
 	user.Password = hashed_password_base64
 	user.Id, _ = models.GenerateUuid32()
 
 	if err := r.storage.db.QueryRow(
-		"INSERT INTO users (id, last_name, first_name, username, password) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-		user.Id, user.LastName, user.FirstName, user.Username, hashed_password_base64,
+		"INSERT INTO users (id, login, password, privileges) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		user.Id, user.Login, hashed_password_base64, user.Privileges,
 	).Scan(&user.Id); err != nil {
 		return nil, err
 	}
@@ -23,28 +23,28 @@ func (r *Repository) AddUser(user *models.User) (*models.User, error) {
 	return user, nil
 }
 
-func (r *Repository) GetUserByUsernamePassword(username string, password string) (*models.User, error) {
+func (r *Repository) GetUserByUsernamePassword(login string, password string) (*models.UserCredentials, error) {
 	hashed_password_base64 := EncryptString(password)
 
-	user := models.User{}
+	user := models.UserCredentials{}
 
 	if err := r.storage.db.QueryRow(
-		"SELECT * FROM users WHERE username = $1 AND password = $2",
-		username, hashed_password_base64,
-	).Scan(&user.Id, &user.LastName, &user.FirstName, &user.Username, &user.Password, &user.CreatedAt, &user.IsActive); err != nil {
+		"SELECT * FROM users WHERE login = $1 AND password = $2",
+		login, hashed_password_base64,
+	).Scan(&user.Id, &user.Login, &user.Password, &user.Privileges, &user.CreatedAt, &user.IsActive); err != nil {
 		return nil, err
 	}
 
 	return &user, nil
 }
 
-func (r *Repository) GetUserById(userId string) (*models.User, error) {
-	user := models.User{}
+func (r *Repository) GetUserById(userId string) (*models.UserCredentials, error) {
+	user := models.UserCredentials{}
 
 	if err := r.storage.db.QueryRow(
 		"SELECT * FROM users WHERE id = $1",
 		userId,
-	).Scan(&user.Id, &user.LastName, &user.FirstName, &user.Username, &user.Password, &user.CreatedAt, &user.IsActive); err != nil {
+	).Scan(&user.Id, &user.Login, &user.Password, &user.Privileges, &user.CreatedAt, &user.IsActive); err != nil {
 		return nil, err
 	}
 
@@ -107,17 +107,17 @@ func (r *Repository) SyncToken(tokenId string, userId string, isRegular bool) (s
 	return res, nil
 }
 
-func (r *Repository) UpdateUser(user *models.User) error {
+func (r *Repository) UpdateUser(user *models.UserCredentials) error {
 	if _, err := r.storage.db.Query(
-		"UPDATE users SET last_name = $1, first_name = $2, password = $3 WHERE id = $4",
-		user.LastName, user.FirstName, EncryptString(user.Password), user.Id,
+		"UPDATE users SET login = $1, password = $2, privileges = $3 WHERE id = $4",
+		user.Login, EncryptString(user.Password), user.Privileges, user.Id,
 	); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *Repository) GetAllAccounts(from int, count int) ([]models.User, error) {
+func (r *Repository) GetAllAccounts(from int, count int) ([]models.UserCredentials, error) {
 	rows, err := r.storage.db.Query(
 		"SELECT * FROM users ORDER BY id OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY",
 		from, count,
@@ -127,10 +127,10 @@ func (r *Repository) GetAllAccounts(from int, count int) ([]models.User, error) 
 	}
 	defer rows.Close()
 
-	var accounts []models.User
+	var accounts []models.UserCredentials
 	for rows.Next() {
-		var user models.User
-		if err := rows.Scan(&user.Id, &user.LastName, &user.FirstName, &user.Username, &user.Password, &user.CreatedAt, &user.IsActive); err != nil {
+		var user models.UserCredentials
+		if err := rows.Scan(&user.Id, &user.Login, &user.Password, &user.Privileges, &user.CreatedAt, &user.IsActive); err != nil {
 			return nil, err
 		}
 		accounts = append(accounts, user)
@@ -141,60 +141,6 @@ func (r *Repository) GetAllAccounts(from int, count int) ([]models.User, error) 
 	}
 
 	return accounts, nil
-}
-
-func (r *Repository) GetAllUserRoles(userId string) ([]models.Role, error) {
-	rows, err := r.storage.db.Query(
-		"SELECT * FROM roles WHERE id IN (SELECT role_id FROM user_roles WHERE user_id = $1)",
-		userId,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var roles []models.Role
-	for rows.Next() {
-		var r models.Role
-		if err := rows.Scan(&r.Id, &r.Name); err != nil {
-			return nil, err
-		}
-		roles = append(roles, r)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return roles, nil
-}
-
-func (r *Repository) AddUserRole(userId string, roleName string) error {
-	if _, err := r.storage.db.Query(
-		"INSERT INTO user_roles (user_id, role_id) VALUES ($1, (SELECT id FROM roles WHERE name = $2 LIMIT 1));",
-		userId, roleName,
-	); err != nil {
-		return err
-	} else {
-		return nil
-	}
-}
-
-func (r *Repository) DeleteAllUserRoles(userId string) (int, error) {
-	res, err := r.storage.db.Exec(
-		"DELETE FROM user_roles WHERE user_id = $1",
-		userId,
-	)
-	if err != nil {
-		return 0, err
-	}
-
-	returning, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(returning), nil
 }
 
 func (r *Repository) SoftDeleteUser(userId string) error {

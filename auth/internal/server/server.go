@@ -135,12 +135,12 @@ func (s *ApiServer) ConfigureRouter() {
 	s.router.HandleFunc("/api/Authentication/Validate", s.HandleAuthenticationValidate()).Methods("GET")
 	s.router.HandleFunc("/api/Authentication/Refresh", s.AuthCreationTokenMiddleware(s.HandleAuthenticationRefresh())).Methods("GET")
 
-	s.router.HandleFunc("/api/Accounts/Me", s.AuthRegularTokenMiddleware(s.userRoleMiddleware(s.HandleGetCurrentAccount()))).Methods("GET")
+	s.router.HandleFunc("/api/Accounts/Me", s.AuthRegularTokenMiddleware(s.HandleGetCurrentAccount())).Methods("GET")
 	s.router.HandleFunc("/api/Accounts/Update", s.AuthRegularTokenMiddleware(s.HandleUpdateAccount())).Methods("PUT")
-	s.router.HandleFunc("/api/Accounts", s.AuthRegularTokenMiddleware(s.userRoleMiddleware(s.HandleGetAllAccounts()))).Methods("GET")
-	s.router.HandleFunc("/api/Accounts", s.AuthRegularTokenMiddleware(s.userRoleMiddleware(s.HandleCreateAccount()))).Methods("POST")
-	s.router.HandleFunc("/api/Accounts/{id}", s.AuthRegularTokenMiddleware(s.userRoleMiddleware(s.HandleUpdateAccountById()))).Methods("PUT")
-	s.router.HandleFunc("/api/Accounts/{id}", s.AuthRegularTokenMiddleware(s.userRoleMiddleware(s.HandleSoftDeleteAccountById()))).Methods("DELETE")
+	s.router.HandleFunc("/api/Accounts", s.AuthRegularTokenMiddleware(s.HandleGetAllAccounts())).Methods("GET")
+	s.router.HandleFunc("/api/Accounts", s.AuthRegularTokenMiddleware(s.HandleCreateAccount())).Methods("POST")
+	s.router.HandleFunc("/api/Accounts/{id}", s.AuthRegularTokenMiddleware(s.HandleUpdateAccountById())).Methods("PUT")
+	s.router.HandleFunc("/api/Accounts/{id}", s.AuthRegularTokenMiddleware(s.HandleSoftDeleteAccountById())).Methods("DELETE")
 
 	s.router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 }
@@ -201,7 +201,7 @@ func (s *ApiServer) AuthCreationTokenMiddleware(next http.HandlerFunc) http.Hand
 			return
 		}
 
-		user, err := s.storage.Repository().GetUserByUsernamePassword(claims.Username, claims.Password)
+		user, err := s.storage.Repository().GetUserByUsernamePassword(claims.Login, claims.Password)
 		if err != nil {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
 			return
@@ -212,25 +212,8 @@ func (s *ApiServer) AuthCreationTokenMiddleware(next http.HandlerFunc) http.Hand
 	}
 }
 
-var RoleContextKey StringContextKey = "role"
+var PrivilegesContextKey StringContextKey = "privileges"
 
-type userRolesResponseBody struct {
-	Roles []models.Role `json:"roles"`
-}
-
-func (s *ApiServer) userRoleMiddleware(next http.Handler) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user, ok := r.Context().Value(UserContextKey).(models.User)
-		if !ok {
-			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
-			return
-		}
-		defer s.storage.Close()
-		if userRoles, err := s.storage.Repository().GetAllUserRoles(user.Id); err != nil {
-			s.ErrorRespond(w, r, http.StatusForbidden, fmt.Errorf("Role not found"))
-		} else {
-			ctx := context.WithValue(r.Context(), RoleContextKey, *&userRoles)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		}
-	})
+type userPrivilegesResponseBody struct {
+	Privileges []models.AuthPrivileges `json:"privileges"`
 }

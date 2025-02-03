@@ -36,7 +36,7 @@ services:
       - network-bridge
     depends_on:
       postgres:
-        conditions: service_healthy
+        condition: service_healthy
 
   api:
     container_name: api-service
@@ -55,7 +55,7 @@ services:
       retries: 5
     depends_on:
       postgres:
-        conditions: service_healthy
+        condition: service_healthy
 
   whisper:
     container_name: whisper-service
@@ -72,6 +72,9 @@ services:
       interval: 2s
       timeout: 10s
       retries: 5
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   minio:
     container_name: minio-storage
@@ -95,39 +98,22 @@ services:
       - minio-data:/data:z
       - shared-data:/shared
 
-  redis:
-    image: redis:latest
-    container_name: redis-service
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      REDIS_USER: ${REDIS_USER}
-      REDIS_USER_PASSWORD: ${REDIS_USER_PASSWORD}
+  rabbitmq:
+    container_name: rabbitmq-service
+    image: rabbitmq:3-management
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "${REBBITMQ_PORT}:${REBBITMQ_PORT}"
+      - "${REBBITMQ_ADMINPANEL_PORT}:${REBBITMQ_ADMINPANEL_PORT}"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     volumes:
-      - redis-data:/data
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - network-bridge
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-    command: >
-      sh -c '
-        mkdir -p /usr/local/etc/redis &&
-        echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
-        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
-        echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
-        echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
-        echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
-        echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
-        redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
-      '
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      test: ["CMD", "rabbitmqctl", "status"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -136,7 +122,7 @@ volumes:
   postgres-data:
   shared-data:
   minio-data:
-  redis-data:
+  rabbitmq-data:
 
 networks:
   network-bridge:

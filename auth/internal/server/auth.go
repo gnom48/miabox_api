@@ -11,10 +11,8 @@ import (
 var tokenError = fmt.Errorf("Invalid token, refresh or sign in to get a new pair")
 
 type signUpRequestBody struct {
-	LastName  string `json:"last_name"`
-	FirstName string `json:"first_name"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
 }
 
 // @Summary SignUp
@@ -32,11 +30,11 @@ func (s *ApiServer) HandleAuthenticationSignUp() http.HandlerFunc {
 			return
 		}
 
-		user := &models.User{
-			FirstName: requestBody.FirstName,
-			LastName:  requestBody.LastName,
-			Username:  requestBody.Username,
-			Password:  requestBody.Password,
+		user := &models.UserCredentials{
+			Login:      requestBody.Login,
+			Password:   requestBody.Password,
+			Privileges: models.USER,
+			IsActive:   true,
 		}
 		defer s.storage.Close()
 		if returning, err := s.storage.Repository().AddUser(user); err != nil {
@@ -48,7 +46,7 @@ func (s *ApiServer) HandleAuthenticationSignUp() http.HandlerFunc {
 }
 
 type signInRequestBody struct {
-	Username string `json:"username"`
+	Login    string `json:"login"`
 	Password string `json:"password"`
 }
 
@@ -73,7 +71,7 @@ func (s *ApiServer) HandleAuthenticationSignIn() http.HandlerFunc {
 		}
 
 		defer s.storage.Close()
-		user, err := s.storage.Repository().GetUserByUsernamePassword(requestBody.Username, requestBody.Password)
+		user, err := s.storage.Repository().GetUserByUsernamePassword(requestBody.Login, requestBody.Password)
 		if err != nil {
 			s.ErrorRespond(w, r, http.StatusNotFound, fmt.Errorf("User not found"))
 			return
@@ -111,7 +109,7 @@ func (s *ApiServer) HandleAuthenticationSignIn() http.HandlerFunc {
 // @Param Authorization header string true "Authorization header"
 func (s *ApiServer) HandleAuthenticationSignOut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, ok := r.Context().Value(UserContextKey).(models.User)
+		user, ok := r.Context().Value(UserContextKey).(models.UserCredentials)
 		if !ok {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
 		}
@@ -163,7 +161,7 @@ func (s *ApiServer) HandleAuthenticationValidate() http.HandlerFunc {
 // @Param Authorization header string true "Authorization header (creation token)"
 func (s *ApiServer) HandleAuthenticationRefresh() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, ok := r.Context().Value(UserContextKey).(models.User)
+		user, ok := r.Context().Value(UserContextKey).(models.UserCredentials)
 		if !ok {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
 		}

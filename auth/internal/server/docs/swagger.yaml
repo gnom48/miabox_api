@@ -1,43 +1,24 @@
 basePath: /
 definitions:
   server.createAccountRequestBody:
-    properties:
-      first_name:
-        type: string
-      last_name:
-        type: string
-      password:
-        type: string
-      roles:
-        items:
-          type: string
-        type: array
-      username:
-        type: string
     type: object
   server.signInRequestBody:
     properties:
-      password:
+      login:
         type: string
-      username:
+      password:
         type: string
     type: object
   server.signUpRequestBody:
     properties:
-      first_name:
-        type: string
-      last_name:
+      login:
         type: string
       password:
-        type: string
-      username:
         type: string
     type: object
   server.updateAccountRequestBody:
     properties:
-      first_name:
-        type: string
-      last_name:
+      login:
         type: string
       password:
         type: string

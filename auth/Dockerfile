@@ -10,7 +10,7 @@ COPY ./cmd ./cmd
 COPY ./internal ./internal
 COPY ./config ./config
 
-RUN go build -o ./auth-service ./cmd/account
+RUN go build -o ./auth-service ./cmd/auth
 
 EXPOSE 8081
 

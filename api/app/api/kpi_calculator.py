@@ -1,8 +1,8 @@
-from api.app.database import UserKpiLevelsOrm, UserTypesOrm
+from api.app.database import KpiLevelsOrm, UserTypesOrm
 
 
 class KpiCalculator:
-    def __init__(self, base_percent: float, level: UserKpiLevelsOrm, deals_rent: int, deals_sale: int, regular_contracts: int, exclusive_contracts: int, cold_calls: int, meetings: int, flyers: int, shows: int, leed_crm: int, rielter_type: UserTypesOrm):
+    def __init__(self, base_percent: float, level: KpiLevelsOrm, deals_rent: int, deals_sale: int, regular_contracts: int, exclusive_contracts: int, cold_calls: int, meetings: int, flyers: int, shows: int, leed_crm: int, rielter_type: UserTypesOrm):
         self.base_percent = base_percent
         self.level = level
         self.deals = deals_rent + deals_sale
@@ -21,13 +21,13 @@ class KpiCalculator:
         self.min_percent = 40.0
 
         if self.rielter_type == UserTypesOrm.PRIVATE:
-            if self.level == UserKpiLevelsOrm.TRAINEE:
+            if self.level == KpiLevelsOrm.TRAINEE:
                 bonus_percent = 0.5 * self.exclusive_contracts + 0.25 * self.regular_contracts
                 if self.cold_calls < 200.0 or self.meetings < 84 or self.flyers < 1200.0 or self.shows < 80.0:
                     return self.base_percent
                 return self.base_percent + bonus_percent
 
-            elif self.level == UserKpiLevelsOrm.SPECIALIST:
+            elif self.level == KpiLevelsOrm.SPECIALIST:
                 bonus_percent = 0.5 * self.exclusive_contracts + 0.25 * self.regular_contracts
                 if self.cold_calls < 90.0 or self.meetings < 40.0 or self.flyers < 1000.0:
                     return self.base_percent
@@ -41,7 +41,7 @@ class KpiCalculator:
                     extra_percent += 1
                 return self.base_percent + bonus_percent + extra_percent
 
-            elif self.level == UserKpiLevelsOrm.EXPERT:
+            elif self.level == KpiLevelsOrm.EXPERT:
                 bonus_percent = 0.5 * self.exclusive_contracts + 0.25 * self.regular_contracts
                 if self.cold_calls < 60.0 or self.meetings < 30.0 or self.flyers < 500.0:
                     return self.base_percent
@@ -55,7 +55,7 @@ class KpiCalculator:
                     extra_percent += 1
                 return self.base_percent + bonus_percent + extra_percent
 
-            elif self.level == UserKpiLevelsOrm.TOP:
+            elif self.level == KpiLevelsOrm.TOP:
                 bonus_percent = 0.5 * self.exclusive_contracts + 0.25 * self.regular_contracts
                 if self.cold_calls < 50.0 or self.meetings < 20.0 or self.flyers < 500.0:
                     return self.base_percent
