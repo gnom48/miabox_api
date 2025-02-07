@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Header, Request
-from api.app.repository import *
+from core.app.repository import *
 # from ..repository import *
 from .models import Note
 from .jwt import verify_jwt_token
@@ -37,7 +37,6 @@ async def note_delete(req: Request, note_id: str, token_authorization: str | Non
     if not user:
         raise HTTPException(status_code=404, detail="not found user")
     return await Repository.del_note(note_id)
-
 
 
 @router_notes.put("/edit", status_code=200)

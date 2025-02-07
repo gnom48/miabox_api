@@ -3,15 +3,16 @@ from shutil import copyfileobj
 from fastapi import APIRouter, HTTPException, Header, Response, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from .jwt.jwt import verify_jwt_token
-from api.app.repository import Repository
+from core.app.repository import Repository
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from .utils import add_task_transcribe_async, transcribe_audio_async, get_task_status_async, Models
-from api.app.database.consts import SECRET_KEY
+from core.app.database.consts import SECRET_KEY
 
 
 router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
 
 calls_support_scheduler = AsyncIOScheduler(timezone="UTC")
+
 
 @router_calls.post("/add_call_info")
 async def call_info_add(info: str, phone_number: str, date_time: int, contact_name: str, length_seconds: int, call_type: int, file: UploadFile | None = None, record_id: str | None = None, token_authorization: str | None = Header(default=None)):

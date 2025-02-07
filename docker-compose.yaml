@@ -1,14 +1,17 @@
 name: miabox-server
 
+x-postgres-config: &postgres-config
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_PORT: ${POSTGRES_PORT}
+  POSTGRES_DB: ${POSTGRES_DB}
+
 services:
   postgres:
     container_name: postgres-db
     image: postgres:15.3-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      POSTGRES_DB: ${POSTGRES_DB}
+      <<: *postgres-config
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     healthcheck:
@@ -26,9 +29,14 @@ services:
 
   auth:
     container_name: auth-service
-    build: ./auth
+    build: 
+      context: ./auth
     ports:
-      - "${AUTH_PORT}:${AUTH_PORT}"  
+      - "${AUTH_PORT}:${AUTH_PORT}"
+    environment:
+      <<: *postgres-config
+      AUTH_PORT: ${AUTH_PORT}
+      LOG_LEVEL: ${LOG_LEVEL}
     volumes:
       - shared-data:/shared
     restart: unless-stopped
@@ -38,18 +46,28 @@ services:
       postgres:
         condition: service_healthy
 
-  api:
-    container_name: api-service
-    build: ./api
+  core:
+    container_name: core-service
+    build: 
+      context: ./core
+      args:
+        CORE_PORT: ${CORE_PORT}
+    environment:
+      <<: *postgres-config
+      AUTH_PORT: ${AUTH_PORT}
+      MINIO_API_PORT: ${MINIO_API_PORT}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      WHISPER_PORT: ${WHISPER_PORT}
+      LOG_LEVEL: ${LOG_LEVEL}
     ports:
-      - "${API_PORT}:${API_PORT}"
+      - "${CORE_PORT}:${CORE_PORT}"
     restart: unless-stopped
     networks:
       - network-bridge
     volumes:
       - shared-data:/shared
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${API_PORT}/user/config" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:${CORE_PORT}/user/config" ]
       interval: 2s
       timeout: 10s
       retries: 5
@@ -59,12 +77,19 @@ services:
 
   whisper:
     container_name: whisper-service
-    build: ./whisper
+    build: 
+      context: ./whisper
+      args:
+        WHISPER_PORT: ${WHISPER_PORT}
     ports:
       - "${WHISPER_PORT}:${WHISPER_PORT}"
     restart: unless-stopped
     networks:
       - network-bridge
+    environment:
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      CORE_PORT: ${CORE_PORT}
+      MODEL: ${MODEL}
     volumes:
       - shared-data:/shared
     healthcheck:
@@ -102,7 +127,7 @@ services:
     container_name: rabbitmq-service
     image: rabbitmq:3-management
     ports:
-      - "${REBBITMQ_PORT}:${REBBITMQ_PORT}"
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
       - "${REBBITMQ_ADMINPANEL_PORT}:${REBBITMQ_ADMINPANEL_PORT}"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}

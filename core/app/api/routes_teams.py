@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Header
 from .jwt.jwt import verify_jwt_token
-from api.app.database.models import UserStatusesOrm, UserTeamOrm
-from api.app.repository import Repository
+from core.app.database.models import UserStatusesOrm, UserTeamOrm
+from core.app.repository import Repository
 from .models import Team, UserTeam, UserStatuses
 
 
@@ -34,9 +34,11 @@ async def team_join(team_id: str, joined_by: int, token_authorization: str | Non
     user = await verify_jwt_token(token_authorization)
     try:
         if not await Repository.get_user_by_id(joined_by):
-            raise HTTPException(status_code=404, detail="Пригласитель не действителен!")
+            raise HTTPException(
+                status_code=404, detail="Пригласитель не действителен!")
     except:
-        raise HTTPException(status_code=404, detail="Пригласитель не действителен!")
+        raise HTTPException(
+            status_code=404, detail="Пригласитель не действителен!")
     user_team = UserTeamOrm()
     user_team.role = UserStatusesOrm.USER
     user_team.team_id = team_id
@@ -66,5 +68,3 @@ async def my_teams(token_authorization: str | None = Header(default=None)):
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
     return await Repository.get_all_teams_by_user_id(user.id)
-
-

@@ -1,6 +1,7 @@
 */__pycache__
 */venv
 *.exe
+*config/config.toml
 
 /venv
 /api/venv

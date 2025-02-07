@@ -14,6 +14,6 @@ RUN pip install --no-cache --upgrade -r requirements.txt
 
 COPY ./ whisper
 
-EXPOSE 8082
+ARG WHISPER_PORT
 
-CMD ["uvicorn", "whisper.app.main:app", "--host", "0.0.0.0", "--port", "8083", "--reload"]
+CMD ["sh", "-c", "python toml_helper.py && uvicorn whisper.app.main:app --host 0.0.0.0 --port ${WHISPER_PORT} --reload"]

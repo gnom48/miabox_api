@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, Header, Request
 from .models import Task
 from .jwt import verify_jwt_token
-from api.app.repository import *
+from core.app.repository import *
 
 
 router_tasks = APIRouter(prefix="/task", tags=["Задачи"])
+
 
 @router_tasks.get("/all", status_code=200)
 async def task_all(token_authorization: str | None = Header(default=None)):
@@ -20,7 +21,7 @@ async def task_all(user_id: str, token_authorization: str | None = Header(defaul
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
     return await Repository.get_all_tasks_by_user_id(user_id, True)
-    
+
 
 @router_tasks.post("/add", status_code=201)
 async def task_add(req: Request, task: Task, token_authorization: str | None = Header(default=None)):

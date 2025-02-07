@@ -16,7 +16,7 @@ async def lifespan(app: FastAPI):
     # main_scheduler.add_job(func=Repository.clear_month_statistics, trigger='cron', day='last', hour=3-3, minute=10)
     # main_scheduler.start()
     # print("Планировщики запущены")
-    # await create_tables()
+    await create_tables()
     yield
     print("Выключение")
 

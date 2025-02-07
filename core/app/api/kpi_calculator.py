@@ -1,4 +1,4 @@
-from api.app.database import KpiLevelsOrm, UserTypesOrm
+from core.app.database import KpiLevelsOrm, UserTypesOrm
 
 
 class KpiCalculator:
@@ -16,7 +16,7 @@ class KpiCalculator:
         self.flyers = flyers
         self.shows = shows
         self.leed_crm = leed_crm
-        
+
     def calculate_kpi(self) -> float:
         self.min_percent = 40.0
 
@@ -72,4 +72,3 @@ class KpiCalculator:
                 raise Exception("Invalid level")
         elif self.rielter_type == UserTypesOrm.COMMERCIAL:
             raise Exception("TODO")
-

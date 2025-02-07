@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, Header
 from .models import UserKpiLevels
-from api.app.repository import Repository
+from core.app.repository import Repository
 from .jwt import verify_jwt_token
 
 
 router_statistics = APIRouter(prefix="/user/statistics", tags=["Статистика"])
 
-    
+
 @router_statistics.get("/get", status_code=200)
 async def user_statistics_get(period: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
@@ -24,13 +24,13 @@ async def user_statistics_get_with_kpi(token_authorization: str | None = Header(
     last_month_kpi = await Repository.get_statistics_with_kpi(user.id)
     current_month_kpi = await Repository.get_current_kpi(user)
     if current_month_kpi is None:
-        return { "last_month_kpi": last_month_kpi, "current_month_kpi": None, "level": None, "summary_deals_rent": None, "summary_deals_sale": None }
-    return { 
-        "last_month_kpi": last_month_kpi, 
+        return {"last_month_kpi": last_month_kpi, "current_month_kpi": None, "level": None, "summary_deals_rent": None, "summary_deals_sale": None}
+    return {
+        "last_month_kpi": last_month_kpi,
         "current_month_kpi": current_month_kpi["kpi"],
-        "level": current_month_kpi["level"], 
-        "summary_deals_rent": current_month_kpi["deals_rent"], 
-        "summary_deals_sale": current_month_kpi["deals_sale"] 
+        "level": current_month_kpi["level"],
+        "summary_deals_rent": current_month_kpi["deals_rent"],
+        "summary_deals_sale": current_month_kpi["deals_sale"]
     }
 
 

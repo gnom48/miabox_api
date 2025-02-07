@@ -1,7 +1,7 @@
 import os
 from fastapi import APIRouter, HTTPException, Header, Request, Response, UploadFile
 from .models import User, Statistics
-from api.app.repository import *
+from core.app.repository import *
 from datetime import datetime
 from .jwt import create_jwt_token, verify_jwt_token
 from shutil import copyfileobj
@@ -15,8 +15,8 @@ router_users = APIRouter(prefix="/user", tags=["Пользователи"])
 async def server_config_get():
     config = await Repository.get_config()
     if config is None:
-        raise HTTPException(status_code=500, detail="db is not availible") 
-    return { "postgres" : config, "api_datetime" : datetime.now() }
+        raise HTTPException(status_code=500, detail="db is not availible")
+    return {"postgres": config, "api_datetime": datetime.now()}
 
 
 @router_users.post("/registration", status_code=201)
@@ -44,7 +44,7 @@ async def user_authorization(req: Request, token_authorization: str | None = Hea
     return await verify_jwt_token(token_authorization)
 
 
-@router_users.put("/edit",status_code=200)
+@router_users.put("/edit", status_code=200)
 async def user_edit(user: User, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
