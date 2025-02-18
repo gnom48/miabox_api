@@ -9,7 +9,7 @@ config = load_var_from_toml(TOML_PATH)['database']
 __CONNRCTION_STR = f"postgresql+asyncpg://{config['POSTGRES_USER']}:{config['POSTGRES_PASSWORD']}@postgres:{config['POSTGRES_PORT']}/{config['POSTGRES_DB']}"
 
 async_engine = create_async_engine(
-    CONNRCTION_STR,
+    __CONNRCTION_STR,
     echo=False,
     pool_size=5,
     max_overflow=3

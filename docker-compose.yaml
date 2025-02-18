@@ -75,32 +75,32 @@ services:
       postgres:
         condition: service_healthy
 
-  whisper:
-    container_name: whisper-service
-    build: 
-      context: ./whisper
-      args:
-        WHISPER_PORT: ${WHISPER_PORT}
-    ports:
-      - "${WHISPER_PORT}:${WHISPER_PORT}"
-    restart: unless-stopped
-    networks:
-      - network-bridge
-    environment:
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      CORE_PORT: ${CORE_PORT}
-      MODEL: ${MODEL}
-      LOG_LEVEL: ${LOG_LEVEL}
-    volumes:
-      - shared-data:/shared
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${WHISPER_PORT}/transcription/config" ]
-      interval: 2s
-      timeout: 10s
-      retries: 5
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
+  # whisper:
+  #   container_name: whisper-service
+  #   build: 
+  #     context: ./whisper
+  #     args:
+  #       WHISPER_PORT: ${WHISPER_PORT}
+  #   ports:
+  #     - "${WHISPER_PORT}:${WHISPER_PORT}"
+  #   restart: unless-stopped
+  #   networks:
+  #     - network-bridge
+  #   environment:
+  #     RABBITMQ_PORT: ${RABBITMQ_PORT}
+  #     CORE_PORT: ${CORE_PORT}
+  #     MODEL: ${MODEL}
+  #     LOG_LEVEL: ${LOG_LEVEL}
+  #   volumes:
+  #     - shared-data:/shared
+  #   healthcheck:
+  #     test: [ "CMD", "curl", "-f", "http://localhost:${WHISPER_PORT}/transcription/config" ]
+  #     interval: 2s
+  #     timeout: 10s
+  #     retries: 5
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
 
   minio:
     container_name: minio-storage

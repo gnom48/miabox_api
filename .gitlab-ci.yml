@@ -1,0 +1,22 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build-job:
+  stage: build
+  script:
+    - echo "building..."
+    - docker-compose build
+
+test-job:
+  stage: test
+  script:
+    - echo "tests skipping..."
+
+deploy-job:
+  stage: deploy  
+  environment: production
+  script:
+    - echo "running..."
+    - docker-compose up -d 
