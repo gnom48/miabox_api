@@ -11,7 +11,7 @@ COPY ./internal ./internal
 
 RUN mkdir ./config
 
-COPY ./toml_helper ./toml_helper
+COPY ./toml_helper.sh ./toml_helper.sh
 
 ARG POSTGRES_PORT
 ARG POSTGRES_DB
