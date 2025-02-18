@@ -14,12 +14,13 @@ type Config struct {
 }
 
 func NewConfig() *Config {
+	logLevel := "debug"
 	return &Config{
 		BindAddress:    ":8081",
-		LogLevel:       "debug",
-		LogHeaders:     false,
-		LogBody:        true,
-		LogQueryParams: true,
+		LogLevel:       logLevel,
+		LogHeaders:     logLevel == "info",
+		LogBody:        logLevel == "info",
+		LogQueryParams: logLevel == "info",
 		StorageConfig:  storage.NewConfig(),
 	}
 }

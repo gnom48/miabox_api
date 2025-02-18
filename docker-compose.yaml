@@ -31,12 +31,12 @@ services:
     container_name: auth-service
     build: 
       context: ./auth
+      args:
+        <<: *postgres-config
+        AUTH_PORT: ${AUTH_PORT}
+        LOG_LEVEL: ${LOG_LEVEL}
     ports:
       - "${AUTH_PORT}:${AUTH_PORT}"
-    environment:
-      <<: *postgres-config
-      AUTH_PORT: ${AUTH_PORT}
-      LOG_LEVEL: ${LOG_LEVEL}
     volumes:
       - shared-data:/shared
     restart: unless-stopped
@@ -90,6 +90,7 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       CORE_PORT: ${CORE_PORT}
       MODEL: ${MODEL}
+      LOG_LEVEL: ${LOG_LEVEL}
     volumes:
       - shared-data:/shared
     healthcheck:

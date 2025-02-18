@@ -19,7 +19,7 @@ import toml
 - LOG_LEVEL
 """
 
-TOML_PATH = 'core/app/config/config.toml'
+TOML_PATH = r'core/app/config/config.toml'
 
 
 def dump_env_to_toml(filepath: str):
@@ -43,6 +43,9 @@ def dump_env_to_toml(filepath: str):
             "log_level": os.getenv("LOG_LEVEL", default="INFO")
         }
     }
+
+    if not os.path.exists(TOML_PATH):
+        os.makedirs(os.path.dirname(TOML_PATH))
 
     with open(filepath, 'w') as f:
         toml.dump(config_data, f)
