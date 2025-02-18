@@ -1,19 +1,21 @@
-#!bin/bash
+#!/bin/sh
 
 # В сервисе AUTH необходимы:
-# 
+#
 # - POSTGRES_PORT
 # - POSTGRES_DB
 # - POSTGRES_PASSWORD
 # - POSTGRES_USER
-# 
+#
 # - AUTH_PORT
-# 
+#
 # - API_KEY
-# 
+#
 # - LOG_LEVEL
 
 TOML_PATH="auth/config/config.toml"
+
+mkdir -p "$(dirname "$TOML_PATH")"
 
 cat <<EOF > "$TOML_PATH"
 [services]
@@ -25,7 +27,6 @@ database_url = "host=postgres port=$1 dbname=$2 sslmode=disable user=$4 password
 [app]
 EOF
 
-if
-$5 = "info"
-then
-echo "log_level = "$5"" >> $TOML_PATH
+if [ "$5" = "info" ]; then
+  echo "log_level = \"$5\"" >> "$TOML_PATH"
+fi

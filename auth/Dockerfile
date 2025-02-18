@@ -12,6 +12,7 @@ COPY ./internal ./internal
 RUN mkdir ./config
 
 COPY ./toml_helper.sh ./
+RUN chmod +x ./toml_helper.sh
 
 ARG POSTGRES_PORT
 ARG POSTGRES_DB
@@ -20,8 +21,7 @@ ARG POSTGRES_USER
 ARG LOG_LEVEL
 ARG AUTH_PORT
 
-RUN chmod +x ./toml_helper.sh
-RUN toml_helper.sh POSTGRES_PORT POSTGRES_DB POSTGRES_PASSWORD POSTGRES_USER LOG_LEVEL AUTH_PORT
+RUN ./toml_helper.sh POSTGRES_PORT POSTGRES_DB POSTGRES_PASSWORD POSTGRES_USER LOG_LEVEL AUTH_PORT
 
 RUN go build -o ./auth-service ./cmd/auth
 
