@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy import text
 from .consts import CONNRCTION_STR
 from .models import *
-from app.toml_helper import load_var_from_toml, load_data_from_toml, TOML_PATH
+from core.toml_helper import load_var_from_toml, load_data_from_toml, TOML_PATH
 
 
 config = load_var_from_toml(TOML_PATH)['database']
