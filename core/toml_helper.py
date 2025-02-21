@@ -51,13 +51,13 @@ def dump_env_to_toml(filepath: str):
         toml.dump(config_data, f)
 
 
-def load_var_from_toml(filepath: str, tag: str, key: str):
+def load_var_from_toml(tag: str, key: str, filepath: str = TOML_PATH):
     with open(filepath, 'r') as f:
         data = toml.load(f)
         return data[tag][key]
 
 
-def load_data_from_toml(filepath: str):
+def load_data_from_toml(filepath: str = TOML_PATH):
     with open(filepath, 'r') as f:
         return toml.load(f)
 

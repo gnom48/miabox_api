@@ -2,10 +2,10 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy import text
 from .consts import CONNRCTION_STR
 from .models import *
-from core.toml_helper import load_var_from_toml, load_data_from_toml, TOML_PATH
+from core.toml_helper import load_data_from_toml
 
 
-config = load_var_from_toml(TOML_PATH)['database']
+config = load_data_from_toml()['database']
 __CONNRCTION_STR = f"postgresql+asyncpg://{config['POSTGRES_USER']}:{config['POSTGRES_PASSWORD']}@postgres:{config['POSTGRES_PORT']}/{config['POSTGRES_DB']}"
 
 async_engine = create_async_engine(

@@ -7,6 +7,18 @@ x-postgres-config: &postgres-config
   POSTGRES_DB: ${POSTGRES_DB}
 
 services:
+  nginx:
+    container_name: nginx-service
+    image: nginx:latest
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./nginx/logs:/var/log/nginx
+    ports:
+      - "${NGINX_PORT}:80"
+    networks:
+      - network-bridge
+
   postgres:
     container_name: postgres-db
     image: postgres:15.3-alpine
@@ -75,32 +87,32 @@ services:
       postgres:
         condition: service_healthy
 
-  # whisper:
-  #   container_name: whisper-service
-  #   build: 
-  #     context: ./whisper
-  #     args:
-  #       WHISPER_PORT: ${WHISPER_PORT}
-  #   ports:
-  #     - "${WHISPER_PORT}:${WHISPER_PORT}"
-  #   restart: unless-stopped
-  #   networks:
-  #     - network-bridge
-  #   environment:
-  #     RABBITMQ_PORT: ${RABBITMQ_PORT}
-  #     CORE_PORT: ${CORE_PORT}
-  #     MODEL: ${MODEL}
-  #     LOG_LEVEL: ${LOG_LEVEL}
-  #   volumes:
-  #     - shared-data:/shared
-  #   healthcheck:
-  #     test: [ "CMD", "curl", "-f", "http://localhost:${WHISPER_PORT}/transcription/config" ]
-  #     interval: 2s
-  #     timeout: 10s
-  #     retries: 5
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
+  whisper:
+    container_name: whisper-service
+    build: 
+      context: ./whisper
+      args:
+        WHISPER_PORT: ${WHISPER_PORT}
+    ports:
+      - "${WHISPER_PORT}:${WHISPER_PORT}"
+    restart: unless-stopped
+    networks:
+      - network-bridge
+    environment:
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      CORE_PORT: ${CORE_PORT}
+      MODEL: ${MODEL}
+      LOG_LEVEL: ${LOG_LEVEL}
+    volumes:
+      - shared-data:/shared
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${WHISPER_PORT}/transcription/config" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   minio:
     container_name: minio-storage
