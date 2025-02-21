@@ -11,11 +11,14 @@ services:
     container_name: nginx-service
     image: nginx:latest
     volumes:
-      - ./nginx:/etc/nginx/conf.d:ro
-      - ./certs:/etc/nginx/certs:ro
       - ./nginx/logs:/var/log/nginx
+      - ./nginx/templates:/etc/nginx/templates
     ports:
-      - "${NGINX_PORT}:80"
+      - "${NGINX_OUTER_PORT}:${NGINX_INNER_PORT}"
+    environment:
+      NGINX_INNER_PORT: ${NGINX_INNER_PORT}
+      CORE_PORT: ${CORE_PORT}
+      KNOWLEDGEBASE_PORT: ${KNOWLEDGEBASE_PORT}
     networks:
       - network-bridge
 
@@ -113,6 +116,24 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+  
+  knowledgebase:
+    container_name: knowledgebase-service
+    build: 
+      context: ./knowledgebase
+      args:
+        KNOWLEDGEBASE_PORT: ${KNOWLEDGEBASE_PORT}
+        LOG_LEVEL: ${LOG_LEVEL}
+    ports:
+      - "${KNOWLEDGEBASE_PORT}:${KNOWLEDGEBASE_PORT}"
+    restart: unless-stopped
+    networks:
+      - network-bridge
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${KNOWLEDGEBASE_PORT}" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
 
   minio:
     container_name: minio-storage
