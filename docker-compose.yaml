@@ -21,7 +21,7 @@ services:
       KNOWLEDGEBASE_PORT: ${KNOWLEDGEBASE_PORT}
     networks:
       - network-bridge
-
+ 
   postgres:
     container_name: postgres-db
     image: postgres:15.3-alpine
@@ -129,11 +129,6 @@ services:
     restart: unless-stopped
     networks:
       - network-bridge
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${KNOWLEDGEBASE_PORT}" ]
-      interval: 2s
-      timeout: 10s
-      retries: 5
 
   minio:
     container_name: minio-storage
