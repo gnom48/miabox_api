@@ -21,6 +21,9 @@ services:
       KNOWLEDGEBASE_PORT: ${KNOWLEDGEBASE_PORT}
     networks:
       - network-bridge
+    depends_on:
+      - core
+      - knowledgebase
  
   postgres:
     container_name: postgres-db
@@ -129,6 +132,11 @@ services:
     restart: unless-stopped
     networks:
       - network-bridge
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${KNOWLEDGEBASE_PORT}/test" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
 
   minio:
     container_name: minio-storage

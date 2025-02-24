@@ -6,7 +6,7 @@ from core.toml_helper import load_data_from_toml
 
 
 config = load_data_from_toml()['database']
-__CONNRCTION_STR = f"postgresql+asyncpg://{config['POSTGRES_USER']}:{config['POSTGRES_PASSWORD']}@postgres:{config['POSTGRES_PORT']}/{config['POSTGRES_DB']}"
+__CONNRCTION_STR = f"postgresql+asyncpg://{config['postgres_user']}:{config['postgres_password']}@postgres:{config['postgres_port']}/{config['postgres_db']}"
 
 async_engine = create_async_engine(
     __CONNRCTION_STR,

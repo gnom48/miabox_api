@@ -18,6 +18,14 @@ def home():
     )
 
 
+@route('/test')
+def home():
+    """Test endpoint."""
+    return dict(
+        ok=True
+    )
+
+
 @route('/static/<filepath:path>')
 def server_static(filepath):
     """Handler for static files, used with the development server.

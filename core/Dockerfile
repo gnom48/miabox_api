@@ -12,5 +12,6 @@ RUN pip install --upgrade -r requirements.txt
 COPY ./ core
 
 ARG CORE_PORT
+ENV CORE_PORT=${CORE_PORT}
 
-CMD ["sh", "-c", "python toml_helper.py && uvicorn core.app.main:app --host 0.0.0.0 --port ${CORE_PORT} --reload"]
+CMD ["sh", "-c", "python core/toml_helper.py && uvicorn core.app.main:app --host 0.0.0.0 --port ${CORE_PORT} --reload"]

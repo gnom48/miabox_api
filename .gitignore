@@ -4,6 +4,9 @@
 *.exe
 *config/config.toml
 
+\nginx\logs\*.log
+/nginx/logs/*.log
+
 /venv
 /api/venv
 /api/__pycache__
