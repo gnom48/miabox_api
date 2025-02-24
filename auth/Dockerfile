@@ -9,8 +9,6 @@ RUN go mod download
 COPY ./cmd ./cmd
 COPY ./internal ./internal
 
-RUN mkdir ./config
-
 COPY ./toml_helper.sh ./
 RUN chmod +x ./toml_helper.sh
 

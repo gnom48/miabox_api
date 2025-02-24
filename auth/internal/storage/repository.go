@@ -14,7 +14,7 @@ func (r *Repository) AddUser(user *models.UserCredentials) (*models.UserCredenti
 	user.Id, _ = models.GenerateUuid32()
 
 	if err := r.storage.db.QueryRow(
-		"INSERT INTO users (id, login, password, privileges) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO auth.auth.user_credentials (id, login, password, privileges) VALUES ($1, $2, $3, $4) RETURNING id",
 		user.Id, user.Login, hashed_password_base64, user.Privileges,
 	).Scan(&user.Id); err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (r *Repository) GetUserByUsernamePassword(login string, password string) (*
 	user := models.UserCredentials{}
 
 	if err := r.storage.db.QueryRow(
-		"SELECT * FROM users WHERE login = $1 AND password = $2",
+		"SELECT * FROM auth.user_credentials WHERE login = $1 AND password = $2",
 		login, hashed_password_base64,
 	).Scan(&user.Id, &user.Login, &user.Password, &user.Privileges, &user.CreatedAt, &user.IsActive); err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (r *Repository) GetUserById(userId string) (*models.UserCredentials, error)
 	user := models.UserCredentials{}
 
 	if err := r.storage.db.QueryRow(
-		"SELECT * FROM users WHERE id = $1",
+		"SELECT * FROM auth.user_credentials WHERE id = $1",
 		userId,
 	).Scan(&user.Id, &user.Login, &user.Password, &user.Privileges, &user.CreatedAt, &user.IsActive); err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func (r *Repository) SyncToken(tokenId string, userId string, isRegular bool) (s
 
 func (r *Repository) UpdateUser(user *models.UserCredentials) error {
 	if _, err := r.storage.db.Query(
-		"UPDATE users SET login = $1, password = $2, privileges = $3 WHERE id = $4",
+		"UPDATE auth.user_credentials SET login = $1, password = $2, privileges = $3 WHERE id = $4",
 		user.Login, EncryptString(user.Password), user.Privileges, user.Id,
 	); err != nil {
 		return err
@@ -119,7 +119,7 @@ func (r *Repository) UpdateUser(user *models.UserCredentials) error {
 
 func (r *Repository) GetAllAccounts(from int, count int) ([]models.UserCredentials, error) {
 	rows, err := r.storage.db.Query(
-		"SELECT * FROM users ORDER BY id OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY",
+		"SELECT * FROM auth.user_credentials ORDER BY id OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY",
 		from, count,
 	)
 	if err != nil {
@@ -145,7 +145,7 @@ func (r *Repository) GetAllAccounts(from int, count int) ([]models.UserCredentia
 
 func (r *Repository) SoftDeleteUser(userId string) error {
 	if _, err := r.storage.db.Query(
-		"UPDATE users SET is_active = false WHERE id = $1;",
+		"UPDATE auth.user_credentials SET is_active = false WHERE id = $1;",
 		userId,
 	); err != nil {
 		return err

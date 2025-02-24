@@ -6,6 +6,6 @@ type Config struct {
 
 func NewConfig() *Config {
 	return &Config{
-		DatabaseUrl: "host=postgres port=5432 dbname=postgres-db sslmode=disable user=postgres password=fbM849INe17RPxy",
+		DatabaseUrl: "host=postgres port=5432 dbname=postgres sslmode=disable user=postgres password=fbM849INe17RPxy",
 	}
 }

@@ -26,10 +26,10 @@ definitions:
 host: localhost:8081
 info:
   contact: {}
-  description: Account API (Account microservice) documentation. Jтвечает за авторизацию
-    и данные о пользователях. Все остальные сервисы зависят от него, ведьименно он
+  description: Account API (Auth microservice) documentation. Отвечает за авторизацию
+    и данные о пользователях. Все остальные сервисы зависят от него, ведь именно он
     выпускает JWT токен и проводит интроспекцию.
-  title: Account
+  title: Auth
   version: "1.0"
 paths:
   /api/Accounts:

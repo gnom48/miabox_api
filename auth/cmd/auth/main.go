@@ -20,7 +20,7 @@ swag init -g server.go account.go auth.go
 var configPath string
 
 func init() {
-	flag.StringVar(&configPath, "config-path", "config/config.toml", "Path to configure file")
+	flag.StringVar(&configPath, "config-path", "/config/config.toml", "Path to configure file")
 }
 
 func main() {

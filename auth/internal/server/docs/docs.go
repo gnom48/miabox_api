@@ -384,8 +384,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8081",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
-	Title:            "Account",
-	Description:      "Account API (Account microservice) documentation. Jтвечает за авторизацию и данные о пользователях. Все остальные сервисы зависят от него, ведьименно он выпускает JWT токен и проводит интроспекцию.",
+	Title:            "Auth",
+	Description:      "Account API (Auth microservice) documentation. Отвечает за авторизацию и данные о пользователях. Все остальные сервисы зависят от него, ведь именно он выпускает JWT токен и проводит интроспекцию.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

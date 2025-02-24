@@ -3,8 +3,8 @@ package models
 type AuthPrivileges string
 
 const (
-	USER  AuthPrivileges = "Пользователь"
-	ADMIN AuthPrivileges = "Администратор"
+	USER  AuthPrivileges = "USER"
+	ADMIN AuthPrivileges = "ADMIN"
 )
 
 type UserCredentials struct {

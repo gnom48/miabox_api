@@ -13,7 +13,7 @@
 #
 # - LOG_LEVEL
 
-TOML_PATH="auth/config/config.toml"
+TOML_PATH="/config/config.toml"
 
 mkdir -p "$(dirname "$TOML_PATH")"
 

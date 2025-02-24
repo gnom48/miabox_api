@@ -119,9 +119,9 @@ func (s *ApiServer) internalServerErrorMiddleware(next http.Handler) http.Handle
 	})
 }
 
-// @title Account
+// @title Auth
 // @version 1.0
-// @description Account API (Account microservice) documentation. Jтвечает за авторизацию и данные о пользователях. Все остальные сервисы зависят от него, ведьименно он выпускает JWT токен и проводит интроспекцию.
+// @description Account API (Auth microservice) documentation. Отвечает за авторизацию и данные о пользователях. Все остальные сервисы зависят от него, ведь именно он выпускает JWT токен и проводит интроспекцию.
 // @host localhost:8081
 // @BasePath /
 // @schemes http
