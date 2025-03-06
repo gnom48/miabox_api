@@ -1,18 +1,29 @@
-import asyncio
-from fastapi import FastAPI
-from .api import router_transcription, async_whisper, Models, task_handler
+from .transcription import AsyncWhisper, Models
 from contextlib import asynccontextmanager
+import logging
+from .rabbitmq import listen
+from minio_client import MinioClient
+from ..toml_helper import load_var_from_toml
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Старт")
-    await async_whisper.initialize_async(Models.base)
-    print("Модель по умолчанию готова")
-    asyncio.create_task(task_handler())
+async def lifespan():
+    logging.debug("Старт")
+
+    minio_client = MinioClient(
+        f"minio:{load_var_from_toml("minio", "minio_api_port")}",
+        load_var_from_toml("minio", "minio_access_key"),
+        load_var_from_toml("minio", "minio_secret_key")
+    )
+    logging.debug("Minio клиент готов")
+
+    async_whisper_model = AsyncWhisper()
+    await async_whisper_model.initialize_async(load_var_from_toml("app", "model"))
+    logging.debug("Модель готова")
+
+    await listen(minio_client=minio_client, async_whisper_model=async_whisper_model)
+    logging.debug("Слушатель сообщений запущен")
+
     yield
-    print("Выключение")
 
-
-app = FastAPI(lifespan=lifespan)
-app.include_router(router_transcription)
+    logging.debug("Выключение")

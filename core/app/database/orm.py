@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncConnection
 from sqlalchemy import text
-from .consts import CONNRCTION_STR
 from .models import *
 from core.toml_helper import load_data_from_toml
 

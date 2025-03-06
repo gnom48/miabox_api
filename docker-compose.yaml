@@ -106,6 +106,8 @@ services:
       - network-bridge
     environment:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
       CORE_PORT: ${CORE_PORT}
       MODEL: ${MODEL}
       LOG_LEVEL: ${LOG_LEVEL}

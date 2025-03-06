@@ -7,6 +7,9 @@ import toml
 - RABBITMQ_PORT
 - CORE_PORT
 
+- MINIO_ACCESS_KEY
+- MINIO_SECRET_KEY
+
 - API_KEY
 
 - MODEL
@@ -20,7 +23,14 @@ def dump_env_to_toml(filepath: str):
     config_data = {
         "services": {
             "core_port": os.getenv("CORE_PORT"),
-            "rabbitmq_port": os.getenv("RABBITMQ_PORT")
+            "rabbitmq_port": os.getenv("RABBITMQ_PORT"),
+            "rabbitmq_user": os.getenv("RABBITMQ_DEFAULT_USER"),
+            "rabbitmq_password": os.getenv("RABBITMQ_DEFAULT_PASS"),
+        },
+        "minio": {
+            "minio_api_port": os.getenv("MINIO_API_PORT"),
+            "minio_access_key": os.getenv("MINIO_ROOT_USER"),
+            "minio_secret_key": os.getenv("MINIO_ROOT_PASSWORD")
         },
         "access": {
             "api_key": os.getenv("API_KEY")
@@ -38,13 +48,13 @@ def dump_env_to_toml(filepath: str):
         toml.dump(config_data, f)
 
 
-def load_var_from_toml(filepath: str, tag: str, key: str):
+def load_var_from_toml(tag: str, key: str, filepath: str = TOML_PATH):
     with open(filepath, 'r') as f:
         data = toml.load(f)
         return data[tag][key]
 
 
-def load_data_from_toml(filepath: str):
+def load_data_from_toml(filepath: str = TOML_PATH):
     with open(filepath, 'r') as f:
         return toml.load(f)
 
