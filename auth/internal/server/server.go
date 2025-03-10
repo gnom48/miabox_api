@@ -3,16 +3,9 @@ package server
 import (
 	"auth/internal/server/tokens"
 	"auth/internal/storage"
-	"bytes"
-	"context"
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"strings"
 
 	_ "auth/internal/server/docs"
-
-	models "auth/internal/models"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -62,61 +55,22 @@ func (s *ApiServer) ConfigureLogger() error {
 	}
 
 	s.logger.SetLevel(level)
+	s.logger.SetFormatter(&logrus.TextFormatter{})
 
 	return nil
 }
 
 func (s *ApiServer) ConfigureStore() error {
-	st := storage.New(s.config.StorageConfig)
-	defer s.storage.Close()
-	if err := st.Open(); err != nil {
-		return err
+	s.storage = storage.New(s.config.StorageConfig)
+
+	conn := s.storage.GetDbConnection()
+
+	err := conn.Ping()
+	if err != nil {
+		s.logger.Fatal(err)
 	}
 
-	s.storage = st
-
 	return nil
-}
-
-func (s *ApiServer) loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		headers := &strings.Builder{}
-		headers.Write([]byte("["))
-		if s.config.LogHeaders {
-			for key, values := range r.Header {
-				for _, value := range values {
-					headers.Write([]byte(key + " = " + value + ", "))
-				}
-			}
-		}
-		headers.Write([]byte("]"))
-
-		bodyBytes := make([]byte, 0)
-		if s.config.LogBody {
-			bodyBytes, _ = ioutil.ReadAll(r.Body)
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-		}
-
-		queryParams := ""
-		if s.config.LogQueryParams {
-			queryParams = r.URL.Query().Encode()
-		}
-
-		s.logger.Info("Method: " + r.Method + " | Path: " + r.URL.Path + " | Headers: " + headers.String() + " | Body: " + string(bodyBytes) + " | Query: " + queryParams)
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (s *ApiServer) internalServerErrorMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				s.ErrorRespond(w, r, http.StatusNotImplemented, fmt.Errorf("Internal Server Error: %v", err))
-			}
-		}()
-		next.ServeHTTP(w, r)
-	})
 }
 
 // @title Auth
@@ -143,77 +97,4 @@ func (s *ApiServer) ConfigureRouter() {
 	s.router.HandleFunc("/api/Accounts/{id}", s.AuthRegularTokenMiddleware(s.HandleSoftDeleteAccountById())).Methods("DELETE")
 
 	s.router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
-}
-
-type StringContextKey string
-
-var UserContextKey StringContextKey = "user"
-
-func (s *ApiServer) AuthRegularTokenMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		tokenString := r.Header.Get("Authorization")
-		if tokenString == "" {
-			http.Error(w, "Authorization header is empty", http.StatusUnauthorized)
-			return
-		}
-
-		claims, err := s.tokenSigner.ValidateRegularToken(tokenString)
-		if err != nil {
-			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
-			return
-		}
-
-		defer s.storage.Close()
-		if token, err := s.storage.Repository().GetTokenById(claims.ID); err != nil || token == nil {
-			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
-			return
-		}
-
-		user, err := s.storage.Repository().GetUserById(claims.UserId)
-		if err != nil {
-			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), UserContextKey, *user)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	}
-}
-
-func (s *ApiServer) AuthCreationTokenMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		tokenString := r.Header.Get("Authorization")
-		if tokenString == "" {
-			http.Error(w, "Authorization header is empty", http.StatusUnauthorized)
-			return
-		}
-
-		claims, err := s.tokenSigner.ValidateCreationToken(tokenString)
-		if err != nil {
-			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
-			return
-		}
-
-		defer s.storage.Close()
-		token, err := s.storage.Repository().GetTokenById(claims.ID)
-		if err != nil || token == nil {
-			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
-			return
-		}
-
-		user, err := s.storage.Repository().GetUserByUsernamePassword(claims.Login, claims.Password)
-		if err != nil {
-			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), UserContextKey, *user)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	}
-}
-
-var PrivilegesContextKey StringContextKey = "privileges"
-
-type userPrivilegesResponseBody struct {
-	Privileges []models.AuthPrivileges `json:"privileges"`
 }

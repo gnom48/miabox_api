@@ -8,8 +8,6 @@ import (
 	models "auth/internal/models"
 )
 
-var tokenError = fmt.Errorf("Invalid token, refresh or sign in to get a new pair")
-
 type signUpRequestBody struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
@@ -36,8 +34,7 @@ func (s *ApiServer) HandleAuthenticationSignUp() http.HandlerFunc {
 			Privileges: models.USER,
 			IsActive:   true,
 		}
-		defer s.storage.Close()
-		if returning, err := s.storage.Repository().AddUser(user); err != nil {
+		if returning, err := s.storage.GetRepository().AddUser(user); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, err)
 		} else {
 			s.Respond(w, r, http.StatusCreated, returning.Id)
@@ -70,8 +67,7 @@ func (s *ApiServer) HandleAuthenticationSignIn() http.HandlerFunc {
 			return
 		}
 
-		defer s.storage.Close()
-		user, err := s.storage.Repository().GetUserByUsernamePassword(requestBody.Login, requestBody.Password)
+		user, err := s.storage.GetRepository().GetUserByUsernamePassword(requestBody.Login, requestBody.Password)
 		if err != nil {
 			s.ErrorRespond(w, r, http.StatusNotFound, fmt.Errorf("User not found"))
 			return
@@ -80,15 +76,15 @@ func (s *ApiServer) HandleAuthenticationSignIn() http.HandlerFunc {
 		creationToken, creationTokenId, cte := s.tokenSigner.GenerateCreationToken(user)
 		regularToken, regularTokenId, rte := s.tokenSigner.GenerateRegularToken(user)
 		if cte != nil || rte != nil {
-			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Errors: "+cte.Error()+"; "+rte.Error()))
+			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("%s", "Errors: "+cte.Error()+"; "+rte.Error()))
 			return
 		}
 
-		if _, err := s.storage.Repository().SyncToken(creationTokenId, user.Id, false); err != nil {
+		if _, err := s.storage.GetRepository().SyncToken(creationTokenId, user.Id, false); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error srt: %v", err))
 			return
 		}
-		if _, err := s.storage.Repository().SyncToken(regularTokenId, user.Id, true); err != nil {
+		if _, err := s.storage.GetRepository().SyncToken(regularTokenId, user.Id, true); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error sct: %v", err))
 			return
 		}
@@ -114,8 +110,7 @@ func (s *ApiServer) HandleAuthenticationSignOut() http.HandlerFunc {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
 		}
 
-		defer s.storage.Close()
-		res, err := s.storage.Repository().DeleteTokensPair(user.Id)
+		res, err := s.storage.GetRepository().DeleteTokensPair(user.Id)
 		if !res {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, err)
 		}
@@ -141,8 +136,7 @@ func (s *ApiServer) HandleAuthenticationValidate() http.HandlerFunc {
 			return
 		}
 
-		defer s.storage.Close()
-		if token, err := s.storage.Repository().GetTokenById(data.ID); err != nil || token == nil {
+		if token, err := s.storage.GetRepository().GetTokenById(data.ID); err != nil || token == nil {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("Token revoked"))
 			return
 		}
@@ -173,12 +167,11 @@ func (s *ApiServer) HandleAuthenticationRefresh() http.HandlerFunc {
 			return
 		}
 
-		defer s.storage.Close()
-		if _, err := s.storage.Repository().SyncToken(creationTokenId, user.Id, false); err != nil {
+		if _, err := s.storage.GetRepository().SyncToken(creationTokenId, user.Id, false); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error: %v", err))
 			return
 		}
-		if _, err := s.storage.Repository().SyncToken(regularTokenId, user.Id, true); err != nil {
+		if _, err := s.storage.GetRepository().SyncToken(regularTokenId, user.Id, true); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error: %v", err))
 			return
 		}

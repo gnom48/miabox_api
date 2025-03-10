@@ -2,7 +2,7 @@ package main
 
 import (
 	"auth/internal/server"
-	"flag"
+	"auth/internal/storage"
 	"log"
 
 	"github.com/BurntSushi/toml"
@@ -17,23 +17,32 @@ cd internal/server
 swag init -g server.go account.go auth.go
 */
 
-var configPath string
-
-func init() {
-	flag.StringVar(&configPath, "config-path", "/config/config.toml", "Path to configure file")
-}
+var conficFilePath = "./internal/config/config.toml"
 
 func main() {
-	flag.Parse()
+	defer func() {
+		if r := recover(); r != nil {
+			log.Fatal("Error while starting app: ", r)
+		}
+	}()
 
-	config := server.NewConfig()
-	_, e := toml.DecodeFile(configPath, config)
+	storageConfig := &storage.Config{}
+	_, e := toml.DecodeFile(conficFilePath, storageConfig)
 	if e != nil {
-		log.Fatal(e)
+		panic(e)
 	}
 
-	server := server.New(config)
-	if err := server.Start(); err == nil {
-		log.Fatal(err)
+	serverConfig := &server.Config{}
+	_, e = toml.DecodeFile(conficFilePath, serverConfig)
+	if e != nil {
+		panic(e)
+	}
+
+	serverConfig.SetDefaultValues()
+	serverConfig.StorageConfig = storageConfig
+
+	server := server.New(serverConfig)
+	if err := server.Start(); err != nil {
+		panic(err)
 	}
 }

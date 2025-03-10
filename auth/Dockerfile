@@ -9,7 +9,7 @@ RUN go mod download
 COPY ./cmd ./cmd
 COPY ./internal ./internal
 
-COPY ./toml_helper.sh ./
+COPY ./scripts/toml_helper.sh ./
 RUN chmod +x ./toml_helper.sh
 
 ARG POSTGRES_PORT
@@ -19,7 +19,15 @@ ARG POSTGRES_USER
 ARG LOG_LEVEL
 ARG AUTH_PORT
 
-RUN ./toml_helper.sh POSTGRES_PORT POSTGRES_DB POSTGRES_PASSWORD POSTGRES_USER LOG_LEVEL AUTH_PORT
+ENV POSTGRES_PORT=${POSTGRES_PORT}
+ENV POSTGRES_DB=${POSTGRES_DB}
+ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+ENV POSTGRES_USER=${POSTGRES_USER}
+ENV LOG_LEVEL="info"
+# ENV LOG_LEVEL=${LOG_LEVEL}
+ENV AUTH_PORT=${AUTH_PORT}
+
+RUN ./toml_helper.sh
 
 RUN go build -o ./auth-service ./cmd/auth
 

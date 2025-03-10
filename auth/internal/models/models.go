@@ -12,7 +12,7 @@ type UserCredentials struct {
 	Login      string         `json:"login"`
 	Password   string         `json:"password,omitempty"`
 	Privileges AuthPrivileges `json:"privileges"`
-	CreatedAt  int64          `json:"created_at"`
+	CreatedAt  string         `json:"created_at"`
 	IsActive   bool           `json:"is_active"`
 }
 

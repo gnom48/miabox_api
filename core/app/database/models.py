@@ -8,6 +8,8 @@ import uuid
 class BaseModelOrm(DeclarativeBase):
     pass
 
+# TODO: AuthPrivilegesOrm должна создаваться в схеме auth
+
 
 class AuthPrivilegesOrm(Enum):
     USER = "Пользователь"
@@ -63,7 +65,7 @@ class UserCredentialsOrm(BaseModelOrm):
     privileges: Mapped[AuthPrivilegesOrm] = mapped_column(
         SqlEnum(AuthPrivilegesOrm), nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime, default=datetime.datetime.utcnow)
+        DateTime, default=datetime.datetime.now())
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
 

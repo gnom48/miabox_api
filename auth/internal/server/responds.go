@@ -2,8 +2,11 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
+
+var tokenError = fmt.Errorf("Invalid token, refresh or sign in to get a new pair")
 
 func (s *ApiServer) Respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
 	w.WriteHeader(code)

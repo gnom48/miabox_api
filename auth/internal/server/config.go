@@ -7,20 +7,14 @@ import (
 type Config struct {
 	BindAddress    string `toml:"bind_address"`
 	LogLevel       string `toml:"log_level"`
-	LogHeaders     bool   `toml:"log_headers"`
-	LogBody        bool   `toml:"log_body"`
-	LogQueryParams bool   `toml:"log_query_params"`
+	LogHeaders     bool
+	LogBody        bool
+	LogQueryParams bool
 	StorageConfig  *storage.Config
 }
 
-func NewConfig() *Config {
-	logLevel := "debug"
-	return &Config{
-		BindAddress:    ":8081",
-		LogLevel:       logLevel,
-		LogHeaders:     logLevel == "info",
-		LogBody:        logLevel == "info",
-		LogQueryParams: logLevel == "info",
-		StorageConfig:  storage.NewConfig(),
-	}
+func (c *Config) SetDefaultValues() {
+	c.LogHeaders = c.LogLevel == "debug"
+	c.LogBody = c.LogLevel == "debug"
+	c.LogQueryParams = c.LogLevel == "debug"
 }

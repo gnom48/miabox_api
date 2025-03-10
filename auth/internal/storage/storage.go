@@ -9,7 +9,7 @@ import (
 type Storage struct {
 	config     *Config
 	db         *sql.DB
-	repository *Repository
+	repository AuthRepository
 }
 
 func New(config *Config) *Storage {
@@ -20,12 +20,7 @@ func New(config *Config) *Storage {
 
 func (s *Storage) Open() error {
 	db, err := sql.Open("postgres", s.config.DatabaseUrl)
-
 	if err != nil {
-		return err
-	}
-
-	if err := db.Ping(); err != nil {
 		return err
 	}
 
@@ -34,22 +29,24 @@ func (s *Storage) Open() error {
 	return nil
 }
 
+func (s *Storage) GetDbConnection() *sql.DB {
+	if s.db == nil {
+		s.Open()
+	}
+	return s.db
+}
+
 func (s *Storage) Close() {
-	if s != nil {
-		if s.db != nil {
-			s.db.Close()
-		}
+	if s.db != nil {
+		s.db.Close()
 	}
 }
 
-func (s *Storage) Repository() *Repository {
+func (s *Storage) GetRepository() AuthRepository {
 	if s.repository == nil {
-		s.repository = &Repository{
-			storage: s,
-		}
-	}
-	if s.db == nil {
-		s.Open()
+		s.repository = NewAuthRepository(s.GetDbConnection())
+	} else {
+		_ = s.GetDbConnection()
 	}
 	return s.repository
 }

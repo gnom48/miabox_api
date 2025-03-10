@@ -64,8 +64,7 @@ func (s *ApiServer) HandleUpdateAccount() http.HandlerFunc {
 		user.Login = requestBody.Login
 		user.Password = requestBody.Password
 
-		defer s.storage.Close()
-		if err := s.storage.Repository().UpdateUser(&user); err != nil {
+		if err := s.storage.GetRepository().UpdateUser(&user); err != nil {
 			s.ErrorRespond(w, r, http.StatusBadRequest, err)
 			return
 		}
@@ -112,8 +111,7 @@ func (s *ApiServer) HandleCreateAccount() http.HandlerFunc {
 			Password:   requestBody.Password,
 		}
 
-		defer s.storage.Close()
-		if returning, err := s.storage.Repository().AddUser(newUser); err != nil {
+		if returning, err := s.storage.GetRepository().AddUser(newUser); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, err)
 			return
 		} else {
@@ -166,8 +164,7 @@ func (s *ApiServer) HandleGetAllAccounts() http.HandlerFunc {
 			return
 		}
 
-		defer s.storage.Close()
-		accounts, err := s.storage.Repository().GetAllAccounts(from, count)
+		accounts, err := s.storage.GetRepository().GetAllAccounts(from, count)
 		if err != nil {
 			s.ErrorRespond(w, r, http.StatusInternalServerError, err)
 			return
@@ -213,8 +210,7 @@ func (s *ApiServer) HandleUpdateAccountById() http.HandlerFunc {
 			IsActive:   true,
 		}
 
-		defer s.storage.Close()
-		if err := s.storage.Repository().UpdateUser(&editableUser); err != nil {
+		if err := s.storage.GetRepository().UpdateUser(&editableUser); err != nil {
 			s.ErrorRespond(w, r, http.StatusInternalServerError, err)
 		} else {
 			s.Respond(w, r, http.StatusMultiStatus, struct {
@@ -245,8 +241,7 @@ func (s *ApiServer) HandleSoftDeleteAccountById() http.HandlerFunc {
 		}
 
 		id := r.URL.Path[len("/api/Accounts/"):]
-		defer s.storage.Close()
-		if err := s.storage.Repository().SoftDeleteUser(id); err != nil {
+		if err := s.storage.GetRepository().SoftDeleteUser(id); err != nil {
 			s.ErrorRespond(w, r, http.StatusInternalServerError, err)
 			return
 		}
