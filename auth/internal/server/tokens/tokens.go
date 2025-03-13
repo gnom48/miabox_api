@@ -9,6 +9,8 @@ import (
 	"github.com/dgrijalva/jwt-go/v4"
 )
 
+var SecretKey string
+
 type TokenSigner interface {
 	GenerateRegularToken(*models.UserCredentials) (string, string, error)
 	GenerateCreationToken(*models.UserCredentials) (string, string, error)

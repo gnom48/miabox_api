@@ -1,6 +1,5 @@
-from fastapi import APIRouter, HTTPException, Header, Request, Depends
+from fastapi import APIRouter, HTTPException, Header, Request, Depends, status
 from api.models import Task
-from .jwt import verify_jwt_token
 from app.database import *
 from app.api import get_user_from_request, UserCredentials
 
@@ -10,7 +9,7 @@ router_tasks = APIRouter(prefix="/task", tags=["Задачи"])
 
 @router_tasks.get("/all", status_code=status.HTTP_200_OK)
 async def task_all(user_credentials: UserCredentials | None = Depends(get_user_from_request)):
-    return await Repository.get_all_tasks_by_user_id(user.id, False)
+    return await Repository.get_all_tasks_by_user_id(user_credentials.id, False)
 
 
 @router_tasks.get("/completed", status_code=status.HTTP_200_OK)
@@ -19,7 +18,7 @@ async def task_all(user_id: str, user_credentials: UserCredentials | None = Depe
 
 
 @router_tasks.post("/add", status_code=status.HTTP_201_CREATED)
-async def task_add(req: Request, task: Task, user_credentials: UserCredentials | None = Depends(get_user_from_request)):
+async def task_add(task: Task, user_credentials: UserCredentials | None = Depends(get_user_from_request)):
     task_id = await Repository.add_task(task)
     if not task_id:
         raise HTTPException(
@@ -28,5 +27,5 @@ async def task_add(req: Request, task: Task, user_credentials: UserCredentials |
 
 
 @router_tasks.delete("/delete", status_code=status.HTTP_200_OK)
-async def task_delete(req: Request, task_id: str, user_credentials: UserCredentials | None = Depends(get_user_from_request)):
+async def task_delete(task_id: str, user_credentials: UserCredentials | None = Depends(get_user_from_request)):
     return await Repository.del_task(task_id)

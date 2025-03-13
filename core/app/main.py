@@ -1,11 +1,10 @@
 from datetime import datetime
-from fastapi import Depends, FastAPI, APIRouter, HTTPException, status
-# from .api import router_users, router_notes, router_tasks, router_teams, router_addresses, router_statistics, router_calls
+from fastapi import FastAPI, HTTPException, status
+# from app.api import router_users, router_notes, router_tasks, router_teams, router_addresses, router_statistics, router_calls
 from contextlib import asynccontextmanager
 
 from app.api import get_user_from_request
 from app.api import UserCredentials
-# from .repository import Repository
 # from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.database import create_tables, drop_tables, Repository
 from app.api import auth_middleware

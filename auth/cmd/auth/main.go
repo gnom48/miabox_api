@@ -2,6 +2,7 @@ package main
 
 import (
 	"auth/internal/server"
+	tokens "auth/internal/server/tokens"
 	"auth/internal/storage"
 	"log"
 
@@ -26,8 +27,19 @@ func main() {
 		}
 	}()
 
+	type secret struct {
+		secretKeyValue string `toml:"secret_key"`
+	}
+	secretStruct := &secret{}
+	_, e := toml.DecodeFile(conficFilePath, secretStruct)
+	if e != nil {
+		panic(e)
+	}
+
+	tokens.SecretKey = secretStruct.secretKeyValue
+
 	storageConfig := &storage.Config{}
-	_, e := toml.DecodeFile(conficFilePath, storageConfig)
+	_, e = toml.DecodeFile(conficFilePath, storageConfig)
 	if e != nil {
 		panic(e)
 	}

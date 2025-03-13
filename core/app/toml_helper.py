@@ -14,7 +14,7 @@ import toml
 - MINIO_API_PORT
 - RABBITMQ_PORT
 
-- API_KEY
+- SECRET_KEY
 
 - LOG_LEVEL
 """
@@ -37,7 +37,7 @@ def dump_env_to_toml(filepath: str):
             "rabbitmq_port": os.getenv("RABBITMQ_PORT")
         },
         "access": {
-            "api_key": os.getenv("API_KEY")
+            "secret_key": os.getenv("SECRET_KEY")
         },
         "app": {
             "log_level": os.getenv("LOG_LEVEL", default="INFO")

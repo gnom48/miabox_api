@@ -9,7 +9,7 @@
 #
 # - AUTH_PORT
 #
-# - API_KEY
+# - SECRET_KEY
 #
 # - LOG_LEVEL
 
@@ -22,5 +22,6 @@ mkdir -p "$(dirname "$TOML_PATH")"
 cat <<EOF > "$TOML_PATH"
 bind_address = "0.0.0.0:$AUTH_PORT"
 log_level = "$LOG_LEVEL"
+secret_key = "$SECRET_KEY"
 database_url = "host=postgres port=$POSTGRES_PORT dbname=$POSTGRES_DB sslmode=disable user=$POSTGRES_USER password=$POSTGRES_PASSWORD search_path=auth"
 EOF

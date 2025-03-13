@@ -28,6 +28,7 @@ func (s *ApiServer) HandleGetCurrentAccount() http.HandlerFunc {
 			return
 		}
 
+		user.Password = ""
 		s.Respond(w, r, http.StatusOK, aboutMeResponseBody{
 			User: user,
 		})
