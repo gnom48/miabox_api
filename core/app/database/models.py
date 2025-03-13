@@ -8,8 +8,6 @@ import uuid
 class BaseModelOrm(DeclarativeBase):
     pass
 
-# TODO: AuthPrivilegesOrm должна создаваться в схеме auth
-
 
 class AuthPrivilegesOrm(Enum):
     USER = "Пользователь"

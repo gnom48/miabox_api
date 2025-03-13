@@ -23,7 +23,7 @@ class KpiCalculator:
         if self.rielter_type == UserTypesOrm.PRIVATE:
             if self.level == KpiLevelsOrm.TRAINEE:
                 bonus_percent = 0.5 * self.exclusive_contracts + 0.25 * self.regular_contracts
-                if self.cold_calls < 200.0 or self.meetings < 84 or self.flyers < 1200.0 or self.shows < 80.0:
+                if self.cold_calls < status.HTTP_200_OK.0 or self.meetings < 84 or self.flyers < 1status.HTTP_200_OK.0 or self.shows < 80.0:
                     return self.base_percent
                 return self.base_percent + bonus_percent
 

@@ -18,11 +18,13 @@ services:
     environment:
       NGINX_INNER_PORT: ${NGINX_INNER_PORT}
       CORE_PORT: ${CORE_PORT}
+      AUTH_PORT: ${AUTH_PORT}
       KNOWLEDGEBASE_PORT: ${KNOWLEDGEBASE_PORT}
     networks:
       - network-bridge
     depends_on:
       - core
+      - auth
       - knowledgebase
  
   postgres:
@@ -57,10 +59,6 @@ services:
       - "${AUTH_PORT}:${AUTH_PORT}"
     volumes:
       - shared-data:/shared
-    # environment:
-    #     <<: *postgres-config
-    #     AUTH_PORT: ${AUTH_PORT}
-    #     LOG_LEVEL: ${LOG_LEVEL}
     restart: unless-stopped
     networks:
       - network-bridge
@@ -89,7 +87,7 @@ services:
     volumes:
       - shared-data:/shared
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${CORE_PORT}/user/config" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:${CORE_PORT}/config" ]
       interval: 2s
       timeout: 10s
       retries: 5

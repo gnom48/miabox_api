@@ -1,9 +1,14 @@
-from fastapi import FastAPI
+from datetime import datetime
+from fastapi import Depends, FastAPI, APIRouter, HTTPException, status
 # from .api import router_users, router_notes, router_tasks, router_teams, router_addresses, router_statistics, router_calls
 from contextlib import asynccontextmanager
+
+from app.api import get_user_from_request
+from app.api import UserCredentials
 # from .repository import Repository
 # from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from .database import create_tables, drop_tables
+from app.database import create_tables, drop_tables, Repository
+from app.api import auth_middleware
 # from apscheduler.triggers.cron import CronTrigger
 
 # main_scheduler = AsyncIOScheduler(timezone="UTC")
@@ -16,12 +21,25 @@ async def lifespan(app: FastAPI):
     # main_scheduler.add_job(func=Repository.clear_month_statistics, trigger='cron', day='last', hour=3-3, minute=10)
     # main_scheduler.start()
     # print("Планировщики запущены")
-    await create_tables()
+    print("Включение")
+    # await create_tables()
     yield
     print("Выключение")
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.middleware("http")(auth_middleware)
+
+
+@app.get("/config", status_code=status.HTTP_200_OK)
+async def server_config_get():
+    config = await Repository.get_config()
+    if config is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database is not availible")
+    return {"postgres": config, "datetime": datetime.now()}
+
 # app.include_router(router_teams)
 # app.include_router(router_notes)
 # app.include_router(router_tasks)

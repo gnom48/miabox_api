@@ -2,14 +2,20 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
+from dataclasses import dataclass
+from uuid import UUID
+from datetime import datetime
+
 
 class AuthPrivileges(str, Enum):
     USER = "Пользователь"
     ADMIN = "Администратор"
 
+
 class UserTypes(str, Enum):
     COMMERCIAL = "Риелтор коммерческой недвижимости"
     PRIVATE = "Риелтор частной недвижимости"
+
 
 class WorkTypes(str, Enum):
     FLYERS = "Рассклейка"
@@ -25,20 +31,24 @@ class WorkTypes(str, Enum):
     REGULAR_CONTRACT = "Обычный договор"
     EXCLUSIVE_CONTRACT = "Эксклюзивный договор"
 
+
 class KpiLevels(str, Enum):
     TRAINEE = "Стажер"
     SPECIALIST = "Специалист"
     EXPERT = "Эксперт"
     TOP = "ТОП"
 
+
 class StatisticPeriod(str, Enum):
     DAY = "День"
     WEEK = "Неделя"
     MONTH = "Месяц"
 
+
 class UserStatuses(str, Enum):
     OWNER = "Владелец"
     USER = "Участник"
+
 
 class UserCredentials(BaseModel):
     id: str
@@ -48,17 +58,20 @@ class UserCredentials(BaseModel):
     created_at: datetime
     is_active: bool
 
+
 class Token(BaseModel):
     id: str
     user_id: str
     token: str
     is_regular: bool
 
+
 class File(BaseModel):
     id: str
     obj_key: str
     obj_name: str
     bucket_name: str
+
 
 class User(BaseModel):
     id: str
@@ -70,12 +83,24 @@ class User(BaseModel):
     phone: Optional[str]
     image: str
 
+
+class AuthData(BaseModel):
+    login: str
+    password: str
+
+
+class RegData(BaseModel):
+    auth_data: AuthData
+    user_info: User
+
+
 class Note(BaseModel):
     id: str
     user_id: str
     title: str
     description: Optional[str]
     created_at: int
+
 
 class Task(BaseModel):
     id: str
@@ -86,15 +111,18 @@ class Task(BaseModel):
     duration_seconds: int
     is_completed: bool
 
+
 class Team(BaseModel):
     id: str
     name: str
     created_at: int
 
+
 class UserTeam(BaseModel):
     team_id: str
     user_id: str
     role: UserStatuses
+
 
 class Statistic(BaseModel):
     id: str
@@ -113,6 +141,7 @@ class Statistic(BaseModel):
     regular_contracts: int
     exclusive_contracts: int
 
+
 class Address(BaseModel):
     id: str
     user_id: str
@@ -121,10 +150,12 @@ class Address(BaseModel):
     lon: float
     date_time: int
 
+
 class Kpi(BaseModel):
     user_id: str
     user_level: KpiLevels
     salary_percentage: float
+
 
 class Call(BaseModel):
     id: str
@@ -136,3 +167,22 @@ class Call(BaseModel):
     call_type: int
     transcription: str
     file_id: str
+
+
+@dataclass
+class TokenModel:
+    user_id: UUID
+    exp: float
+    jti: UUID
+    iat: float
+    sub: str
+
+    @classmethod
+    def from_json(cls, json_data: dict):
+        return cls(
+            user_id=UUID(json_data["user_id"]),
+            exp=json_data["exp"],
+            jti=UUID(json_data["jti"]),
+            iat=json_data["iat"],
+            sub=json_data["sub"]
+        )
