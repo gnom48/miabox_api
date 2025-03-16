@@ -1,6 +1,6 @@
 import datetime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import DateTime, ForeignKey, Column, Integer, String, Float, Boolean, Enum as SqlEnum
+from sqlalchemy import DateTime, ForeignKey, String, Float, Boolean, Enum as SqlEnum, Integer
 from enum import Enum
 import uuid
 
@@ -85,9 +85,11 @@ class FileOrm(BaseModelOrm):
 
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    obj_key: Mapped[str] = mapped_column(String)
     obj_name: Mapped[str] = mapped_column(String)
     bucket_name: Mapped[str] = mapped_column(String)
+
+    calls: Mapped[list["СallOrm"]] = relationship(
+        "СallOrm", back_populates="file")
 
 
 class UserOrm(BaseModelOrm):
@@ -102,24 +104,22 @@ class UserOrm(BaseModelOrm):
     gender: Mapped[str | None] = mapped_column(String, nullable=True)
     birthday: Mapped[int | None] = mapped_column(Integer, nullable=True)
     phone: Mapped[str | None] = mapped_column(String, nullable=True)
-    image: Mapped[str] = mapped_column(ForeignKey(FileOrm.id), default="1")
+    image: Mapped[str | None] = mapped_column(ForeignKey(FileOrm.id))
 
-    credentials: Mapped[list["UserCredentialsOrm"]] = relationship(
-        "UserCredentialsOrm", back_populates="user")
-    tokens: Mapped[list["TokenOrm"]] = relationship(
-        "TokenOrm", back_populates="user")
     notes: Mapped[list["NoteOrm"]] = relationship(
-        "NoteOrm", back_populates="user")
+        "NoteOrm", back_populates="user", cascade="all, delete-orphan")
     tasks: Mapped[list["TaskOrm"]] = relationship(
-        "TaskOrm", back_populates="user")
+        "TaskOrm", back_populates="user", cascade="all, delete-orphan")
     teams: Mapped[list["UserTeamOrm"]] = relationship(
-        "UserTeamOrm", back_populates="user")
+        "UserTeamOrm", back_populates="user", cascade="all, delete-orphan")
     statistics: Mapped[list["StatisticOrm"]] = relationship(
-        "StatisticOrm", back_populates="user")
+        "StatisticOrm", back_populates="user", cascade="all, delete-orphan")
     addresses: Mapped[list["AddressOrm"]] = relationship(
-        "AddressOrm", back_populates="user")
+        "AddressOrm", back_populates="user", cascade="all, delete-orphan")
     calls: Mapped[list["СallOrm"]] = relationship(
-        "CallOrm", back_populates="user")
+        "СallOrm", back_populates="user", cascade="all, delete-orphan")
+    kpi: Mapped[list["KpiOrm"]] = relationship(
+        "KpiOrm", back_populates="user", cascade="all, delete-orphan")
 
 
 class NoteOrm(BaseModelOrm):
@@ -164,7 +164,7 @@ class TeamOrm(BaseModelOrm):
     created_at: Mapped[int] = mapped_column(Integer)
 
     users: Mapped[list["UserTeamOrm"]] = relationship(
-        "UserTeamOrm", back_populates="team")
+        "UserTeamOrm", back_populates="team", cascade="all, delete-orphan")
 
 
 class UserTeamOrm(BaseModelOrm):
@@ -179,6 +179,23 @@ class UserTeamOrm(BaseModelOrm):
 
     team: Mapped["TeamOrm"] = relationship("TeamOrm", back_populates="users")
     user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="teams")
+
+
+class FileAccessModeOrm(Enum):
+    READ = "Чтение"
+    WRITE = "Запись"
+
+
+class FilesAccessOrm(BaseModelOrm):
+    __tablename__ = 'files_access'
+    __table_args__ = {'schema': 'public'}
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(ForeignKey(UserOrm.id))
+    file_id: Mapped[str] = mapped_column(ForeignKey(FileOrm.id))
+    file_access_mode: Mapped[FileAccessModeOrm] = mapped_column(
+        SqlEnum(FileAccessModeOrm), default=FileAccessModeOrm.READ)
 
 
 class StatisticOrm(BaseModelOrm):
@@ -255,4 +272,4 @@ class СallOrm(BaseModelOrm):
     file_id: Mapped[str] = mapped_column(ForeignKey(FileOrm.id))
 
     user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="calls")
-    file: Mapped["FileOrm"] = relationship("FileOrm")
+    file: Mapped["FileOrm"] = relationship("FileOrm", back_populates="calls")

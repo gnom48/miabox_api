@@ -53,8 +53,8 @@ class UserStatuses(str, Enum):
 class UserCredentials(BaseModel):
     id: str
     login: str
-    password: str
-    privileges: AuthPrivileges
+    password: str = ""
+    privileges: AuthPrivileges | str
     created_at: datetime
     is_active: bool
 

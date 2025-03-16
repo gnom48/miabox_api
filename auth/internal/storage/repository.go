@@ -4,6 +4,7 @@ import (
 	models "auth/internal/models"
 	utils "auth/internal/utils"
 	"database/sql"
+	"time"
 )
 
 type repository struct {
@@ -21,8 +22,8 @@ func (r *repository) AddUser(user *models.UserCredentials) (*models.UserCredenti
 	user.Id, _ = models.GenerateUuid32()
 
 	if err := r.db.QueryRow(
-		"INSERT INTO user_credentials (id, login, password, privileges) VALUES ($1, $2, $3, $4) RETURNING id",
-		user.Id, user.Login, user.Password, user.Privileges,
+		"INSERT INTO user_credentials (id, login, password, privileges, created_at, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+		user.Id, user.Login, user.Password, user.Privileges, time.Now(), true,
 	).Scan(&user.Id); err != nil {
 		return nil, err
 	}

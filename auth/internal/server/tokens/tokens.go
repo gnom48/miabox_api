@@ -41,7 +41,7 @@ func (t *TokenSign) GenerateRegularToken(user *models.UserCredentials) (string, 
 		UserId: user.Id,
 		StandardClaims: jwt.StandardClaims{
 			ID:        tokenId,
-			ExpiresAt: jwt.At(time.Now().Add(15 * time.Minute)),
+			ExpiresAt: jwt.At(time.Now().Add(3 * time.Hour)),
 			IssuedAt:  jwt.At(time.Now()),
 			Subject:   regularTokenType,
 		},

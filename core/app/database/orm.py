@@ -6,7 +6,7 @@ from app.toml_helper import load_data_from_toml
 
 
 config = load_data_from_toml()['database']
-CONNRCTION_STR = f"postgresql+asyncpg://{config['postgres_user']}:{config['postgres_password']}@postgres:{config['postgres_port']}/{config['postgres_db']}"
+# CONNRCTION_STR = f"postgresql+asyncpg://{config['postgres_user']}:{config['postgres_password']}@postgres:{config['postgres_port']}/{config['postgres_db']}"
 
 url = URL.create(
     drivername="postgresql+asyncpg",
@@ -36,7 +36,6 @@ async def create_tables():
 
 async def drop_tables():
     async with async_engine.begin() as connection:
-        await pre_delete_actions(conn=connection)
         await connection.run_sync(BaseModelOrm.metadata.drop_all)
 
 
@@ -60,7 +59,3 @@ async def after_create_actions(conn: AsyncConnection):
         CREATE TRIGGER insert_empty_user_info AFTER INSERT ON auth.user_credentials
             FOR EACH ROW EXECUTE PROCEDURE insert_empty_user_info();
         """))
-
-
-async def pre_delete_actions(conn: AsyncConnection):
-    await conn.execute(text("DROP SCHEMA IF EXISTS auth"))

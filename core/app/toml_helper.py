@@ -12,6 +12,8 @@ import toml
 - AUTH_PORT
 - WHISPER_PORT
 - MINIO_API_PORT
+- MINIO_ROOT_USER
+- MINIO_ROOT_PASSWORD
 - RABBITMQ_PORT
 
 - SECRET_KEY
@@ -19,7 +21,7 @@ import toml
 - LOG_LEVEL
 """
 
-TOML_PATH = r'core/app/config/config.toml'
+TOML_PATH = r'app/config/config.toml'
 
 
 def dump_env_to_toml(filepath: str):
@@ -34,6 +36,9 @@ def dump_env_to_toml(filepath: str):
             "auth_port": os.getenv("AUTH_PORT"),
             "whisper_port": os.getenv("WHISPER_PORT"),
             "minio_port": os.getenv("MINIO_API_PORT"),
+            "minio_api_port": os.getenv("MINIO_API_PORT"),
+            "minio_access_key": os.getenv("MINIO_ROOT_USER"),
+            "minio_secret_key": os.getenv("MINIO_ROOT_PASSWORD"),
             "rabbitmq_port": os.getenv("RABBITMQ_PORT")
         },
         "access": {

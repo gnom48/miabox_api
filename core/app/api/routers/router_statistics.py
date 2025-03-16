@@ -8,13 +8,13 @@ router_statistics = APIRouter(prefix="/user/statistics", tags=["Статисти
 
 
 @router_statistics.get("/get", status_code=status.HTTP_200_OK)
-async def user_statistics_get(period: str, user_credentials: UserCredentials | None = Depends(get_user_from_request)):
+async def user_statistics_get(period: str, user_credentials: UserCredentials = Depends(get_user_from_request)):
     res = await Repository.get_statistics_by_period(user_credentials.id, period)
     return res
 
 
 @router_statistics.get("/get_kpi", status_code=status.HTTP_200_OK)
-async def user_statistics_get_with_kpi(user_credentials: UserCredentials | None = Depends(get_user_from_request)):
+async def user_statistics_get_with_kpi(user_credentials: UserCredentials = Depends(get_user_from_request)):
     last_month_kpi = await Repository.get_statistics_with_kpi(user_credentials.id)
     current_month_kpi = await Repository.get_current_kpi(user_credentials.id)
     if current_month_kpi is None:
@@ -29,13 +29,13 @@ async def user_statistics_get_with_kpi(user_credentials: UserCredentials | None 
 
 
 @router_statistics.put("/update", status_code=status.HTTP_200_OK)
-async def user_statistics_update(statistic: str, addvalue: int, user_credentials: UserCredentials | None = Depends(get_user_from_request)):
+async def user_statistics_update(statistic: str, addvalue: int, user_credentials: UserCredentials = Depends(get_user_from_request)):
     res = await Repository.update_statistics(user_credentials.id, statistic, addvalue)
     return res
 
 
 @router_statistics.put("/move_kpi_level", status_code=status.HTTP_200_OK)
-async def user_statistics_kpi_move(level: UserKpiLevels, user_credentials: UserCredentials | None = Depends(get_user_from_request)):
+async def user_statistics_kpi_move(level: UserKpiLevels, user_credentials: UserCredentials = Depends(get_user_from_request)):
     res = await Repository.update_kpi_level(user_credentials.id, level)
     if res == None:
         raise HTTPException(
