@@ -34,13 +34,13 @@ class WorkTypesOrm(Enum):
     EXCLUSIVE_CONTRACT = "Эксклюзивный договор"
 
 
-class KpiLevelsOrm(Enum):
+class StatisticPeriodOrm(Enum):
     DAY = "День"
     WEEK = "Неделя"
     MONTH = "Месяц"
 
 
-class StatisticPeriodOrm(Enum):
+class KpiLevelsOrm(Enum):
     TRAINEE = "Стажер"
     SPECIALIST = "Специалист"
     EXPERT = "Эксперт"
@@ -79,6 +79,14 @@ class TokenOrm(BaseModelOrm):
     is_regular: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
+class VersionOrm(BaseModelOrm):
+    __tablename__ = "versions"
+    __table_args__ = {'schema': 'public'}
+
+    suported_version: Mapped[str] = mapped_column(
+        String, primary_key=True, default=lambda: str(uuid.uuid4()))
+
+
 class FileOrm(BaseModelOrm):
     __tablename__ = 'files'
     __table_args__ = {'schema': 'public'}
@@ -88,8 +96,8 @@ class FileOrm(BaseModelOrm):
     obj_name: Mapped[str] = mapped_column(String)
     bucket_name: Mapped[str] = mapped_column(String)
 
-    calls: Mapped[list["СallOrm"]] = relationship(
-        "СallOrm", back_populates="file")
+    # calls: Mapped[list["CallOrm"]] = relationship(
+    #     "СallOrm", back_populates="file")
 
 
 class UserOrm(BaseModelOrm):
@@ -106,20 +114,20 @@ class UserOrm(BaseModelOrm):
     phone: Mapped[str | None] = mapped_column(String, nullable=True)
     image: Mapped[str | None] = mapped_column(ForeignKey(FileOrm.id))
 
-    notes: Mapped[list["NoteOrm"]] = relationship(
-        "NoteOrm", back_populates="user", cascade="all, delete-orphan")
-    tasks: Mapped[list["TaskOrm"]] = relationship(
-        "TaskOrm", back_populates="user", cascade="all, delete-orphan")
-    teams: Mapped[list["UserTeamOrm"]] = relationship(
-        "UserTeamOrm", back_populates="user", cascade="all, delete-orphan")
-    statistics: Mapped[list["StatisticOrm"]] = relationship(
-        "StatisticOrm", back_populates="user", cascade="all, delete-orphan")
-    addresses: Mapped[list["AddressOrm"]] = relationship(
-        "AddressOrm", back_populates="user", cascade="all, delete-orphan")
-    calls: Mapped[list["СallOrm"]] = relationship(
-        "СallOrm", back_populates="user", cascade="all, delete-orphan")
-    kpi: Mapped[list["KpiOrm"]] = relationship(
-        "KpiOrm", back_populates="user", cascade="all, delete-orphan")
+    # notes: Mapped[list["NoteOrm"]] = relationship(
+    #     "NoteOrm", back_populates="user", cascade="all, delete-orphan")
+    # tasks: Mapped[list["TaskOrm"]] = relationship(
+    #     "TaskOrm", back_populates="user", cascade="all, delete-orphan")
+    # teams: Mapped[list["UserTeamOrm"]] = relationship(
+    #     "UserTeamOrm", back_populates="user", cascade="all, delete-orphan")
+    # statistics: Mapped[list["StatisticOrm"]] = relationship(
+    #     "StatisticOrm", back_populates="user", cascade="all, delete-orphan")
+    # addresses: Mapped[list["AddressOrm"]] = relationship(
+    #     "AddressOrm", back_populates="user", cascade="all, delete-orphan")
+    # calls: Mapped[list["CallOrm"]] = relationship(
+    #     "СallOrm", back_populates="user", cascade="all, delete-orphan")
+    # kpi: Mapped[list["KpiOrm"]] = relationship(
+    #     "KpiOrm", back_populates="user", cascade="all, delete-orphan")
 
 
 class NoteOrm(BaseModelOrm):
@@ -134,7 +142,7 @@ class NoteOrm(BaseModelOrm):
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[int] = mapped_column(Integer)
 
-    user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="notes")
+    # user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="notes")
 
 
 class TaskOrm(BaseModelOrm):
@@ -151,7 +159,7 @@ class TaskOrm(BaseModelOrm):
     duration_seconds: Mapped[int] = mapped_column(Integer)
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="tasks")
+    # user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="tasks")
 
 
 class TeamOrm(BaseModelOrm):
@@ -163,8 +171,8 @@ class TeamOrm(BaseModelOrm):
     name: Mapped[str] = mapped_column(String)
     created_at: Mapped[int] = mapped_column(Integer)
 
-    users: Mapped[list["UserTeamOrm"]] = relationship(
-        "UserTeamOrm", back_populates="team", cascade="all, delete-orphan")
+    # users: Mapped[list["UserTeamOrm"]] = relationship(
+    #     "UserTeamOrm", back_populates="team", cascade="all, delete-orphan")
 
 
 class UserTeamOrm(BaseModelOrm):
@@ -177,8 +185,8 @@ class UserTeamOrm(BaseModelOrm):
         UserOrm.id, ondelete="CASCADE"), primary_key=True)
     role: Mapped[UserStatusesOrm] = mapped_column(SqlEnum(UserStatusesOrm))
 
-    team: Mapped["TeamOrm"] = relationship("TeamOrm", back_populates="users")
-    user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="teams")
+    # team: Mapped["TeamOrm"] = relationship("TeamOrm", back_populates="users")
+    # user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="teams")
 
 
 class FileAccessModeOrm(Enum):
@@ -193,7 +201,8 @@ class FilesAccessOrm(BaseModelOrm):
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     user_id: Mapped[str] = mapped_column(ForeignKey(UserOrm.id))
-    file_id: Mapped[str] = mapped_column(ForeignKey(FileOrm.id))
+    file_id: Mapped[str] = mapped_column(
+        ForeignKey(FileOrm.id, ondelete="CASCADE"))
     file_access_mode: Mapped[FileAccessModeOrm] = mapped_column(
         SqlEnum(FileAccessModeOrm), default=FileAccessModeOrm.READ)
 
@@ -221,8 +230,8 @@ class StatisticOrm(BaseModelOrm):
     regular_contracts: Mapped[int] = mapped_column(Integer, default=0)
     exclusive_contracts: Mapped[int] = mapped_column(Integer, default=0)
 
-    user: Mapped["UserOrm"] = relationship(
-        "UserOrm", back_populates="statistics")
+    # user: Mapped["UserOrm"] = relationship(
+    #     "UserOrm", back_populates="statistics")
 
 
 class AddressOrm(BaseModelOrm):
@@ -238,8 +247,8 @@ class AddressOrm(BaseModelOrm):
     lon: Mapped[float] = mapped_column(Float, default=0.0)
     date_time: Mapped[int] = mapped_column(Integer, default=0)
 
-    user: Mapped["UserOrm"] = relationship(
-        "UserOrm", back_populates="addresses")
+    # user: Mapped["UserOrm"] = relationship(
+    #     "UserOrm", back_populates="addresses")
 
 
 class KpiOrm(BaseModelOrm):
@@ -251,10 +260,10 @@ class KpiOrm(BaseModelOrm):
     user_level: Mapped[KpiLevelsOrm] = mapped_column(SqlEnum(KpiLevelsOrm))
     salary_percentage: Mapped[float] = mapped_column(Float, default=0.0)
 
-    user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="kpi")
+    # user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="kpi")
 
 
-class СallOrm(BaseModelOrm):
+class CallOrm(BaseModelOrm):
     __tablename__ = 'calls'
     __table_args__ = {'schema': 'public'}
 
@@ -267,9 +276,9 @@ class СallOrm(BaseModelOrm):
     contact_name: Mapped[str] = mapped_column(String)
     length_seconds: Mapped[int] = mapped_column(Integer)
     call_type: Mapped[int] = mapped_column(Integer)
-    transcription: Mapped[str] = mapped_column(
-        String, default="no transcription")
-    file_id: Mapped[str] = mapped_column(ForeignKey(FileOrm.id))
+    transcription: Mapped[str | None] = mapped_column(
+        String, default=None)
+    file_id: Mapped[str | None] = mapped_column(ForeignKey(FileOrm.id))
 
-    user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="calls")
-    file: Mapped["FileOrm"] = relationship("FileOrm", back_populates="calls")
+    # user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="calls")
+    # file: Mapped["FileOrm"] = relationship("FileOrm", back_populates="calls")

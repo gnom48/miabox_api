@@ -1,31 +1,65 @@
-from fastapi import APIRouter, HTTPException, Header, Request, Depends, status
-from app.database import Repository
-from api.models import Note
-from app.api import get_user_from_request, UserCredentials
-
+from fastapi import APIRouter, HTTPException, Depends, status
+from app.database.repositories import NotesRepository
+from app.api.models import Note, UserCredentials
+from app.api.middlewares import get_user_from_request
 
 router_notes = APIRouter(prefix="/note", tags=["Заметки"])
 
 
 @router_notes.get("/all", status_code=status.HTTP_200_OK)
-async def notes_all(user_credentials: UserCredentials = Depends(get_user_from_request)):
-    return await Repository.get_all_notes_by_user_id(user.id)
+async def get_all_notes(
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    notes_repository: NotesRepository = Depends(
+        NotesRepository.repository_factory)
+):
+    async with notes_repository:
+        notes = await notes_repository.get_all_notes_by_user_id(user_credentials.id)
+        if notes is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Notes not found")
+        return notes
 
 
 @router_notes.post("/add", status_code=status.HTTP_201_CREATED)
-async def note_add(note: Note, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    note_id = await Repository.add_note(note)
-    if not note_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="unable to insert")
-    return note_id
+async def add_note(
+    note: Note,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    notes_repository: NotesRepository = Depends(
+        NotesRepository.repository_factory)
+):
+    async with notes_repository:
+        note_id = await notes_repository.add_note(note)
+        if not note_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to insert note")
+        return note_id
 
 
 @router_notes.delete("/delete", status_code=status.HTTP_200_OK)
-async def note_delete(note_id: str, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    return await Repository.del_note(note_id)
+async def delete_note(
+    note_id: str,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    notes_repository: NotesRepository = Depends(
+        NotesRepository.repository_factory)
+):
+    async with notes_repository:
+        success = await notes_repository.delete_note(note_id)
+        if not success:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="Note not found or unable to delete")
+        return {"detail": "Note deleted successfully"}
 
 
 @router_notes.put("/edit", status_code=status.HTTP_200_OK)
-async def note_edit(note: Note, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    return await Repository.edit_note(note)
+async def edit_note(
+    note: Note,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    notes_repository: NotesRepository = Depends(
+        NotesRepository.repository_factory)
+):
+    async with notes_repository:
+        success = await notes_repository.edit_note(note)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to update note")
+        return {"detail": "Note updated successfully"}

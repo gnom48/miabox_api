@@ -1,4 +1,3 @@
-# from .routers import *
-from .routers import router_files
+from .routers import router_files, router_users, router_addresses, router_calls, router_notes, router_tasks, router_teams
 from .middlewares import get_user_from_request, auth_middleware, error_middleware
 from .models import *

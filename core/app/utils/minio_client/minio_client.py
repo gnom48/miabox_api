@@ -38,11 +38,10 @@ class MinioClient:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
 
-    def get_presigned_url(self, bucket_name: str, file_name: str, expires: timedelta = timedelta(days=7)):
+    def get_presigned_url(self, bucket_name: str, file_name: str, expires: timedelta = timedelta(hours=12)):
         try:
-            url = self.client.presigned_get_object(
-                bucket_name, file_name, expires=expires)
-            return {"url": url}
+            return self.client.get_presigned_url(
+                "GET", bucket_name, file_name)
         except S3Error as err:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
@@ -59,7 +58,7 @@ class MinioClient:
     def minio_client_factory():
         config = load_data_from_toml()["services"]
         return MinioClient(
-            endpoint=f"minio:{config["minio_api_port"]}",
+            endpoint=config["minio_api_ip"],
             access_key=config["minio_access_key"],
             secret_key=config["minio_secret_key"]
         )

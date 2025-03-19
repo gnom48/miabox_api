@@ -1,5 +1,3 @@
-from fastapi import UploadFile
-from ..orm import new_session
 from sqlalchemy.sql import text
 from app.database.models import FileOrm, FilesAccessOrm, FileAccessModeOrm
 from sqlalchemy import select, update, delete, insert, and_
@@ -67,6 +65,17 @@ class FilesRepository(BaseRepository):
         try:
             async with self.session:
                 return await self.session.get(FileOrm, file_id)
+        except Exception as e:
+            logging.error(e.__str__())
+            return None
+
+    async def delete_file(self, file_id: str) -> bool:
+        """Убирает доступ у пользователя к файлу."""
+        try:
+            async with self.session:
+                await self.session.delete(FileOrm, file_id)
+                await self.session.commit()
+                return True
         except Exception as e:
             logging.error(e.__str__())
             return None

@@ -13,116 +13,116 @@ class Repository:
 
     # -------------------------- config --------------------------
 
-    @classmethod
-    async def get_config(cls) -> tuple:
-        async with new_session() as session:
-            try:
-                req = text("SELECT version() AS db_version;")
-                result = await session.execute(req)
-                version = result.scalars().first()
-                req = text("SELECT now() AS db_datetime;")
-                result = await session.execute(req)
-                ntime = result.scalars().first()
-                return (version, ntime)
-            except:
-                return None
+    # @classmethod
+    # async def get_config(cls) -> tuple:
+    #     async with new_session() as session:
+    #         try:
+    #             req = text("SELECT version() AS db_version;")
+    #             result = await session.execute(req)
+    #             version = result.scalars().first()
+    #             req = text("SELECT now() AS db_datetime;")
+    #             result = await session.execute(req)
+    #             ntime = result.scalars().first()
+    #             return (version, ntime)
+    #         except:
+    #             return None
 
-    @classmethod
-    async def get_supported_version(cls) -> int:
-        async with new_session() as session:
-            try:
-                req = text("SELECT supported_version FROM versions;")
-                result = await session.execute(req)
-                version = result.scalars().first()
-                return int(version)
-            except:
-                return 0
+    # @classmethod
+    # async def get_supported_version(cls) -> int:
+    #     async with new_session() as session:
+    #         try:
+    #             req = text("SELECT supported_version FROM versions;")
+    #             result = await session.execute(req)
+    #             version = result.scalars().first()
+    #             return int(version)
+    #         except:
+    #             return 0
 
     # -------------------------- users --------------------------
 
-    @classmethod
-    async def registrate_user(cls, data: User) -> bool:
-        async with new_session() as session:
-            new_user_id = -1
-            try:
-                new_user = UserOrm(**data.model_dump())
-                new_user.type = UserTypesOrm[data.type.name]
-                new_user.reg_date = int(time.time())
-                new_user.id = None
-                session.add(new_user)
-                await session.flush()
-                new_user_id = new_user.id
-            except:
-                return new_user_id
+    # @classmethod
+    # async def registrate_user(cls, data: User) -> bool:
+    #     async with new_session() as session:
+    #         new_user_id = -1
+    #         try:
+    #             new_user = UserOrm(**data.model_dump())
+    #             new_user.type = UserTypesOrm[data.type.name]
+    #             new_user.reg_date = int(time.time())
+    #             new_user.id = None
+    #             session.add(new_user)
+    #             await session.flush()
+    #             new_user_id = new_user.id
+    #         except:
+    #             return new_user_id
 
-            day_stats = DayStatisticsOrm()
-            day_stats.user_id = new_user.id
-            week_stats = WeekStatisticsOrm()
-            week_stats.user_id = new_user.id
-            month_stats = MonthStatisticsOrm()
-            month_stats.user_id = new_user.id
-            summary = SummaryStatisticsWithLevelOrm()
-            summary.user_id = new_user.id
-            summary.deals_rent = 0
-            summary.deals_sale = 0
-            coefs = Repository.get_user_level_by_deals_count(0)
-            summary.user_level = coefs[0]
-            summary.base_percent = coefs[1]
-            session.add(day_stats)
-            session.add(week_stats)
-            session.add(month_stats)
-            session.add(summary)
+    #         day_stats = DayStatisticsOrm()
+    #         day_stats.user_id = new_user.id
+    #         week_stats = WeekStatisticsOrm()
+    #         week_stats.user_id = new_user.id
+    #         month_stats = MonthStatisticsOrm()
+    #         month_stats.user_id = new_user.id
+    #         summary = SummaryStatisticsWithLevelOrm()
+    #         summary.user_id = new_user.id
+    #         summary.deals_rent = 0
+    #         summary.deals_sale = 0
+    #         coefs = Repository.get_user_level_by_deals_count(0)
+    #         summary.user_level = coefs[0]
+    #         summary.base_percent = coefs[1]
+    #         session.add(day_stats)
+    #         session.add(week_stats)
+    #         session.add(month_stats)
+    #         session.add(summary)
 
-            await session.commit()
-            return new_user_id
+    #         await session.commit()
+    #         return new_user_id
 
-    @classmethod
-    async def edit_user(cls, data: User) -> bool:
-        async with new_session() as session:
-            try:
-                old_user = await session.get(UserOrm, data.id)
-                old_user.type = UserTypesOrm[data.type.name]
-                old_user.birthday = data.birthday
-                old_user.gender = data.gender
-                old_user.login = data.login
-                old_user.password = data.password
-                old_user.name = data.name
-                old_user.phone = data.phone
-                old_user.email = data.email
-                await session.flush()
-            except:
-                return False
-            await session.commit()
-            return True
+    # @classmethod
+    # async def edit_user(cls, data: User) -> bool:
+    #     async with new_session() as session:
+    #         try:
+    #             old_user = await session.get(UserOrm, data.id)
+    #             old_user.type = UserTypesOrm[data.type.name]
+    #             old_user.birthday = data.birthday
+    #             old_user.gender = data.gender
+    #             old_user.login = data.login
+    #             old_user.password = data.password
+    #             old_user.name = data.name
+    #             old_user.phone = data.phone
+    #             old_user.email = data.email
+    #             await session.flush()
+    #         except:
+    #             return False
+    #         await session.commit()
+    #         return True
 
-    @classmethod
-    async def get_user_by_id(cls, id: str) -> UserOrm:
-        async with new_session() as session:
-            try:
-                res = await session.get(UserOrm, id)
-                return res
-            except:
-                return None
+    # @classmethod
+    # async def get_user_by_id(cls, id: str) -> UserOrm:
+    #     async with new_session() as session:
+    #         try:
+    #             res = await session.get(UserOrm, id)
+    #             return res
+    #         except:
+    #             return None
 
-    @classmethod
-    async def get_user_statistics(cls, id: str) -> StatisticsViaOrm:
-        async with new_session() as session:
-            try:
-                res = await session.get(StatisticsViaOrm, id)
-                return res
-            except:
-                return None
+    # @classmethod
+    # async def get_user_statistics(cls, id: str) -> StatisticsViaOrm:
+    #     async with new_session() as session:
+    #         try:
+    #             res = await session.get(StatisticsViaOrm, id)
+    #             return res
+    #         except:
+    #             return None
 
-    @classmethod
-    async def get_user_by_login(cls, login: str, password: str) -> UserOrm:
-        async with new_session() as session:
-            try:
-                query = select(UserOrm).where(UserOrm.login == login).where(
-                    UserOrm.password == password)
-                r = await session.execute(query)
-                return r.scalar()
-            except:
-                return None
+    # @classmethod
+    # async def get_user_by_login(cls, login: str, password: str) -> UserOrm:
+    #     async with new_session() as session:
+    #         try:
+    #             query = select(UserOrm).where(UserOrm.login == login).where(
+    #                 UserOrm.password == password)
+    #             r = await session.execute(query)
+    #             return r.scalar()
+    #         except:
+    #             return None
 
     # -------------------------- notes --------------------------
 
@@ -445,7 +445,7 @@ class Repository:
                         user=Repository.__hide_password(await session.get(UserOrm, i.user_id)),
                         statistics={j: await Repository.get_statistics_by_period(period=j, user_id=i.user_id) for j in [StatisticPeriods.DAY_STATISTICS_PERIOD, StatisticPeriods.WEEK_STATISTICS_PERIOD, StatisticPeriods.MONTH_STATISTICS_PERIOD]},
                         addresses=(await session.execute(select(AddresInfoOrm).where(AddresInfoOrm.user_id == i.user_id))).scalars().all(),
-                        calls=(await session.execute(select(СallOrm).where(СallOrm.user_id == i.user_id))).scalars().all(),
+                        calls=(await session.execute(select(CallOrm).where(CallOrm.user_id == i.user_id))).scalars().all(),
                         kpi=await session.get(LastMonthStatisticsWithKpiOrm, i.user_id),
                         role=i.role.name) for i in team_users__]
                     res_teams.append(team_with_info)
@@ -655,7 +655,7 @@ class Repository:
                 file_to_save.data = None  # await file.read()
                 session.add(file_to_save)
                 await session.flush()
-                user_call = СallOrm()
+                user_call = CallOrm()
                 user_call.user_id = user_id
                 user_call.date_time = date_time
                 user_call.info = info
@@ -672,10 +672,10 @@ class Repository:
                 return None
 
     @classmethod
-    async def get_all_info_user_calls(cls, user_id: str) -> list[СallOrm] | None:
+    async def get_all_info_user_calls(cls, user_id: str) -> list[CallOrm] | None:
         async with new_session() as session:
             try:
-                query = select(СallOrm).where(СallOrm.user_id == user_id)
+                query = select(CallOrm).where(CallOrm.user_id == user_id)
                 r = await session.execute(query)
                 return list(r.scalars().all())
             except:
@@ -685,7 +685,7 @@ class Repository:
     async def get_all_user_call_records(cls, user_id: str) -> list[CallsRecordsOrm] | None:
         async with new_session() as session:
             try:
-                calls: list[СallOrm] = await Repository.get_all_info_user_calls(user_id)
+                calls: list[CallOrm] = await Repository.get_all_info_user_calls(user_id)
                 records = [call.record_id for call in calls]
                 query = select(CallsRecordsOrm)
                 r = await session.execute(query)
@@ -711,7 +711,7 @@ class Repository:
     async def update_transcription(cls, user_id: str, record_id: str, transcription: str) -> bool | None:
         async with new_session() as session:
             try:
-                req = await session.execute(select(СallOrm).where(СallOrm.user_id == user_id).where(СallOrm.record_id == record_id))
+                req = await session.execute(select(CallOrm).where(CallOrm.user_id == user_id).where(CallOrm.record_id == record_id))
                 user_call = req.scalars().first()
                 user_call.transcription = transcription
                 await session.commit()

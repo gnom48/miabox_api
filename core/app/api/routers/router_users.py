@@ -1,62 +1,59 @@
-import os
-import aiohttp
 from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response, UploadFile, status
-from app.api import User, AuthData, RegData, UserCredentials
-from app.database import *
-from datetime import datetime
-from shutil import copyfileobj
-from fastapi.responses import FileResponse
-from app.api import get_user_from_request, UserCredentials
-from app.toml_helper import load_var_from_toml
+from fastapi.responses import RedirectResponse
+from app.api.models import User, UserCredentials
+from app.database import BaseRepository, UsersRepository, FilesRepository
+from app.api.middlewares import get_user_from_request
+from app.utils.minio_client import MinioClient
 
 
 router_users = APIRouter(prefix="/user", tags=["Пользователи"])
 
 
+@router_users.get("/supported_versions", status_code=status.HTTP_200_OK)
+async def get_supported_versions():
+    return await BaseRepository.get_supported_versions()
+
+
 @router_users.get("/info", status_code=status.HTTP_200_OK)
-async def user_authorization(user_credentials: UserCredentials = Depends(get_user_from_request)):
-    return user_credentials
+async def user_authorization(
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    user_repository: UsersRepository = Depends(
+        UsersRepository.repository_factory)
+):
+    async with user_repository:
+        return await user_repository.get_user_by_id(user_credentials.id)
 
-# TODO: edit -> update
 
-
-@router_users.put("/edit", status_code=status.HTTP_200_OK)
-async def user_edit(user: User, user_credentials: UserCredentials = Depends(get_user_from_request)):
+@router_users.put("/update", status_code=status.HTTP_200_OK)
+async def update_user(
+    user: User,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    user_repository: UsersRepository = Depends(
+        UsersRepository.repository_factory)
+):
     if user.id != user_credentials.id:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
-    res = await Repository.edit_user(user)
-    if not res:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="edit error")
-    return res
-
-# TODO: set_image_file -> set_avatar
-
-
-@router_users.post("/set_image_file", status_code=status.HTTP_200_OK)
-async def set_image_to_user_by_file(file: UploadFile, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    try:
-        await file.seek(0)
-        with open(rf"/shared/images/{file.filename}", "wb") as buffer:
-            copyfileobj(file.file, buffer)
-    except IOError as e:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="file operation error")
-    res = await Repository.edit_image_file(file, file.filename, user_credentials.id)
-    if res is not None:
+            status_code=status.HTTP_403_FORBIDDEN, detail="Not self account")
+    async with user_repository:
+        res = await user_repository.update_user(user)
+        if not res:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="update error")
         return res
-    raise HTTPException(
-        status_code=status.HTTP_status.HTTP_402_PAYMENT_REQUIRED_PAYMENT_REQUIRED, detail="db operation error")
-
-# TODO: get_image_file -> get_avatar
 
 
-@router_users.get("/get_image_file", status_code=status.HTTP_200_OK)
-async def set_image_to_user(user_id: str, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    image = await Repository.get_image(user_id)
-    file_path = rf"/shared/images/{image.name}"
-    if not os.path.exists(file_path):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
-    return FileResponse(file_path, media_type='application/octet-stream', filename=image.name)
+@router_users.post("/set_avatar", status_code=status.HTTP_200_OK)
+async def set_avatar(
+    file: UploadFile,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    user_repository: UsersRepository = Depends(
+        UsersRepository.repository_factory),
+    files_repository: FilesRepository = Depends(
+        FilesRepository.repository_factory),
+    minio_client: MinioClient = Depends(MinioClient.minio_client_factory)
+):
+    async with files_repository:
+        minio_client.upload_file(user_credentials.id, file)
+        new_avatar_file_id = await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id)
+        async with user_repository:
+            return await user_repository.update_avatar_only(user_credentials.id, new_avatar_file_id)

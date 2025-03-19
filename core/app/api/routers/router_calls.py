@@ -1,69 +1,106 @@
-import os
-from shutil import copyfileobj
-from fastapi import APIRouter, Depends, HTTPException, Header, Response, UploadFile, status
-from fastapi.responses import FileResponse, StreamingResponse
-from app.api import get_user_from_request, UserCredentials
-from app.database import Repository
-
+from fastapi import APIRouter, Depends, HTTPException, Header, UploadFile, status
+from fastapi.responses import FileResponse
+from app.database.repositories import CallsRepository, FilesRepository
+from app.api.models import UserCredentials, Call
+from app.api.middlewares import get_user_from_request
+from app.utils.minio_client import MinioClient
+from app.utils import rabbitmq
 
 router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
 
 
-@router_calls.post("/add_call_info")
-async def call_info_add(info: str, phone_number: str, date_time: int, contact_name: str, length_seconds: int, call_type: int, file: UploadFile | None = None, record_id: str | None = None, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    filename = "no file"
+@router_calls.post("/add_call", status_code=status.HTTP_201_CREATED)
+async def add_call(
+    call: Call,
+    file: UploadFile | None = None,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    calls_repository: CallsRepository = Depends(
+        CallsRepository.repository_factory),
+    files_repository: FilesRepository = Depends(
+        FilesRepository.repository_factory),
+    minio_client: MinioClient = Depends(MinioClient.minio_client_factory)
+):
+    new_file_id: str | None = None
     if file is not None:
         try:
-            filename = file.filename
             await file.seek(0)
-            with open(rf"/shared/calls/{file.filename}", "wb") as buffer:
-                copyfileobj(file.file, buffer)
+            minio_client.upload_file(user_credentials.id, file)
+            new_file_id = await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id)
         except IOError as e:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="file format error")
-    ret_val = await Repository.add_call_record_to_storage(user_id=user_credentials.id, file=file, new_filename=filename, date_time=date_time, info=info, phone_number=phone_number, length_seconds=length_seconds, call_type=call_type, contact_name=contact_name, record_id=record_id)
-    if not ret_val:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="addition error")
-    return ret_val
+                status_code=status.HTTP_400_BAD_REQUEST, detail="File format error")
+
+    async with calls_repository:
+        call.file_id = new_file_id
+        record_id = await calls_repository.add_call_record_to_storage(call)
+        if not record_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to add call record")
+        return record_id
 
 
-@router_calls.get("/get_all_calls")
-async def get_all_calls(user_id: str, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    ret_val = await Repository.get_all_info_user_calls(user_id=user_credentials.id)
-    return ret_val
+@router_calls.get("/get_all_calls", status_code=status.HTTP_200_OK)
+async def get_all_calls(
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    calls_repository: CallsRepository = Depends(
+        CallsRepository.repository_factory)
+):
+    async with calls_repository:
+        calls = await calls_repository.get_all_info_user_calls(user_credentials.id)
+        if calls is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Calls not found")
+        return calls
 
 
-@router_calls.get("/get_all_records_info")
-async def get_all_records_info(user_id: str, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    ret_val = await Repository.get_all_user_call_records(user_id=user_credentials.construct)
-    return ret_val
+@router_calls.get("/order_call_transcription", status_code=status.HTTP_200_OK)
+async def order_call_transcription(
+    call_id: str,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    calls_repository: CallsRepository = Depends(
+        CallsRepository.repository_factory),
+    files_repository: FilesRepository = Depends(
+        FilesRepository.repository_factory)
+):
+    async with calls_repository:
+        async with files_repository:
+            call = await calls_repository.get_one_call(call_id)
+            file_id = call.file_id
+            if not file_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="File info not found")
+            file_info = await files_repository.get_file_info_by_id(file_id)
+            if not file_info:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+            return rabbitmq.send_message_to_queue(call_id=call_id, object_name=file_info.obj_name, bucket_name=file_info.bucket_name)
+
+# TODO:
+# @router_calls.get("/get_order_transcription_status", status_code=status.HTTP_200_OK)
+# async def get_order_transcription_status(
+#     task_id: str,
+#     user_credentials: UserCredentials = Depends(get_user_from_request)
+# ):
+#     # Assuming get_task_status_async is a function that retrieves the task status
+#     return await get_task_status_async(task_id)
 
 
-@router_calls.get("/get_call_record_file")
-async def get_call_record_file(user_id: str, record_id: str, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    file_info = await Repository.get_call_record(user_id=user.id, record_id=record_id)
-    file_path = rf"/shared/calls/{file_info.name}"
-    if not os.path.exists(file_path):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
-    return FileResponse(file_path, media_type='application/octet-stream', filename=file_info.name)
+# @router_calls.put("/update_transcription", status_code=status.HTTP_200_OK)
+# async def update_transcription(
+#     transcription: str,
+#     call_id: str,
+#     user_credentials: UserCredentials = Depends(get_user_from_request),
+#     calls_repository: CallsRepository = Depends(
+#         CallsRepository.repository_factory),
+#     secret_key: str | None = Header(default=None)
+# ):
+#     if not secret_key or secret_key != "YOUR_SECRET_KEY":
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
-
-@router_calls.get("/order_call_transcription")
-async def order_call_transcription(user_id: str, record_id: str, model: str = Models.base, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    filename = await Repository.get_filename(user_id, record_id)
-    return await add_task_transcribe_async(filename, user_id, record_id, model)
-
-
-@router_calls.get("/get_order_transcription_status")
-async def order_call_transcription(task_id: str, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    return await get_task_status_async(task_id)
-
-
-@router_calls.put("/update_transcription")
-async def update_transcription(transcription: str, user_id: str, record_id: str, secret_key: str | None = Header(default=None)):
-    if not secret_key or secret_key != SECRET_KEY:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
-    return await Repository.update_transcription(user_id=user_id, record_id=record_id, transcription=transcription)
+#     async with calls_repository:
+#         success = await calls_repository.update_transcription(user_credentials.id, call_id, transcription)
+#         if not success:
+#             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+#                                 detail="Unable to update transcription")
+#         return {"detail": "Transcription updated successfully"}

@@ -1,12 +1,10 @@
 from fastapi import Header, Request, status
 import aiohttp
-import json
 from datetime import datetime
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from app.toml_helper import load_var_from_toml
 from app.api.models import UserCredentials
-from dataclasses import dataclass, asdict, field
 
 
 async def auth_middleware(request: Request, call_next):
@@ -45,4 +43,4 @@ def get_user_from_request(request: Request, token_authorization: str = Header(al
 
 class AuthResponse(BaseModel):
     user: UserCredentials
-    requested_at: datetime = field(default_factory=datetime.now)
+    requested_at: datetime = datetime.now

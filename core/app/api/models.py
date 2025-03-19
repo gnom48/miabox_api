@@ -59,6 +59,10 @@ class UserCredentials(BaseModel):
     is_active: bool
 
 
+class Version(BaseModel):
+    suported_versions: list[str]
+
+
 class Token(BaseModel):
     id: str
     user_id: str

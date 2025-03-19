@@ -1,52 +1,105 @@
-from fastapi import APIRouter, HTTPException, Header, Depends
-from app.database import UserStatusesOrm, UserTeamOrm, Repository
-from api.models import Team, UserTeam, UserStatuses
-from app.api import get_user_from_request, UserCredentials
-
+from fastapi import APIRouter, HTTPException, Depends, status
+from app.database.repositories import TeamsRepository, UsersRepository
+from app.api.models import Team, UserTeam, UserStatuses
+from app.api.middlewares import get_user_from_request
+from app.api.models import UserCredentials
 
 router_teams = APIRouter(prefix="/team", tags=["Команды"])
 
 
-@router_teams.post("/create")
-async def team_add(team: Team, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    ret_val_team_id = await Repository.add_team(data=team, user_id=user.id)
-    if not ret_val_team_id:
-        raise HTTPException(
-            status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="not able to create team")
-    return ret_val_team_id
-
-
-@router_teams.delete("/delete")
-async def team_delete(team_id: str, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    return await Repository.del_team(team_id)
-
-
-@router_teams.post("/join")
-async def team_join(team_id: str, joined_by: int, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    try:
-        if not await Repository.get_user_by_id(joined_by):
+@router_teams.post("/create", status_code=status.HTTP_201_CREATED)
+async def create_team(
+    team: Team,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    teams_repository: TeamsRepository = Depends(
+        TeamsRepository.repository_factory)
+):
+    async with teams_repository:
+        team_id = await teams_repository.add_team(team, user_credentials.id)
+        if not team_id:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Пригласитель не действителен!")
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Пригласитель не действителен!")
-    user_team = UserTeamOrm()
-    user_team.role = UserStatusesOrm.USER
-    user_team.team_id = team_id
-    user_team.user_id = user.id
-    return await Repository.join_to_team(user_team)
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to create team")
+        return team_id
 
 
-@router_teams.put("/leave")
-async def team_leave(team_id: str, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    return await Repository.leave_team(user_id=user.id, team_id=team_id)
+@router_teams.delete("/delete", status_code=status.HTTP_200_OK)
+async def delete_team(
+    team_id: str,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    teams_repository: TeamsRepository = Depends(
+        TeamsRepository.repository_factory)
+):
+    async with teams_repository:
+        success = await teams_repository.delete_team(team_id)
+        if not success:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="Team not found or unable to delete")
+        return {"detail": "Team deleted successfully"}
 
 
-@router_teams.put("/move_team_role")
-async def move_team_role(team_id: str, user_id: str, role: UserStatuses, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    return await Repository.move_team_user_role(user_id=user.id, team_id=team_id, role=role)
+@router_teams.post("/join", status_code=status.HTTP_200_OK)
+async def join_team(
+    team_id: str,
+    joined_by: str,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    teams_repository: TeamsRepository = Depends(
+        TeamsRepository.repository_factory)
+):
+    async with teams_repository:
+        if not teams_repository.can_user_invite(user_id=user_credentials.id, team_id=team_id):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found!")
+
+        user_team = UserTeam(role=UserStatuses.USER,
+                             team_id=team_id, user_id=user_credentials.id)
+        success = await teams_repository.join_to_team(user_team)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to join team")
+        return {"detail": "Joined team successfully"}
 
 
-@router_teams.get("/my_teams")
-async def my_teams(user_credentials: UserCredentials = Depends(get_user_from_request)):
-    return await Repository.get_all_teams_by_user_id(user.id)
+@router_teams.put("/leave", status_code=status.HTTP_200_OK)
+async def leave_team(
+    team_id: str,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    teams_repository: TeamsRepository = Depends(
+        TeamsRepository.repository_factory)
+):
+    async with teams_repository:
+        success = await teams_repository.leave_team(user_credentials.id, team_id)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to leave team")
+        return {"detail": "Left team successfully"}
+
+
+@router_teams.put("/move_team_role", status_code=status.HTTP_200_OK)
+async def move_team_role(
+    team_id: str,
+    user_id: str,
+    role: UserStatuses,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    teams_repository: TeamsRepository = Depends(
+        TeamsRepository.repository_factory)
+):
+    async with teams_repository:
+        success = await teams_repository.move_team_user_role(team_id, user_id, role)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to change role")
+        return {"detail": "Role changed successfully"}
+
+
+@router_teams.get("/my_teams", status_code=status.HTTP_200_OK)
+async def get_my_teams(
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    teams_repository: TeamsRepository = Depends(
+        TeamsRepository.repository_factory)
+):
+    async with teams_repository:
+        teams = await teams_repository.get_all_teams_by_user_id(user_credentials.id)
+        if teams is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No teams found")
+        return teams

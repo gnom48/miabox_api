@@ -1,5 +1,6 @@
 from ..orm import new_session
-from sqlalchemy.sql import text
+from app.database.models import VersionOrm
+from sqlalchemy.sql import text, select
 import logging
 
 
@@ -21,6 +22,10 @@ class BaseRepository:
         logging.debug("Сессия закрыта")
         await self.dispose()
 
+    @staticmethod
+    def repository_factory():
+        return BaseRepository()
+
     # -------------------------- config --------------------------
 
     @classmethod
@@ -34,5 +39,15 @@ class BaseRepository:
                 result = await session.execute(req)
                 ntime = result.scalars().first()
                 return (version, ntime)
+            except:
+                return None
+
+    @classmethod
+    async def get_supported_versions(cls) -> list[VersionOrm]:
+        async with new_session() as session:
+            try:
+                req = select(VersionOrm)
+                result = await session.execute(req)
+                return list(result.scalars().all())
             except:
                 return None

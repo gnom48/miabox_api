@@ -41,6 +41,7 @@ async def on_message_proccess(incoming_message: IncomingMessage):
             logging.debug("Сообщение перемещено в очередь complete")
 
             os.remove(msg_data.file_path)
+            await incoming_message.ack()
         except Exception as e:
             logging.error("Ошибка обработки сообщения", exc_info=True)
             await incoming_message.nack()
