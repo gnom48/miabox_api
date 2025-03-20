@@ -29,6 +29,7 @@ def dump_env_to_toml(filepath: str):
             "rabbitmq_password": os.getenv("RABBITMQ_DEFAULT_PASS"),
         },
         "minio": {
+            "minio_api_ip": os.getenv("MINIO_API_IP"),
             "minio_api_port": os.getenv("MINIO_API_PORT"),
             "minio_access_key": os.getenv("MINIO_ROOT_USER"),
             "minio_secret_key": os.getenv("MINIO_ROOT_PASSWORD")

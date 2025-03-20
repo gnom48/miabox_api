@@ -1,3 +1,4 @@
+from enum import Enum
 from sqlalchemy.sql import text
 from app.database.models import FileOrm, FilesAccessOrm, FileAccessModeOrm
 from sqlalchemy import select, update, delete, insert, and_
@@ -28,6 +29,22 @@ class FilesRepository(BaseRepository):
                 await self.add_access_to(user_id, new_file.id)
 
                 return new_file.id
+        except Exception as e:
+            logging.error(e.__str__())
+            return None
+
+    async def check_access(self, access: Enum, user_id: str, file_id: str) -> bool:
+        """Проверяет доступ к файлу."""
+        try:
+            async with self.session:
+                select_request = select(FilesAccessOrm).where(
+                    FilesAccessOrm.file_id == file_id)
+                access_records = await self.session.execute(select_request)
+                file_access_list = list(access_records.scalars().all())
+                if access.name == FileAccessModeOrm.WRITE.name:
+                    return any(item.user_id == user_id and item.file_access_mode.name == access.name for item in file_access_list)
+                else:
+                    return any(item.user_id == user_id for item in file_access_list)
         except Exception as e:
             logging.error(e.__str__())
             return None
@@ -73,7 +90,8 @@ class FilesRepository(BaseRepository):
         """Убирает доступ у пользователя к файлу."""
         try:
             async with self.session:
-                await self.session.delete(FileOrm, file_id)
+                file_to_del = await self.session.get(FileOrm, file_id)
+                await self.session.delete(file_to_del)
                 await self.session.commit()
                 return True
         except Exception as e:

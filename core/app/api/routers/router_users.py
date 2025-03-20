@@ -8,10 +8,7 @@ from app.utils.minio_client import MinioClient
 
 router_users = APIRouter(prefix="/user", tags=["Пользователи"])
 
-
-@router_users.get("/supported_versions", status_code=status.HTTP_200_OK)
-async def get_supported_versions():
-    return await BaseRepository.get_supported_versions()
+# GOOD: полностью исправно
 
 
 @router_users.get("/info", status_code=status.HTTP_200_OK)
@@ -56,4 +53,6 @@ async def set_avatar(
         minio_client.upload_file(user_credentials.id, file)
         new_avatar_file_id = await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id)
         async with user_repository:
-            return await user_repository.update_avatar_only(user_credentials.id, new_avatar_file_id)
+            if await user_repository.update_avatar_only(user_credentials.id, new_avatar_file_id):
+                return new_avatar_file_id
+            return None

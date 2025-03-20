@@ -1,22 +1,22 @@
-from sqlalchemy import select, update, delete
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
-from app.database.models import TeamOrm, UserTeamOrm, UserStatusesOrm, UserOrm, AddresInfoOrm, CallOrm, LastMonthStatisticsWithKpiOrm
+from sqlalchemy import select, update
+# UserOrm, AddressOrm, CallOrm, LastMonthStatisticsWithKpiOrm
+from app.database.models import TeamOrm, UserTeamOrm, UserStatusesOrm
 from .base_repository import BaseRepository
 import logging
 
 
-class UserWithStats:
-    def __init__(self, user: UserOrm, statistics: Dict[StatisticPeriods, Union[None, StatisticsOrm]], role: UserStatuses):
-        self.user = user
-        self.statistics = statistics
-        self.role = role
+# class UserWithStats:
+#     def __init__(self, user: UserOrm, statistics: Dict[StatisticPeriods, Union[None, StatisticsOrm]], role: UserStatuses):
+#         self.user = user
+#         self.statistics = statistics
+#         self.role = role
 
 
-class TeamWithInfo:
-    def __init__(self, team: TeamOrm, members: list[UserWithStats]):
-        self.team = team
-        self.members = members
+# class TeamWithInfo:
+#     def __init__(self, team: TeamOrm, members: list[UserWithStats]):
+#         self.team = team
+#         self.members = members
 
 
 class TeamsRepository(BaseRepository):
@@ -28,44 +28,44 @@ class TeamsRepository(BaseRepository):
     def repository_factory():
         return TeamsRepository()
 
-    async def get_all_teams_by_user_id(self, user_id: str) -> list[TeamWithInfo] | None:
-        """Возвращает все команды, связанные с пользователем, с дополнительной информацией."""
-        try:
-            async with self.session:
-                query = select(UserTeamOrm).where(
-                    UserTeamOrm.user_id == user_id)
-                result = await self.session.execute(query)
-                teams_user = list(result.scalars().all())
-                res_teams = []
+    # async def get_all_teams_by_user_id(self, user_id: str) -> list[TeamWithInfo] | None:
+    #     """Возвращает все команды, связанные с пользователем, с дополнительной информацией."""
+    #     try:
+    #         async with self.session:
+    #             query = select(UserTeamOrm).where(
+    #                 UserTeamOrm.user_id == user_id)
+    #             result = await self.session.execute(query)
+    #             teams_user = list(result.scalars().all())
+    #             res_teams = []
 
-                for team_user in teams_user:
-                    team = await self.session.get(TeamOrm, team_user.team_id)
-                    team_with_info = TeamWithInfo(team=team, members=[])
+    #             for team_user in teams_user:
+    #                 team = await self.session.get(TeamOrm, team_user.team_id)
+    #                 team_with_info = TeamWithInfo(team=team, members=[])
 
-                    query_userteam = select(UserTeamOrm).where(
-                        UserTeamOrm.team_id == team.id)
-                    result_userteam = await self.session.execute(query_userteam)
-                    team_users = list(result_userteam.scalars().all())
+    #                 query_userteam = select(UserTeamOrm).where(
+    #                     UserTeamOrm.team_id == team.id)
+    #                 result_userteam = await self.session.execute(query_userteam)
+    #                 team_users = list(result_userteam.scalars().all())
 
-                    team_with_info.members = [
-                        UserWithStats(
-                            user=self.__hide_password(await self.session.get(UserOrm, user_team.user_id)),
-                            statistics={
-                                period: await self.get_statistics_by_period(period=period, user_id=user_team.user_id)
-                                for period in [StatisticPeriods.DAY_STATISTICS_PERIOD, StatisticPeriods.WEEK_STATISTICS_PERIOD, StatisticPeriods.MONTH_STATISTICS_PERIOD]
-                            },
-                            addresses=(await self.session.execute(select(AddresInfoOrm).where(AddresInfoOrm.user_id == user_team.user_id))).scalars().all(),
-                            calls=(await self.session.execute(select(CallOrm).where(CallOrm.user_id == user_team.user_id))).scalars().all(),
-                            kpi=await self.session.get(LastMonthStatisticsWithKpiOrm, user_team.user_id),
-                            role=user_team.role.name
-                        )
-                        for user_team in team_users
-                    ]
-                    res_teams.append(team_with_info)
-                return res_teams
-        except SQLAlchemyError as e:
-            logging.error(e.__str__())
-            return None
+    #                 team_with_info.members = [
+    #                     UserWithStats(
+    #                         user=self.__hide_password(await self.session.get(UserOrm, user_team.user_id)),
+    #                         statistics={
+    #                             period: await self.get_statistics_by_period(period=period, user_id=user_team.user_id)
+    #                             for period in [StatisticPeriods.DAY_STATISTICS_PERIOD, StatisticPeriods.WEEK_STATISTICS_PERIOD, StatisticPeriods.MONTH_STATISTICS_PERIOD]
+    #                         },
+    #                         addresses=(await self.session.execute(select(AddressOrm).where(AddressOrm.user_id == user_team.user_id))).scalars().all(),
+    #                         calls=(await self.session.execute(select(CallOrm).where(CallOrm.user_id == user_team.user_id))).scalars().all(),
+    #                         kpi=await self.session.get(LastMonthStatisticsWithKpiOrm, user_team.user_id),
+    #                         role=user_team.role.name
+    #                     )
+    #                     for user_team in team_users
+    #                 ]
+    #                 res_teams.append(team_with_info)
+    #             return res_teams
+    #     except SQLAlchemyError as e:
+    #         logging.error(e.__str__())
+    #         return None
 
     async def can_user_invite(self, user_id: str, team_id: str) -> bool:
         """Может ли пользователь пригласить пользователя в команду."""
@@ -134,7 +134,13 @@ class TeamsRepository(BaseRepository):
         """Добавляет пользователя в команду."""
         try:
             async with self.session:
-                self.session.add(data)
+                self.session.add(
+                    UserTeamOrm(
+                        team_id=data.team_id,
+                        user_id=data.user_id,
+                        role=UserStatusesOrm.USER
+                    )
+                )
                 await self.session.commit()
                 return True
         except SQLAlchemyError as e:

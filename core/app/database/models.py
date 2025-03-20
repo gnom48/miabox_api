@@ -9,47 +9,52 @@ class BaseModelOrm(DeclarativeBase):
     pass
 
 
-class AuthPrivilegesOrm(Enum):
-    USER = "Пользователь"
-    ADMIN = "Администратор"
+class AuthPrivilegesOrm(str, Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
 
 
-class UserTypesOrm(Enum):
-    COMMERCIAL = "Риелтор коммерческой недвижимости"
-    PRIVATE = "Риелтор частной недвижимости"
+class UserTypesOrm(str, Enum):
+    COMMERCIAL = "COMMERCIAL"
+    PRIVATE = "PRIVATE"
 
 
-class WorkTypesOrm(Enum):
-    FLYERS = "Рассклейка"
-    CALLS = "Обзвон"
-    SHOW = "Показ объекта"
-    MEET = "Встреча по объекту"
-    DEAL_RENT = "Сделка по аренде"
-    DEAL_SALE = "Сделка по продаже"
-    DEPOSIT = "Получение задатка"
-    SEARCH = "Поиск объектов"
-    ANALYTICS = "Аналитика рынка"
-    OTHER = "Нечто особенное"
-    REGULAR_CONTRACT = "Обычный договор"
-    EXCLUSIVE_CONTRACT = "Эксклюзивный договор"
+class WorkTypesOrm(str, Enum):
+    FLYERS = "FLYERS"
+    CALLS = "CALLS"
+    SHOW = "SHOW"
+    MEET = "MEET"
+    DEAL_RENT = "DEAL_RENT"
+    DEAL_SALE = "DEAL_SALE"
+    DEPOSIT = "DEPOSIT"
+    SEARCH = "SEARCH"
+    ANALYTICS = "ANALYTICS"
+    OTHER = "OTHER"
+    REGULAR_CONTRACT = "REGULAR_CONTRACT"
+    EXCLUSIVE_CONTRACT = "EXCLUSIVE_CONTRACT"
 
 
-class StatisticPeriodOrm(Enum):
-    DAY = "День"
-    WEEK = "Неделя"
-    MONTH = "Месяц"
+class KpiLevelsOrm(str, Enum):
+    TRAINEE = "TRAINEE"
+    SPECIALIST = "SPECIALIST"
+    EXPERT = "EXPERT"
+    TOP = "TOP"
 
 
-class KpiLevelsOrm(Enum):
-    TRAINEE = "Стажер"
-    SPECIALIST = "Специалист"
-    EXPERT = "Эксперт"
-    TOP = "ТОП"
+class StatisticPeriodOrm(str, Enum):
+    DAY = "DAY"
+    WEEK = "WEEK"
+    MONTH = "MONTH"
 
 
-class UserStatusesOrm(Enum):
-    OWNER = "Владелец"
-    USER = "Участник"
+class UserStatusesOrm(str, Enum):
+    OWNER = "OWNER"
+    USER = "USER"
+
+
+class FileAccessModeOrm(str, Enum):
+    READ = "READ"
+    WRITE = "WRITE"
 
 
 class UserCredentialsOrm(BaseModelOrm):
@@ -187,11 +192,6 @@ class UserTeamOrm(BaseModelOrm):
 
     # team: Mapped["TeamOrm"] = relationship("TeamOrm", back_populates="users")
     # user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="teams")
-
-
-class FileAccessModeOrm(Enum):
-    READ = "Чтение"
-    WRITE = "Запись"
 
 
 class FilesAccessOrm(BaseModelOrm):

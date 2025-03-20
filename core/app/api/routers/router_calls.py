@@ -20,6 +20,11 @@ async def add_call(
         FilesRepository.repository_factory),
     minio_client: MinioClient = Depends(MinioClient.minio_client_factory)
 ):
+    # FIXME: в swagger нихуя не отправляется
+    if call.user_id != user_credentials.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Try to add another user call")
+
     new_file_id: str | None = None
     if file is not None:
         try:
@@ -39,14 +44,16 @@ async def add_call(
         return record_id
 
 
-@router_calls.get("/get_all_calls", status_code=status.HTTP_200_OK)
+@router_calls.get("/get_all_user_calls", status_code=status.HTTP_200_OK)
 async def get_all_calls(
+    user_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
     calls_repository: CallsRepository = Depends(
         CallsRepository.repository_factory)
 ):
+    # TODO: проверка доступа
     async with calls_repository:
-        calls = await calls_repository.get_all_info_user_calls(user_credentials.id)
+        calls = await calls_repository.get_all_info_user_calls(user_id)
         if calls is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Calls not found")
@@ -62,6 +69,7 @@ async def order_call_transcription(
     files_repository: FilesRepository = Depends(
         FilesRepository.repository_factory)
 ):
+    # TODO: проверка доступа
     async with calls_repository:
         async with files_repository:
             call = await calls_repository.get_one_call(call_id)

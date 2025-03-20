@@ -98,7 +98,8 @@ async def get_my_teams(
         TeamsRepository.repository_factory)
 ):
     async with teams_repository:
-        teams = await teams_repository.get_all_teams_by_user_id(user_credentials.id)
+        # await teams_repository.get_all_teams_by_user_id(user_credentials.id)
+        teams = []
         if teams is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="No teams found")

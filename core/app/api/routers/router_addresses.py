@@ -1,14 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.database.repositories import AddressesRepository
-from app.api.models import AddresInfo, UserCredentials
+from app.api.models import Address, UserCredentials
 from app.api.middlewares import get_user_from_request
 
 router_addresses = APIRouter(prefix="/address", tags=["Адреса"])
 
+# GOOD: полностью исправно
+
 
 @router_addresses.post("/add_address_info", status_code=status.HTTP_201_CREATED)
 async def add_address_info(
-    address_info: AddresInfo,
+    address_info: Address,
     user_credentials: UserCredentials = Depends(get_user_from_request),
     addresses_repository: AddressesRepository = Depends(
         AddressesRepository.repository_factory)

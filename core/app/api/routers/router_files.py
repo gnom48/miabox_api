@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, UploadFile, status, HTTPException
 from fastapi.responses import FileResponse
 from app.database.repositories import FilesRepository
-from app.database.models import FileAccessModeOrm
-from app.api.models import UserCredentials
+from app.api.models import UserCredentials, FileAccessMode
 from app.api.middlewares import get_user_from_request
 from app.utils.minio_client import MinioClient
 
 
 router_files = APIRouter(prefix="/files", tags=["Файлы"])
+
+# GOOD: полностью исправно
 
 
 @router_files.get("/info", status_code=status.HTTP_200_OK)
@@ -42,14 +43,12 @@ async def download_file(
     files_repository: FilesRepository = Depends(
         FilesRepository.repository_factory)
 ):
+    # REVIEW: возвращает реально поток, без имени файла, мб перевернутый и тд
     async with files_repository:
-        file_info = await files_repository.get_file_info_by_id(file_id)
-        if user_credentials.id in list(map(lambda item: item.user_id, await files_repository.get_file_access(file_id))):
-            # return minio_client.download_file(file_info.bucket_name, file_info.obj_name)
-            return FileResponse(minio_client.download_file(
-                file_info.bucket_name, file_info.obj_name), media_type='application/octet-stream', filename=file_info.obj_name)
-        else:
+        if not await files_repository.check_access(FileAccessMode.READ, user_credentials.id, file_id):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+        file_info = await files_repository.get_file_info_by_id(file_id)
+        return minio_client.download_file(file_info.bucket_name, file_info.obj_name)
 
 
 @router_files.get("/presigned_url", status_code=status.HTTP_200_OK)
@@ -61,6 +60,8 @@ async def pre_signed_file(
         FilesRepository.repository_factory)
 ):
     async with files_repository:
+        if not await files_repository.check_access(FileAccessMode.READ, user_credentials.id, file_id):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
         file_info = await files_repository.get_file_info_by_id(file_id)
         if user_credentials.id in list(map(lambda item: item.user_id, await files_repository.get_file_access(file_id))):
             url = minio_client.get_presigned_url(
@@ -79,10 +80,10 @@ async def delete_file(
         FilesRepository.repository_factory)
 ):
     async with files_repository:
-        file_info = await files_repository.get_file_info_by_id(file_id)
-        file_access_list = await files_repository.get_file_access(file_id)
-        if any(item.user_id == user_credentials.id and item.file_access_mode == FileAccessModeOrm.WRITE for item in file_access_list):
-            await files_repository.delete_file(file_id)
-            return minio_client.delete_file(file_info.bucket_name, file_info.obj_name)
-        else:
+        if not await files_repository.check_access(FileAccessMode.READ, user_credentials.id, file_id):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+        file_info = await files_repository.get_file_info_by_id(file_id)
+        delete_success = await files_repository.delete_file(file_id)
+        if not delete_success:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+        return minio_client.delete_file(file_info.bucket_name, file_info.obj_name)

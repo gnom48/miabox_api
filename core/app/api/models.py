@@ -4,50 +4,54 @@ from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass
 from uuid import UUID
-from datetime import datetime
 
 
 class AuthPrivileges(str, Enum):
-    USER = "Пользователь"
-    ADMIN = "Администратор"
+    USER = "USER"
+    ADMIN = "ADMIN"
 
 
 class UserTypes(str, Enum):
-    COMMERCIAL = "Риелтор коммерческой недвижимости"
-    PRIVATE = "Риелтор частной недвижимости"
+    COMMERCIAL = "COMMERCIAL"
+    PRIVATE = "PRIVATE"
 
 
 class WorkTypes(str, Enum):
-    FLYERS = "Рассклейка"
-    CALLS = "Обзвон"
-    SHOW = "Показ объекта"
-    MEET = "Встреча по объекту"
-    DEAL_RENT = "Сделка по аренде"
-    DEAL_SALE = "Сделка по продаже"
-    DEPOSIT = "Получение задатка"
-    SEARCH = "Поиск объектов"
-    ANALYTICS = "Аналитика рынка"
-    OTHER = "Нечто особенное"
-    REGULAR_CONTRACT = "Обычный договор"
-    EXCLUSIVE_CONTRACT = "Эксклюзивный договор"
+    FLYERS = "FLYERS"
+    CALLS = "CALLS"
+    SHOW = "SHOW"
+    MEET = "MEET"
+    DEAL_RENT = "DEAL_RENT"
+    DEAL_SALE = "DEAL_SALE"
+    DEPOSIT = "DEPOSIT"
+    SEARCH = "SEARCH"
+    ANALYTICS = "ANALYTICS"
+    OTHER = "OTHER"
+    REGULAR_CONTRACT = "REGULAR_CONTRACT"
+    EXCLUSIVE_CONTRACT = "EXCLUSIVE_CONTRACT"
 
 
 class KpiLevels(str, Enum):
-    TRAINEE = "Стажер"
-    SPECIALIST = "Специалист"
-    EXPERT = "Эксперт"
-    TOP = "ТОП"
+    TRAINEE = "TRAINEE"
+    SPECIALIST = "SPECIALIST"
+    EXPERT = "EXPERT"
+    TOP = "TOP"
 
 
 class StatisticPeriod(str, Enum):
-    DAY = "День"
-    WEEK = "Неделя"
-    MONTH = "Месяц"
+    DAY = "DAY"
+    WEEK = "WEEK"
+    MONTH = "MONTH"
 
 
 class UserStatuses(str, Enum):
-    OWNER = "Владелец"
-    USER = "Участник"
+    OWNER = "OWNER"
+    USER = "USER"
+
+
+class FileAccessMode(str, Enum):
+    READ = "READ"
+    WRITE = "WRITE"
 
 
 class UserCredentials(BaseModel):
@@ -60,7 +64,7 @@ class UserCredentials(BaseModel):
 
 
 class Version(BaseModel):
-    suported_versions: list[str]
+    suported_versions: List[str]
 
 
 class Token(BaseModel):
@@ -72,20 +76,19 @@ class Token(BaseModel):
 
 class File(BaseModel):
     id: str
-    obj_key: str
     obj_name: str
     bucket_name: str
 
 
 class User(BaseModel):
     id: str
-    type: UserTypes
+    type: UserTypes | str
     email: str
     name: str
     gender: Optional[str]
     birthday: Optional[int]
     phone: Optional[str]
-    image: str
+    image: Optional[str]
 
 
 class AuthData(BaseModel):
@@ -109,7 +112,7 @@ class Note(BaseModel):
 class Task(BaseModel):
     id: str
     user_id: str
-    work_type: WorkTypes
+    work_type: WorkTypes | str
     description: Optional[str]
     created_at: int
     duration_seconds: int
@@ -125,13 +128,20 @@ class Team(BaseModel):
 class UserTeam(BaseModel):
     team_id: str
     user_id: str
-    role: UserStatuses
+    role: UserStatuses | str
+
+
+class FilesAccess(BaseModel):
+    id: str
+    user_id: str
+    file_id: str
+    file_access_mode: FileAccessMode | str
 
 
 class Statistic(BaseModel):
     id: str
     user_id: str
-    period_type: StatisticPeriod
+    period_type: StatisticPeriod | str
     flyers: int
     calls: int
     shows: int
@@ -157,7 +167,7 @@ class Address(BaseModel):
 
 class Kpi(BaseModel):
     user_id: str
-    user_level: KpiLevels
+    user_level: KpiLevels | str
     salary_percentage: float
 
 
@@ -169,8 +179,8 @@ class Call(BaseModel):
     contact_name: str
     length_seconds: int
     call_type: int
-    transcription: str
-    file_id: str
+    transcription: Optional[str]
+    file_id: Optional[str]
 
 
 @dataclass

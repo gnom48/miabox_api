@@ -1,11 +1,10 @@
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import RedirectResponse
-# from app.api import router_users, router_notes, router_tasks, router_teams, router_addresses, router_statistics, router_calls
 from contextlib import asynccontextmanager
-# from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.database import create_tables, drop_tables, BaseRepository
 from app.api import auth_middleware, error_middleware, router_files, router_users, router_addresses, router_calls, router_notes, router_tasks, router_teams
+# from apscheduler.schedulers.asyncio import AsyncIOScheduler
 # from apscheduler.triggers.cron import CronTrigger
 
 # main_scheduler = AsyncIOScheduler(timezone="UTC")
@@ -46,6 +45,13 @@ async def server_config_get():
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database is not availible")
     return {"postgres": config, "datetime": datetime.now()}
+
+# TODO: создать таблицуи проверить
+
+
+@app.get("/supported_versions", status_code=status.HTTP_200_OK)
+async def get_supported_versions():
+    return await BaseRepository.get_supported_versions()
 
 app.include_router(router_files)
 app.include_router(router_teams)
