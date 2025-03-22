@@ -3,6 +3,8 @@
 .env
 *.exe
 *config/config.toml
+\.vscode
+/.vscode
 
 \nginx\logs\*.log
 /nginx/logs/*.log

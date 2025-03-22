@@ -243,7 +243,7 @@ class KpiOrm(BaseModelOrm):
     user_id: Mapped[str] = mapped_column(ForeignKey(
         UserOrm.id, ondelete="CASCADE"), primary_key=True)
     kpi_level: Mapped[KpiLevelsOrm] = mapped_column(SqlEnum(KpiLevelsOrm))
-    salary_percentage: Mapped[float] = mapped_column(Float, default=0.0)
+    base_salary_percentage: Mapped[float] = mapped_column(Float, default=0.0)
     kpi: Mapped[float] = mapped_column(Float, default=0.0)
 
     # user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="kpi")

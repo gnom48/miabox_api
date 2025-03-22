@@ -2,7 +2,7 @@ from enum import Enum
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
-from app.database.models import StatisticOrm, StatisticPeriodOrm, WorkTypesOrm, KpiOrm
+from app.database.models import StatisticOrm, StatisticPeriodOrm, WorkTypesOrm, KpiOrm, KpiLevelsOrm
 from .base_repository import BaseRepository
 import logging
 
@@ -100,16 +100,27 @@ class StatisticsRepository(BaseRepository):
                         KpiOrm(
                             user_id=kpi.user_id,
                             kpi_level=kpi.kpi_level,
-                            salary_percentage=kpi.salary_percentage,
+                            salary_percentage=kpi.base_salary_percentage,
                             kpi=kpi.kpi
                         )
                     )
                 else:
                     current_kpi.user_id = kpi.user_id
                     current_kpi.kpi_level = kpi.kpi_level
-                    current_kpi.salary_percentage = kpi.salary_percentage
+                    current_kpi.base_salary_percentage = kpi.base_salary_percentage
                     current_kpi.kpi = kpi.kpi
                 await self.session.commit()
         except SQLAlchemyError as e:
             logging.error(e.__str__())
             return None
+
+    def get_kpi_level(self, total_deals_count: int, top_flag: bool = False) -> tuple:
+        """Возвращает кортеж типа (уровнь KPI, базовый процент зп)."""
+        if top_flag and total_deals_count >= 21:
+            return (KpiLevelsOrm.TOP, 50)
+        elif total_deals_count <= 3:
+            return (KpiLevelsOrm.TRAINEE, 40)
+        elif total_deals_count >= 3 and total_deals_count <= 20:
+            return (KpiLevelsOrm.SPECIALIST, 43)
+        elif total_deals_count > 21:
+            return (KpiLevelsOrm.EXPERT, 45)
