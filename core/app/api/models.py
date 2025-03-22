@@ -38,12 +38,6 @@ class KpiLevels(str, Enum):
     TOP = "TOP"
 
 
-class StatisticPeriod(str, Enum):
-    DAY = "DAY"
-    WEEK = "WEEK"
-    MONTH = "MONTH"
-
-
 class UserStatuses(str, Enum):
     OWNER = "OWNER"
     USER = "USER"
@@ -138,22 +132,28 @@ class FilesAccess(BaseModel):
     file_access_mode: FileAccessMode | str
 
 
+class StatisticAggregated(BaseModel):
+    user_id: str
+    start: int
+    end: int
+    works: dict[WorkTypes | str, int]
+
+
 class Statistic(BaseModel):
     id: str
     user_id: str
-    period_type: StatisticPeriod | str
-    flyers: int
-    calls: int
-    shows: int
-    meets: int
-    deals_rent: int
-    deals_sale: int
-    deposits: int
-    searches: int
-    analytics: int
-    others: int
-    regular_contracts: int
-    exclusive_contracts: int
+    datetime: int
+    work_type: WorkTypes | str
+    count: int
+    is_archive: bool
+
+
+class KpiSummary(BaseModel):
+    last_month_kpi: float
+    current_month_kpi: float
+    level: KpiLevels | str
+    summary_deals_rent: int
+    summary_deals_sale: int
 
 
 class Address(BaseModel):

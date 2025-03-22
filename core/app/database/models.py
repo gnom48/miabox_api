@@ -1,6 +1,6 @@
 import datetime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import DateTime, ForeignKey, String, Float, Boolean, Enum as SqlEnum, Integer
+from sqlalchemy import DateTime, ForeignKey, String, Float, Boolean, Enum as SqlEnum, Integer, Date
 from enum import Enum
 import uuid
 
@@ -39,12 +39,6 @@ class KpiLevelsOrm(str, Enum):
     SPECIALIST = "SPECIALIST"
     EXPERT = "EXPERT"
     TOP = "TOP"
-
-
-class StatisticPeriodOrm(str, Enum):
-    DAY = "DAY"
-    WEEK = "WEEK"
-    MONTH = "MONTH"
 
 
 class UserStatusesOrm(str, Enum):
@@ -215,20 +209,11 @@ class StatisticOrm(BaseModelOrm):
         String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     user_id: Mapped[str] = mapped_column(
         ForeignKey(UserOrm.id, ondelete="CASCADE"))
-    period_type: Mapped[StatisticPeriodOrm] = mapped_column(
-        SqlEnum(StatisticPeriodOrm))
-    flyers: Mapped[int] = mapped_column(Integer, default=0)
-    calls: Mapped[int] = mapped_column(Integer, default=0)
-    shows: Mapped[int] = mapped_column(Integer, default=0)
-    meets: Mapped[int] = mapped_column(Integer, default=0)
-    deals_rent: Mapped[int] = mapped_column(Integer, default=0)
-    deals_sale: Mapped[int] = mapped_column(Integer, default=0)
-    deposits: Mapped[int] = mapped_column(Integer, default=0)
-    searches: Mapped[int] = mapped_column(Integer, default=0)
-    analytics: Mapped[int] = mapped_column(Integer, default=0)
-    others: Mapped[int] = mapped_column(Integer, default=0)
-    regular_contracts: Mapped[int] = mapped_column(Integer, default=0)
-    exclusive_contracts: Mapped[int] = mapped_column(Integer, default=0)
+    datetime: Mapped[int] = mapped_column(
+        Integer, default=int(datetime.datetime.now().timestamp()))
+    work_type: Mapped[WorkTypesOrm] = mapped_column(SqlEnum(WorkTypesOrm))
+    count: Mapped[int] = mapped_column(Integer, default=0)
+    is_archive: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # user: Mapped["UserOrm"] = relationship(
     #     "UserOrm", back_populates="statistics")
@@ -257,8 +242,9 @@ class KpiOrm(BaseModelOrm):
 
     user_id: Mapped[str] = mapped_column(ForeignKey(
         UserOrm.id, ondelete="CASCADE"), primary_key=True)
-    user_level: Mapped[KpiLevelsOrm] = mapped_column(SqlEnum(KpiLevelsOrm))
+    kpi_level: Mapped[KpiLevelsOrm] = mapped_column(SqlEnum(KpiLevelsOrm))
     salary_percentage: Mapped[float] = mapped_column(Float, default=0.0)
+    kpi: Mapped[float] = mapped_column(Float, default=0.0)
 
     # user: Mapped["UserOrm"] = relationship("UserOrm", back_populates="kpi")
 

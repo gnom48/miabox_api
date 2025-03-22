@@ -46,8 +46,6 @@ async def server_config_get():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database is not availible")
     return {"postgres": config, "datetime": datetime.now()}
 
-# TODO: создать таблицуи проверить
-
 
 @app.get("/supported_versions", status_code=status.HTTP_200_OK)
 async def get_supported_versions():

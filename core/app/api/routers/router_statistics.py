@@ -1,43 +1,63 @@
 from fastapi import APIRouter, HTTPException, Header, Depends, status
-from api.models import UserKpiLevels
-from app.database import Repository
-from app.api import get_user_from_request, UserCredentials
+from app.api.middlewares import get_user_from_request
+from app.api.models import UserCredentials, Statistic, StatisticAggregated, KpiSummary, Kpi
+from core.app.database.repositories import StatisticsRepository
 
 
 router_statistics = APIRouter(prefix="/user/statistics", tags=["Статистика"])
 
 
-@router_statistics.get("/get", status_code=status.HTTP_200_OK)
-async def user_statistics_get(period: str, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    res = await Repository.get_statistics_by_period(user_credentials.id, period)
-    return res
+@router_statistics.get("/aggregated", status_code=status.HTTP_200_OK)
+async def user_statistics_get(
+    start: int,
+    end: int,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    statistics_repository: StatisticsRepository = Depends(
+        StatisticsRepository.repository_factory)
+):
+    async with statistics_repository:
+        res = await statistics_repository.get_statistics_in_period(user_credentials.id, start, end)
+        if not res:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Sequence contains no elements")
+        return StatisticAggregated(
+            user_id=user_credentials.id,
+            start=start,
+            end=end,
+            works=res
+        )
 
 
-@router_statistics.get("/get_kpi", status_code=status.HTTP_200_OK)
-async def user_statistics_get_with_kpi(user_credentials: UserCredentials = Depends(get_user_from_request)):
-    last_month_kpi = await Repository.get_statistics_with_kpi(user_credentials.id)
-    current_month_kpi = await Repository.get_current_kpi(user_credentials.id)
-    if current_month_kpi is None:
-        return {"last_month_kpi": last_month_kpi, "current_month_kpi": None, "level": None, "summary_deals_rent": None, "summary_deals_sale": None}
-    return {
-        "last_month_kpi": last_month_kpi,
-        "current_month_kpi": current_month_kpi["kpi"],
-        "level": current_month_kpi["level"],
-        "summary_deals_rent": current_month_kpi["deals_rent"],
-        "summary_deals_sale": current_month_kpi["deals_sale"]
-    }
+@router_statistics.get("/kpi", status_code=status.HTTP_200_OK)
+async def user_statistics_get_with_kpi(
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    statistics_repository: StatisticsRepository = Depends(
+        StatisticsRepository.repository_factory)
+):
+    async with statistics_repository:
+        last_month_kpi = await statistics_repository.get_last_month_kpi(user_credentials.id)
+        if not last_month_kpi:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Sequence contains no elements")
+        return KpiSummary(
+            last_month_kpi=last_month_kpi.kpi,
+            current_month_kpi=0.0,
+            level=last_month_kpi.kpi_level,
+            summary_deals_rent=0,
+            summary_deals_sale=0
+        )
 
 
-@router_statistics.put("/update", status_code=status.HTTP_200_OK)
-async def user_statistics_update(statistic: str, addvalue: int, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    res = await Repository.update_statistics(user_credentials.id, statistic, addvalue)
-    return res
-
-
-@router_statistics.put("/move_kpi_level", status_code=status.HTTP_200_OK)
-async def user_statistics_kpi_move(level: UserKpiLevels, user_credentials: UserCredentials = Depends(get_user_from_request)):
-    res = await Repository.update_kpi_level(user_credentials.id, level)
-    if res == None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="move level error")
-    return res
+@router_statistics.put("/manually_set_kpi", status_code=status.HTTP_200_OK)
+async def user_statistics_kpi_move(
+    kpi: Kpi,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    statistics_repository: StatisticsRepository = Depends(
+        StatisticsRepository.repository_factory)
+):
+    async with statistics_repository:
+        res = await statistics_repository.set_kpi_level(kpi)
+        if res == None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="move level error")
+        return res

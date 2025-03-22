@@ -6,4 +6,4 @@ from .calls_repository import *
 from .notes_repository import NotesRepository
 from .tasks_repository import TasksRepository
 from .teams_repository import TeamsRepository
-# from .statistics_repository import *
+from .statistics_repository import StatisticsRepository
