@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.database.repositories import AddressesRepository
 from app.api.models import Address, UserCredentials
 from app.api.middlewares import get_user_from_request
+from app.utils.osm import reverse_geocoding_by_coords
 
 router_addresses = APIRouter(prefix="/address", tags=["Адреса"])
 
@@ -15,7 +16,16 @@ async def add_address_info(
     addresses_repository: AddressesRepository = Depends(
         AddressesRepository.repository_factory)
 ):
+    if add_address_info.user_id != user_credentials.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Not self account in address info")
     async with addresses_repository:
+        if not add_address_info.address or add_address_info.address == "":
+            try:
+                address_info.address = reverse_geocoding_by_coords()[
+                    "display_name"]
+            except Exception as e:
+                address_info.address = "Не удалось получить адрес"
         address_id = await addresses_repository.add_address_info(address_info)
         if not address_id:
             raise HTTPException(

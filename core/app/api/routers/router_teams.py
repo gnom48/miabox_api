@@ -98,6 +98,7 @@ async def get_my_teams(
         TeamsRepository.repository_factory)
 ):
     async with teams_repository:
+        # TODO: надо делать
         # await teams_repository.get_all_teams_by_user_id(user_credentials.id)
         teams = []
         if teams is None:

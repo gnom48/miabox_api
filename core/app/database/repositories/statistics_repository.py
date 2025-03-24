@@ -2,7 +2,7 @@ from enum import Enum
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
-from app.database.models import StatisticOrm, StatisticPeriodOrm, WorkTypesOrm, KpiOrm, KpiLevelsOrm
+from app.database.models import StatisticOrm, WorkTypesOrm, KpiOrm, KpiLevelsOrm
 from .base_repository import BaseRepository
 import logging
 

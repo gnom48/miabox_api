@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Header, UploadFile, status
+from typing import Optional
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Header, UploadFile, status
 from fastapi.responses import FileResponse
 from app.database.repositories import CallsRepository, FilesRepository
 from app.api.models import UserCredentials, Call
@@ -8,11 +9,18 @@ from app.utils import rabbitmq
 
 router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
 
+# GOOD: проверены add_call и get_all_user_calls
+# TODO: запросы по транскрипции
+
 
 @router_calls.post("/add_call", status_code=status.HTTP_201_CREATED)
 async def add_call(
-    call: Call,
-    file: UploadFile | None = None,
+    file: Optional[UploadFile] = None,
+    date_time: int = Form(...),
+    phone_number: str = Form(...),
+    contact_name: str = Form(...),
+    length_seconds: int = Form(...),
+    call_type: int = Form(...),
     user_credentials: UserCredentials = Depends(get_user_from_request),
     calls_repository: CallsRepository = Depends(
         CallsRepository.repository_factory),
@@ -20,11 +28,17 @@ async def add_call(
         FilesRepository.repository_factory),
     minio_client: MinioClient = Depends(MinioClient.minio_client_factory)
 ):
-    # FIXME: в swagger нихуя не отправляется
-    if call.user_id != user_credentials.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Try to add another user call")
-
+    call = Call(
+        id="",
+        user_id=user_credentials.id,
+        date_time=date_time,
+        phone_number=phone_number,
+        contact_name=contact_name,
+        length_seconds=length_seconds,
+        call_type=call_type,
+        transcription=None,
+        file_id=None
+    )
     new_file_id: str | None = None
     if file is not None:
         try:

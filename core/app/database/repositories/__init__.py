@@ -2,7 +2,7 @@ from .base_repository import BaseRepository
 from .users_repository import UsersRepository
 from .files_repository import FilesRepository
 from .addresses_repository import AddressesRepository
-from .calls_repository import *
+from .calls_repository import CallsRepository
 from .notes_repository import NotesRepository
 from .tasks_repository import TasksRepository
 from .teams_repository import TeamsRepository

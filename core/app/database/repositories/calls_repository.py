@@ -27,7 +27,7 @@ class CallsRepository(BaseRepository):
                     call_type=call.call_type,
                     length_seconds=call.length_seconds,
                     transcription=None,
-                    file_id=call.new_file_id
+                    file_id=call.file_id
                 )
                 self.session.add(user_call)
                 await self.session.commit()
