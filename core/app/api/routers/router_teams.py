@@ -6,6 +6,8 @@ from app.api.models import UserCredentials
 
 router_teams = APIRouter(prefix="/team", tags=["Команды"])
 
+# GOOD: соответствует потребностям приложения
+
 
 @router_teams.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_team(

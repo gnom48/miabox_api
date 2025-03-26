@@ -7,6 +7,7 @@ from app.utils.osm import reverse_geocoding_by_coords
 router_addresses = APIRouter(prefix="/address", tags=["Адреса"])
 
 # GOOD: полностью исправно
+# GOOD: соответствует потребностям приложения
 
 
 @router_addresses.post("/add_address_info", status_code=status.HTTP_201_CREATED)

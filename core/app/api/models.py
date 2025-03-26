@@ -142,9 +142,10 @@ class StatisticAggregated(BaseModel):
 class Statistic(BaseModel):
     id: str
     user_id: str
-    datetime: int
+    date_time: int
     work_type: WorkTypes | str
     count: int
+    comment: Optional[str]
     is_archive: bool
 
 
@@ -167,8 +168,9 @@ class Address(BaseModel):
 
 class Kpi(BaseModel):
     user_id: str
-    user_level: KpiLevels | str
-    salary_percentage: float
+    kpi_level: KpiLevels | str
+    base_salary_percentage: float
+    kpi: float
 
 
 class Call(BaseModel):

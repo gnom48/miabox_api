@@ -32,7 +32,7 @@ async def auth_middleware(request: Request, call_next):
                     'user_credentials', auth_response.user)
                 return await call_next(request)
     except Exception as e:
-        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=e.__str__())
+        return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content="Server infrastructure error")
 
 
 def get_user_from_request(request: Request, token_authorization: str = Header(alias='token-authorization')) -> UserCredentials:

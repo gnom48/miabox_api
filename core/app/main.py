@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import RedirectResponse
 from contextlib import asynccontextmanager
 from app.database import create_tables, drop_tables, BaseRepository
-from app.api import auth_middleware, error_middleware, router_files, router_users, router_addresses, router_calls, router_notes, router_tasks, router_teams
+from app.api import auth_middleware, error_middleware, router_files, router_users, router_addresses, router_calls, router_notes, router_tasks, router_teams, router_statistics
 # from apscheduler.schedulers.asyncio import AsyncIOScheduler
 # from apscheduler.triggers.cron import CronTrigger
 
@@ -57,5 +57,5 @@ app.include_router(router_notes)
 app.include_router(router_tasks)
 app.include_router(router_users)
 app.include_router(router_addresses)
-# app.include_router(router_statistics)
+app.include_router(router_statistics)
 app.include_router(router_calls)

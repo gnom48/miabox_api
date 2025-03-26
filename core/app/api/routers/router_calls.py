@@ -58,7 +58,7 @@ async def add_call(
         return record_id
 
 
-@router_calls.get("/get_all_user_calls", status_code=status.HTTP_200_OK)
+@router_calls.get("/get_all_calls", status_code=status.HTTP_200_OK)
 async def get_all_calls(
     user_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),

@@ -1,5 +1,5 @@
 from enum import Enum
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from app.database.models import StatisticOrm, WorkTypesOrm, KpiOrm, KpiLevelsOrm
@@ -22,19 +22,11 @@ class StatisticsRepository(BaseRepository):
             async with self.session:
                 new_stat_record = StatisticOrm(
                     user_id=stat.user_id,
-                    period_type=stat.period_type,
-                    flyers=stat.flyers,
-                    calls=stat.calls,
-                    shows=stat.shows,
-                    meets=stat.meets,
-                    deals_rent=stat.deals_rent,
-                    deals_sale=stat.deals_sale,
-                    deposits=stat.deposits,
-                    searches=stat.searches,
-                    analytics=stat.analytics,
-                    others=stat.others,
-                    regular_contracts=stat.regular_contracts,
-                    exclusive_contracts=stat.exclusive_contracts
+                    date_time=stat.date_time,
+                    work_type=stat.work_type,
+                    comment=stat.comment,
+                    count=stat.count,
+                    is_archive=stat.is_archive
                 )
                 self.session.add(new_stat_record)
                 await self.session.commit()
@@ -43,40 +35,23 @@ class StatisticsRepository(BaseRepository):
             logging.error(e.__str__())
             return None
 
-    async def update_statistics_record(self, stat: StatisticOrm) -> str | None:
-        """Обновляет запись статистики в базу данных."""
-        try:
-            async with self.session:
-                stat_to_update = await self.session.get(StatisticOrm, stat.id)
-                stat_to_update.user_id = stat.user_id
-                stat_to_update.period_type = stat.period_type
-                stat_to_update.flyers = stat.flyers
-                stat_to_update.calls = stat.calls
-                stat_to_update.shows = stat.shows
-                stat_to_update.meets = stat.meets
-                stat_to_update.deals_rent = stat.deals_rent
-                stat_to_update.deals_sale = stat.deals_sale
-                stat_to_update.deposits = stat.deposits
-                stat_to_update.searches = stat.searches
-                stat_to_update.analytics = stat.analytics
-                stat_to_update.others = stat.others
-                stat_to_update.regular_contracts = stat.regular_contracts
-                stat_to_update.exclusive_contracts = stat.exclusive_contracts
-                await self.session.commit()
-                return True
-        except SQLAlchemyError as e:
-            logging.error(e.__str__())
-            return None
-
     async def get_statistics_in_period(self, user_id: str, start: int, end: int) -> dict[WorkTypesOrm | str, int]:
         """Возвращает статистику за период от start до end."""
         try:
             async with self.session:
-                query = select(StatisticOrm).where(StatisticOrm.user_id == user_id).where(
-                    StatisticOrm.datetime >= start).where(StatisticOrm.end <= end).group_by(StatisticOrm.work_type)
+                query = (
+                    select(
+                        StatisticOrm.work_type,
+                        func.sum(StatisticOrm.count).label('total_count')
+                    )
+                    .where(StatisticOrm.user_id == user_id)
+                    .where(StatisticOrm.date_time >= start)
+                    .where(StatisticOrm.date_time <= end)
+                    .group_by(StatisticOrm.work_type)
+                )
                 records = await self.session.execute(query)
-                all_works = list(records.scalars().all())
-                return {i.work_type.name: i.count for i in all_works}
+                all_works = records.fetchall()
+                return {work_type: total_count for work_type, total_count in all_works}
         except SQLAlchemyError as e:
             logging.error(e.__str__())
             return None
@@ -91,7 +66,7 @@ class StatisticsRepository(BaseRepository):
             return None
 
     async def set_kpi_level(self, kpi: KpiOrm) -> bool:
-        """Устанавливает KPI вручную."""
+        """Устанавливает KPI вручную. Если не было записи - создаст"""
         try:
             async with self.session:
                 current_kpi = await self.session.get(KpiOrm, kpi.user_id)
@@ -100,7 +75,7 @@ class StatisticsRepository(BaseRepository):
                         KpiOrm(
                             user_id=kpi.user_id,
                             kpi_level=kpi.kpi_level,
-                            salary_percentage=kpi.base_salary_percentage,
+                            base_salary_percentage=kpi.base_salary_percentage,
                             kpi=kpi.kpi
                         )
                     )
@@ -110,9 +85,10 @@ class StatisticsRepository(BaseRepository):
                     current_kpi.base_salary_percentage = kpi.base_salary_percentage
                     current_kpi.kpi = kpi.kpi
                 await self.session.commit()
+                return True
         except SQLAlchemyError as e:
             logging.error(e.__str__())
-            return None
+            return False
 
     def get_kpi_level(self, total_deals_count: int, top_flag: bool = False) -> tuple:
         """Возвращает кортеж типа (уровнь KPI, базовый процент зп)."""

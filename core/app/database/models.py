@@ -209,9 +209,10 @@ class StatisticOrm(BaseModelOrm):
         String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     user_id: Mapped[str] = mapped_column(
         ForeignKey(UserOrm.id, ondelete="CASCADE"))
-    datetime: Mapped[int] = mapped_column(
+    date_time: Mapped[int] = mapped_column(
         Integer, default=int(datetime.datetime.now().timestamp()))
     work_type: Mapped[WorkTypesOrm] = mapped_column(SqlEnum(WorkTypesOrm))
+    comment: Mapped[str | None] = mapped_column(String, default=None)
     count: Mapped[int] = mapped_column(Integer, default=0)
     is_archive: Mapped[bool] = mapped_column(Boolean, default=False)
 
