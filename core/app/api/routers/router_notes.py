@@ -3,14 +3,14 @@ from app.database.repositories import NotesRepository
 from app.api.models import Note, UserCredentials
 from app.api.middlewares import get_user_from_request
 
-router_notes = APIRouter(prefix="/note", tags=["Заметки"])
+router_notes = APIRouter(prefix="/notes", tags=["Заметки"])
 
 # GOOD: полностью исправно
 # GOOD: соответствует потребностям приложения
 
 
-@router_notes.get("/all", status_code=status.HTTP_200_OK)
-async def get_all_notes(
+@router_notes.get("/", status_code=status.HTTP_200_OK)
+async def get_notes(
     user_credentials: UserCredentials = Depends(get_user_from_request),
     notes_repository: NotesRepository = Depends(
         NotesRepository.repository_factory)
@@ -23,7 +23,7 @@ async def get_all_notes(
         return notes
 
 
-@router_notes.post("/add", status_code=status.HTTP_201_CREATED)
+@router_notes.post("/", status_code=status.HTTP_201_CREATED)
 async def add_note(
     note: Note,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -38,7 +38,7 @@ async def add_note(
         return note_id
 
 
-@router_notes.delete("/delete", status_code=status.HTTP_200_OK)
+@router_notes.delete("/{note_id}", status_code=status.HTTP_200_OK)
 async def delete_note(
     note_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -53,8 +53,8 @@ async def delete_note(
         return {"detail": "Note deleted successfully"}
 
 
-@router_notes.put("/edit", status_code=status.HTTP_200_OK)
-async def edit_note(
+@router_notes.put("/", status_code=status.HTTP_200_OK)
+async def update_note(
     note: Note,
     user_credentials: UserCredentials = Depends(get_user_from_request),
     notes_repository: NotesRepository = Depends(

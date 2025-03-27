@@ -4,12 +4,12 @@ from app.api.models import Team, UserTeam, UserStatuses
 from app.api.middlewares import get_user_from_request
 from app.api.models import UserCredentials
 
-router_teams = APIRouter(prefix="/team", tags=["Команды"])
+router_teams = APIRouter(prefix="/teams", tags=["Команды"])
 
 # GOOD: соответствует потребностям приложения
 
 
-@router_teams.post("/create", status_code=status.HTTP_201_CREATED)
+@router_teams.post("/", status_code=status.HTTP_201_CREATED)
 async def create_team(
     team: Team,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -24,7 +24,7 @@ async def create_team(
         return team_id
 
 
-@router_teams.delete("/delete", status_code=status.HTTP_200_OK)
+@router_teams.delete("/{team_id}", status_code=status.HTTP_200_OK)
 async def delete_team(
     team_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -39,7 +39,7 @@ async def delete_team(
         return {"detail": "Team deleted successfully"}
 
 
-@router_teams.post("/join", status_code=status.HTTP_200_OK)
+@router_teams.post("/{team_id}/join", status_code=status.HTTP_200_OK)
 async def join_team(
     team_id: str,
     joined_by: str,
@@ -61,7 +61,7 @@ async def join_team(
         return {"detail": "Joined team successfully"}
 
 
-@router_teams.put("/leave", status_code=status.HTTP_200_OK)
+@router_teams.put("/{team_id}/leave", status_code=status.HTTP_200_OK)
 async def leave_team(
     team_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -76,8 +76,8 @@ async def leave_team(
         return {"detail": "Left team successfully"}
 
 
-@router_teams.put("/move_team_role", status_code=status.HTTP_200_OK)
-async def move_team_role(
+@router_teams.put("/{team_id}/user/{user_id}/role", status_code=status.HTTP_200_OK)
+async def set_user_role_in_team(
     team_id: str,
     user_id: str,
     role: UserStatuses,
@@ -93,7 +93,7 @@ async def move_team_role(
         return {"detail": "Role changed successfully"}
 
 
-@router_teams.get("/my_teams", status_code=status.HTTP_200_OK)
+@router_teams.get("/", status_code=status.HTTP_200_OK)
 async def get_my_teams(
     user_credentials: UserCredentials = Depends(get_user_from_request),
     teams_repository: TeamsRepository = Depends(

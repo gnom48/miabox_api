@@ -13,7 +13,7 @@ router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
 # TODO: запросы по транскрипции
 
 
-@router_calls.post("/add_call", status_code=status.HTTP_201_CREATED)
+@router_calls.post("/", status_code=status.HTTP_201_CREATED)
 async def add_call(
     file: Optional[UploadFile] = None,
     date_time: int = Form(...),
@@ -58,8 +58,8 @@ async def add_call(
         return record_id
 
 
-@router_calls.get("/get_all_calls", status_code=status.HTTP_200_OK)
-async def get_all_calls(
+@router_calls.get("/user/{user_id}", status_code=status.HTTP_200_OK)
+async def get_calls(
     user_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
     calls_repository: CallsRepository = Depends(
@@ -74,7 +74,7 @@ async def get_all_calls(
         return calls
 
 
-@router_calls.get("/order_call_transcription", status_code=status.HTTP_200_OK)
+@router_calls.get("/transcription/{call_id}", status_code=status.HTTP_200_OK)
 async def order_call_transcription(
     call_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -97,8 +97,8 @@ async def order_call_transcription(
                     status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
             return rabbitmq.send_message_to_queue(call_id=call_id, object_name=file_info.obj_name, bucket_name=file_info.bucket_name)
 
-# TODO:
-# @router_calls.get("/get_order_transcription_status", status_code=status.HTTP_200_OK)
+# TODO: не убрать - раскомментировать и переписать
+# @router_calls.get("/transcription/status", status_code=status.HTTP_200_OK)
 # async def get_order_transcription_status(
 #     task_id: str,
 #     user_credentials: UserCredentials = Depends(get_user_from_request)
@@ -107,7 +107,7 @@ async def order_call_transcription(
 #     return await get_task_status_async(task_id)
 
 
-# @router_calls.put("/update_transcription", status_code=status.HTTP_200_OK)
+# @router_calls.put("/transcription", status_code=status.HTTP_200_OK)
 # async def update_transcription(
 #     transcription: str,
 #     call_id: str,

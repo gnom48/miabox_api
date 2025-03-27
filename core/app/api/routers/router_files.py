@@ -11,7 +11,7 @@ router_files = APIRouter(prefix="/files", tags=["Файлы"])
 # GOOD: полностью исправно
 
 
-@router_files.get("/info", status_code=status.HTTP_200_OK)
+@router_files.get("/{file_id}", status_code=status.HTTP_200_OK)
 async def get_file_info(
     file_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -22,7 +22,7 @@ async def get_file_info(
         return await files_repository.get_file_info_by_id(file_id)
 
 
-@router_files.post("/upload", status_code=status.HTTP_201_CREATED)
+@router_files.post("/", status_code=status.HTTP_201_CREATED)
 async def upload_file(
     file: UploadFile,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -35,8 +35,8 @@ async def upload_file(
         return await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id)
 
 
-@router_files.get("/download", status_code=status.HTTP_200_OK)
-async def download_file(
+@router_files.get("/{file_id}/download", status_code=status.HTTP_200_OK)
+async def download_file_stream(
     file_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
     minio_client: MinioClient = Depends(MinioClient.minio_client_factory),
@@ -51,8 +51,8 @@ async def download_file(
         return minio_client.download_file(file_info.bucket_name, file_info.obj_name)
 
 
-@router_files.get("/presigned_url", status_code=status.HTTP_200_OK)
-async def pre_signed_file(
+@router_files.get("/{file_id}/presigned_url", status_code=status.HTTP_200_OK)
+async def get_presigned_file(
     file_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
     minio_client: MinioClient = Depends(MinioClient.minio_client_factory),
@@ -71,7 +71,7 @@ async def pre_signed_file(
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
 
-@router_files.delete("/delete", status_code=status.HTTP_202_ACCEPTED)
+@router_files.delete("/{file_id}", status_code=status.HTTP_202_ACCEPTED)
 async def delete_file(
     file_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),

@@ -6,14 +6,14 @@ from app.api.middlewares import get_user_from_request
 from app.utils.minio_client import MinioClient
 
 
-router_users = APIRouter(prefix="/user", tags=["Пользователи"])
+router_users = APIRouter(prefix="/users", tags=["Пользователи"])
 
 # GOOD: полностью исправно
 # GOOD: соответствует потребностям приложения
 
 
-@router_users.get("/info", status_code=status.HTTP_200_OK)
-async def user_authorization(
+@router_users.get("/", status_code=status.HTTP_200_OK)
+async def get_user(
     user_credentials: UserCredentials = Depends(get_user_from_request),
     user_repository: UsersRepository = Depends(
         UsersRepository.repository_factory)
@@ -22,7 +22,7 @@ async def user_authorization(
         return await user_repository.get_user_by_id(user_credentials.id)
 
 
-@router_users.put("/update", status_code=status.HTTP_200_OK)
+@router_users.put("/", status_code=status.HTTP_200_OK)
 async def update_user(
     user: User,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -40,8 +40,9 @@ async def update_user(
         return res
 
 
-@router_users.post("/set_avatar", status_code=status.HTTP_200_OK)
+@router_users.post("/{user_id}/avatar", status_code=status.HTTP_200_OK)
 async def set_avatar(
+    user_id: str,
     file: UploadFile,
     user_credentials: UserCredentials = Depends(get_user_from_request),
     user_repository: UsersRepository = Depends(

@@ -1,4 +1,4 @@
-from fastapi import Header, Request, status
+from fastapi import HTTPException, Header, Request, status
 import aiohttp
 from datetime import datetime
 from fastapi.responses import JSONResponse
@@ -20,10 +20,9 @@ async def auth_middleware(request: Request, call_next):
                                    headers=headers, params=params) as response:
                 response_text = await response.text()
                 if not str(response.status).startswith('2'):
-                    raise Exception(response_text)
+                    raise HTTPException(status_code=response_text)
 
-                auth_response = AuthResponse.model_validate_json(
-                    response_text)
+                auth_response = AuthResponse.model_validate_json(response_text)
 
                 if not auth_response.user.is_active:
                     raise Exception("account is not active")
@@ -31,11 +30,14 @@ async def auth_middleware(request: Request, call_next):
                 request.state.__setattr__(
                     'user_credentials', auth_response.user)
                 return await call_next(request)
-    except Exception as e:
+    except aiohttp.ClientConnectorDNSError as e:
         return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content="Server infrastructure error")
+    except Exception as e:
+        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=e.__str__())
 
 
 def get_user_from_request(request: Request, token_authorization: str = Header(alias='token-authorization')) -> UserCredentials:
+    # NOTE: здесь указывается параметр token_authorization, для того чтобы не указывать его явно в каждой конечной точке
     if hasattr(request.state, 'user_credentials'):
         return request.state.__getattr__('user_credentials')
     return None

@@ -3,13 +3,13 @@ from app.database.repositories import TasksRepository
 from app.api.models import Task, UserCredentials
 from app.api.middlewares import get_user_from_request
 
-router_tasks = APIRouter(prefix="/task", tags=["Задачи"])
+router_tasks = APIRouter(prefix="/tasks", tags=["Задачи"])
 
 # GOOD: соответствует потребностям приложения
 
 
-@router_tasks.get("/all", status_code=status.HTTP_200_OK)
-async def get_all_tasks(
+@router_tasks.get("/", status_code=status.HTTP_200_OK)
+async def get_tasks(
     user_credentials: UserCredentials = Depends(get_user_from_request),
     tasks_repository: TasksRepository = Depends(
         TasksRepository.repository_factory)
@@ -36,7 +36,7 @@ async def get_completed_tasks(
         return tasks
 
 
-@router_tasks.post("/add", status_code=status.HTTP_201_CREATED)
+@router_tasks.post("/", status_code=status.HTTP_201_CREATED)
 async def add_task(
     task: Task,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -51,7 +51,7 @@ async def add_task(
         return task_id
 
 
-@router_tasks.delete("/delete", status_code=status.HTTP_200_OK)
+@router_tasks.delete("/{task_id}", status_code=status.HTTP_200_OK)
 async def delete_task(
     task_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),

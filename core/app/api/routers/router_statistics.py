@@ -7,11 +7,11 @@ from app.utils.kpi_calculator import KpiCalculator
 import datetime
 
 
-router_statistics = APIRouter(prefix="/user/statistics", tags=["Статистика"])
+router_statistics = APIRouter(prefix="/statistics", tags=["Статистика"])
 
 
-@router_statistics.post("/add", status_code=status.HTTP_201_CREATED)
-async def user_statistics_get(
+@router_statistics.post("/", status_code=status.HTTP_201_CREATED)
+async def add_statistic(
     record: Statistic,
     user_credentials: UserCredentials = Depends(get_user_from_request),
     statistics_repository: StatisticsRepository = Depends(
@@ -24,8 +24,9 @@ async def user_statistics_get(
         return record_id
 
 
-@router_statistics.get("/aggregated", status_code=status.HTTP_200_OK)
-async def user_statistics_get(
+@router_statistics.get("/{user_id}/aggregated", status_code=status.HTTP_200_OK)
+async def get_user_statistics_aggregated(
+    user_id: str,
     start: int,
     end: int,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -45,8 +46,9 @@ async def user_statistics_get(
         )
 
 
-@router_statistics.get("/kpi", status_code=status.HTTP_200_OK)
-async def user_statistics_get_with_kpi(
+@router_statistics.get("/{user_id}/kpi", status_code=status.HTTP_200_OK)
+async def get_kpi(
+    user_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
     statistics_repository: StatisticsRepository = Depends(
         StatisticsRepository.repository_factory),
@@ -93,8 +95,9 @@ async def user_statistics_get_with_kpi(
             )
 
 
-@router_statistics.put("/manually_set_kpi", status_code=status.HTTP_200_OK)
-async def user_statistics_kpi_move(
+@router_statistics.put("/{user_id}/kpi", status_code=status.HTTP_200_OK)
+async def set_kpi(
+    user_id: str,
     kpi: Kpi,
     user_credentials: UserCredentials = Depends(get_user_from_request),
     statistics_repository: StatisticsRepository = Depends(
