@@ -26,7 +26,7 @@ async def add_address(
                 address_info.address = await reverse_geocoding_by_coords()[
                     "display_name"]
             except Exception as e:
-                address_info.address = "Не удалось получить адрес"
+                address_info.address = ""
         address_id = await addresses_repository.add_address_info(address_info)
         if not address_id:
             raise HTTPException(

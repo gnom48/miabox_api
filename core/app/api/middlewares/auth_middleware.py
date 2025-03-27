@@ -8,7 +8,7 @@ from app.api.models import UserCredentials
 
 
 async def auth_middleware(request: Request, call_next):
-    if not request.url.path.startswith(("/address", "/calls", "/note", "/task", "/team", "/user", "/files")):
+    if not request.url.path.startswith(("/addresses", "/calls", "/notes", "/tasks", "/teams", "/users", "/files")):
         return await call_next(request)
 
     try:
