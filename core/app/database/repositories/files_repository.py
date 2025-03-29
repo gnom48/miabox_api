@@ -4,6 +4,10 @@ from app.database.models import FileOrm, FilesAccessOrm, FileAccessModeOrm
 from sqlalchemy import select, update, delete, insert, and_
 from .base_repository import BaseRepository
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.api.models import File, FileAccessMode, FilesAccess
 
 
 class FilesRepository(BaseRepository):

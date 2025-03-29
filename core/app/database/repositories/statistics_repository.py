@@ -5,6 +5,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.database.models import StatisticOrm, WorkTypesOrm, KpiOrm, KpiLevelsOrm
 from .base_repository import BaseRepository
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.api.models import *
 
 
 class StatisticsRepository(BaseRepository):
@@ -16,18 +20,12 @@ class StatisticsRepository(BaseRepository):
     def repository_factory():
         return StatisticsRepository()
 
-    async def add_statistics_record(self, stat: StatisticOrm) -> str | None:
+    async def add_statistics_record(self, stat: 'Statistic') -> str | None:
         """Добавляет запись статистики в базу данных."""
         try:
             async with self.session:
-                new_stat_record = StatisticOrm(
-                    user_id=stat.user_id,
-                    date_time=stat.date_time,
-                    work_type=stat.work_type,
-                    comment=stat.comment,
-                    count=stat.count,
-                    is_archive=stat.is_archive
-                )
+                new_stat_record = StatisticOrm(**stat.model_dump())
+                stat.id = None
                 self.session.add(new_stat_record)
                 await self.session.commit()
                 return new_stat_record.id
@@ -65,20 +63,13 @@ class StatisticsRepository(BaseRepository):
             logging.error(e.__str__())
             return None
 
-    async def set_kpi_level(self, kpi: KpiOrm) -> bool:
+    async def set_kpi_level(self, kpi: 'Kpi') -> bool:
         """Устанавливает KPI вручную. Если не было записи - создаст"""
         try:
             async with self.session:
                 current_kpi = await self.session.get(KpiOrm, kpi.user_id)
                 if not current_kpi:
-                    self.session.add(
-                        KpiOrm(
-                            user_id=kpi.user_id,
-                            kpi_level=kpi.kpi_level,
-                            base_salary_percentage=kpi.base_salary_percentage,
-                            kpi=kpi.kpi
-                        )
-                    )
+                    self.session.add(KpiOrm(**kpi.model_dump()))
                 else:
                     current_kpi.user_id = kpi.user_id
                     current_kpi.kpi_level = kpi.kpi_level

@@ -4,6 +4,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.database.models import AddressOrm
 from .base_repository import BaseRepository
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.api.models import Address
 
 
 class AddressesRepository(BaseRepository):
@@ -15,17 +19,12 @@ class AddressesRepository(BaseRepository):
     def repository_factory():
         return AddressesRepository()
 
-    async def add_address_info(self, data: AddressOrm) -> str:
+    async def add_address_info(self, data: 'Address') -> str:
         """Добавляет информацию об адресе в базу данных."""
         try:
             async with self.session:
-                address_info_orm = AddressOrm(
-                    user_id=data.user_id,
-                    address=data.address,
-                    lat=data.lat,
-                    lon=data.lon,
-                    date_time=data.date_time
-                )
+                address_info_orm = AddressOrm(**data.model_dump())
+                address_info_orm.id = None
                 self.session.add(address_info_orm)
                 await self.session.commit()
                 return address_info_orm.id

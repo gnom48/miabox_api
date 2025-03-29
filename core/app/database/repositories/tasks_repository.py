@@ -3,6 +3,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.database.models import TaskOrm, WorkTypesOrm
 from .base_repository import BaseRepository
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.api.models import Task, WorkTypes
 
 
 class TasksRepository(BaseRepository):
@@ -26,18 +30,12 @@ class TasksRepository(BaseRepository):
             logging.error(e.__str__())
             return None
 
-    async def add_task(self, data: TaskOrm) -> str | None:
+    async def add_task(self, data: 'Task') -> str | None:
         """Добавляет новую задачу в базу данных."""
         try:
             async with self.session:
-                new_task = TaskOrm(
-                    user_id=data.user_id,
-                    work_type=data.work_type,
-                    description=data.description,
-                    created_at=data.created_at,
-                    duration_seconds=data.duration_seconds,
-                    is_completed=False
-                )
+                new_task = TaskOrm(**data.model_dump())
+                new_task.id = None
                 self.session.add(new_task)
                 await self.session.commit()
                 return new_task.id

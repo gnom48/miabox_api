@@ -1,22 +1,13 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, update
-# UserOrm, AddressOrm, CallOrm, LastMonthStatisticsWithKpiOrm
-from app.database.models import TeamOrm, UserTeamOrm, UserStatusesOrm
+from app.database.models import TeamOrm, UserTeamOrm, UserStatusesOrm, UserOrm, AddressOrm, CallOrm
 from .base_repository import BaseRepository
 import logging
+from typing import TYPE_CHECKING
 
-
-# class UserWithStats:
-#     def __init__(self, user: UserOrm, statistics: Dict[StatisticPeriods, Union[None, StatisticsOrm]], role: UserStatuses):
-#         self.user = user
-#         self.statistics = statistics
-#         self.role = role
-
-
-# class TeamWithInfo:
-#     def __init__(self, team: TeamOrm, members: list[UserWithStats]):
-#         self.team = team
-#         self.members = members
+if TYPE_CHECKING:
+    from app.api.models import *
+    from app.common.models import *
 
 
 class TeamsRepository(BaseRepository):
@@ -28,44 +19,35 @@ class TeamsRepository(BaseRepository):
     def repository_factory():
         return TeamsRepository()
 
-    # async def get_all_teams_by_user_id(self, user_id: str) -> list[TeamWithInfo] | None:
-    #     """Возвращает все команды, связанные с пользователем, с дополнительной информацией."""
-    #     try:
-    #         async with self.session:
-    #             query = select(UserTeamOrm).where(
-    #                 UserTeamOrm.user_id == user_id)
-    #             result = await self.session.execute(query)
-    #             teams_user = list(result.scalars().all())
-    #             res_teams = []
+    async def get_all_teams_by_user_id(self, user_id: str) -> list['TeamWithInfo'] | None:
+        """Возвращает все команды, связанные с пользователем, с дополнительной информацией."""
+        from app.common.models import TeamWithInfo, UserWithRole
+        try:
+            async with self.session:
+                query = select(UserTeamOrm).where(
+                    UserTeamOrm.user_id == user_id)
+                result = await self.session.execute(query)
+                user_teams = result.scalars().all()
 
-    #             for team_user in teams_user:
-    #                 team = await self.session.get(TeamOrm, team_user.team_id)
-    #                 team_with_info = TeamWithInfo(team=team, members=[])
+                teams_with_info = []
+                for user_team in user_teams:
+                    team = await self.session.get(TeamOrm, user_team.team_id)
 
-    #                 query_userteam = select(UserTeamOrm).where(
-    #                     UserTeamOrm.team_id == team.id)
-    #                 result_userteam = await self.session.execute(query_userteam)
-    #                 team_users = list(result_userteam.scalars().all())
+                    query_userteam = select(UserTeamOrm).where(
+                        UserTeamOrm.team_id == team.id)
+                    result_team_users = await self.session.execute(query_userteam)
+                    team_users = result_team_users.scalars().all()
 
-    #                 team_with_info.members = [
-    #                     UserWithStats(
-    #                         user=self.__hide_password(await self.session.get(UserOrm, user_team.user_id)),
-    #                         statistics={
-    #                             period: await self.get_statistics_by_period(period=period, user_id=user_team.user_id)
-    #                             for period in [StatisticPeriods.DAY_STATISTICS_PERIOD, StatisticPeriods.WEEK_STATISTICS_PERIOD, StatisticPeriods.MONTH_STATISTICS_PERIOD]
-    #                         },
-    #                         addresses=(await self.session.execute(select(AddressOrm).where(AddressOrm.user_id == user_team.user_id))).scalars().all(),
-    #                         calls=(await self.session.execute(select(CallOrm).where(CallOrm.user_id == user_team.user_id))).scalars().all(),
-    #                         kpi=await self.session.get(LastMonthStatisticsWithKpiOrm, user_team.user_id),
-    #                         role=user_team.role.name
-    #                     )
-    #                     for user_team in team_users
-    #                 ]
-    #                 res_teams.append(team_with_info)
-    #             return res_teams
-    #     except SQLAlchemyError as e:
-    #         logging.error(e.__str__())
-    #         return None
+                    teams_with_info.append(TeamWithInfo(team=team, members=[
+                        UserWithRole(
+                            user=await self.session.get(UserOrm, team_user.user_id),
+                            role=team_user.role.name
+                        ) for team_user in team_users
+                    ]))
+                return teams_with_info
+        except SQLAlchemyError as e:
+            logging.error(e.__str__())
+            return None
 
     async def can_user_invite(self, user_id: str, team_id: str) -> bool:
         """Может ли пользователь пригласить пользователя в команду."""
@@ -80,19 +62,18 @@ class TeamsRepository(BaseRepository):
             logging.error(e.__str__())
             return None
 
-    async def add_team(self, data: TeamOrm, user_id: str) -> str | None:
+    async def add_team(self, data: 'Team', user_id: str) -> str | None:
         """Добавляет новую команду в базу данных."""
+        from app.api.models import Team, UserTeam, UserStatuses
         try:
             async with self.session:
-                new_team = TeamOrm(
-                    name=data.name,
-                    created_at=data.created_at
-                )
+                new_team = TeamOrm(**data.model_dump())
+                new_team.id = None
                 self.session.add(new_team)
                 await self.session.commit()
 
-                user_team = UserTeamOrm(
-                    role=UserStatusesOrm.OWNER,
+                user_team = UserTeam(
+                    role=UserStatuses.OWNER,
                     team_id=new_team.id,
                     user_id=user_id
                 )
@@ -116,8 +97,9 @@ class TeamsRepository(BaseRepository):
             logging.error(e.__str__())
             return False
 
-    async def edit_team(self, data: TeamOrm) -> bool:
+    async def edit_team(self, data: 'Team') -> bool:
         """Редактирует информацию о команде в базе данных."""
+        from app.api.models import Team
         try:
             async with self.session:
                 team_to_edit = await self.session.get(TeamOrm, data.id)
@@ -130,28 +112,24 @@ class TeamsRepository(BaseRepository):
             logging.error(e.__str__())
             return False
 
-    async def join_to_team(self, data: UserTeamOrm) -> bool:
+    async def join_to_team(self, data: 'UserTeam') -> bool:
         """Добавляет пользователя в команду."""
+        from app.api.models import UserTeam
         try:
             async with self.session:
-                self.session.add(
-                    UserTeamOrm(
-                        team_id=data.team_id,
-                        user_id=data.user_id,
-                        role=UserStatusesOrm.USER
-                    )
-                )
+                self.session.add(UserTeamOrm(**data.model_dump()))
                 await self.session.commit()
                 return True
         except SQLAlchemyError as e:
             logging.error(e.__str__())
             return False
 
-    async def move_team_user_role(self, team_id: str, user_id: str, role: UserStatusesOrm) -> bool:
+    async def move_team_user_role(self, team_id: str, user_id: str, role: 'UserStatuses') -> bool:
         """Изменяет роль пользователя в команде."""
+        from app.api.models import UserStatuses
         try:
             async with self.session:
-                role_orm = UserStatusesOrm.OWNER if role == UserStatusesOrm.OWNER else UserStatusesOrm.USER
+                role_orm = UserStatusesOrm.OWNER if role == UserStatuses.OWNER else UserStatusesOrm.USER
                 query = (
                     update(UserTeamOrm)
                     .where(UserTeamOrm.team_id == team_id, UserTeamOrm.user_id == user_id)

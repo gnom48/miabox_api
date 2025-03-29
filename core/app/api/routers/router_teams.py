@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends, status
-from app.database.repositories import TeamsRepository, UsersRepository
+import time
+from fastapi import APIRouter, HTTPException, Depends, Query, status
+from app.database.repositories import TeamsRepository, UsersRepository, StatisticsRepository, AddressesRepository, CallsRepository
 from app.api.models import Team, UserTeam, UserStatuses
 from app.api.middlewares import get_user_from_request
 from app.api.models import UserCredentials
+from app.common.models import *
 
 router_teams = APIRouter(prefix="/teams", tags=["Команды"])
 
@@ -95,15 +97,47 @@ async def set_user_role_in_team(
 
 @router_teams.get("/", status_code=status.HTTP_200_OK)
 async def get_my_teams(
+    show_stats: bool = Query(default=False),
+    show_addresses: bool = Query(default=False),
+    show_calls: bool = Query(default=False),
     user_credentials: UserCredentials = Depends(get_user_from_request),
     teams_repository: TeamsRepository = Depends(
-        TeamsRepository.repository_factory)
+        TeamsRepository.repository_factory),
+    statistics_repository: StatisticsRepository = Depends(
+        StatisticsRepository.repository_factory),
+    address_repository: AddressesRepository = Depends(
+        AddressesRepository.repository_factory),
+    calls_repository: CallsRepository = Depends(
+        CallsRepository.repository_factory)
 ):
     async with teams_repository:
-        # TODO: надо делать
-        # await teams_repository.get_all_teams_by_user_id(user_credentials.id)
-        teams = []
+        teams = await teams_repository.get_all_teams_by_user_id(user_credentials.id)
         if teams is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="No teams found")
+        if show_stats:
+            async with statistics_repository:
+                now = datetime.datetime.now()
+                first_day_of_month = datetime.datetime(now.year, now.month, 1)
+                start_unix = int(time.mktime(first_day_of_month.timetuple()))
+                if now.month == 12:
+                    last_day_of_month = datetime.datetime(
+                        now.year + 1, 1, 1) - datetime.timedelta(days=1)
+                else:
+                    last_day_of_month = datetime.datetime(
+                        now.year, now.month + 1, 1) - datetime.timedelta(days=1)
+                end_unix = int(time.mktime(last_day_of_month.timetuple()))
+                # NOTE: здесь start и end - это первое и последнее число текущего календарного месяца
+                for t in teams:
+                    for m in t.members:
+                        m.stats = await statistics_repository.get_statistics_in_period(m.user.id, start_unix, end_unix)
+                        m.kpi = await statistics_repository.get_last_month_kpi(m.user.id)
+        if show_calls:
+            async with calls_repository:
+                # TODO: потом дописать
+                ...
+        if show_addresses:
+            async with address_repository:
+                # TODO: потом дописать
+                ...
         return teams

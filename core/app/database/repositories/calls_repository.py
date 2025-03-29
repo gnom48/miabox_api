@@ -4,6 +4,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.database.models import CallOrm, FileOrm
 from .base_repository import BaseRepository
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.api.models import Call
 
 
 class CallsRepository(BaseRepository):
@@ -15,20 +19,13 @@ class CallsRepository(BaseRepository):
     def repository_factory():
         return CallsRepository()
 
-    async def add_call_record_to_storage(self, call: CallOrm) -> str | None:
+    async def add_call_record_to_storage(self, call: 'Call') -> str | None:
         """Добавляет запись звонка в базу данных."""
+        from app.api.models import Call
         try:
             async with self.session:
-                user_call = CallOrm(
-                    user_id=call.user_id,
-                    date_time=call.date_time,
-                    phone_number=call.phone_number,
-                    contact_name=call.contact_name,
-                    call_type=call.call_type,
-                    length_seconds=call.length_seconds,
-                    transcription=None,
-                    file_id=call.file_id
-                )
+                user_call = CallOrm(**call.model_dump())
+                user_call.id = None
                 self.session.add(user_call)
                 await self.session.commit()
                 return user_call.id

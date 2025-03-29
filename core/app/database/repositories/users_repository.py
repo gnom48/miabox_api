@@ -2,6 +2,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.database.models import UserOrm, UserTypesOrm
 from .base_repository import BaseRepository
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.api.models import User, UserTypes
 
 
 class UsersRepository(BaseRepository):
@@ -13,7 +17,7 @@ class UsersRepository(BaseRepository):
     def repository_factory():
         return UsersRepository()
 
-    async def update_user(self, data: UserOrm) -> bool:
+    async def update_user(self, data: 'User') -> bool:
         """Редактирует информацию о пользователе в базе данных."""
         try:
             async with self.session:

@@ -4,6 +4,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.database.models import NoteOrm
 from .base_repository import BaseRepository
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.api.models import Note
 
 
 class NotesRepository(BaseRepository):
@@ -26,15 +30,13 @@ class NotesRepository(BaseRepository):
             logging.error(e.__str__())
             return None
 
-    async def add_note(self, data: NoteOrm) -> str | None:
+    async def add_note(self, data: 'Note') -> str | None:
         """Добавляет новую заметку в базу данных."""
+        from app.api.models import Note
         try:
             async with self.session:
                 new_note = NoteOrm(
-                    user_id=data.user_id,
-                    title=data.title,
-                    description=data.description,
-                    created_at=data.created_at
+                    **data.model_dump()
                 )
                 self.session.add(new_note)
                 await self.session.commit()
@@ -57,8 +59,9 @@ class NotesRepository(BaseRepository):
             logging.error(e.__str__())
             return False
 
-    async def edit_note(self, data: NoteOrm) -> bool:
+    async def edit_note(self, data: 'Note') -> bool:
         """Редактирует существующую заметку в базе данных."""
+        from app.api.models import Note
         try:
             async with self.session:
                 note_to_edit = await self.session.get(NoteOrm, data.id)

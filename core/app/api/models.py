@@ -183,22 +183,3 @@ class Call(BaseModel):
     call_type: int
     transcription: Optional[str]
     file_id: Optional[str]
-
-
-@dataclass
-class TokenModel:
-    user_id: UUID
-    exp: float
-    jti: UUID
-    iat: float
-    sub: str
-
-    @classmethod
-    def from_json(cls, json_data: dict):
-        return cls(
-            user_id=UUID(json_data["user_id"]),
-            exp=json_data["exp"],
-            jti=UUID(json_data["jti"]),
-            iat=json_data["iat"],
-            sub=json_data["sub"]
-        )
