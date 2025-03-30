@@ -1,0 +1,51 @@
+name: miabox-server
+
+services:
+  nginx:
+    extends:
+      file: docker-compose.nginx.yaml
+      service: nginx
+
+  postgres:
+    extends:
+      file: docker-compose.postgres.yaml
+      service: postgres
+
+  auth:
+    extends:
+      file: docker-compose.auth.yaml
+      service: auth
+
+  core:
+    extends:
+      file: docker-compose.core.yaml
+      service: core
+
+  whisper:
+    extends:
+      file: docker-compose.whisper.yaml
+      service: whisper
+
+  knowledgebase:
+    extends:
+      file: docker-compose.knowledgebase.yaml
+      service: knowledgebase
+
+  minio:
+    extends:
+      file: docker-compose.minio.yaml
+      service: minio
+
+  rabbitmq:
+    extends:
+      file: docker-compose.rabbitmq.yaml
+      service: rabbitmq
+
+volumes:
+  postgres-data:
+  minio-data:
+  rabbitmq-data:
+
+networks:
+  network-bridge:
+    driver: bridge

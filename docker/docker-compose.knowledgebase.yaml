@@ -1,0 +1,29 @@
+services:
+  knowledgebase:
+    container_name: knowledgebase-service
+    build: 
+      context: ../knowledgebase
+      args:
+        KNOWLEDGEBASE_PORT: ${KNOWLEDGEBASE_PORT}
+
+        LOG_LEVEL: ${LOG_LEVEL}
+    ports:
+      - "${KNOWLEDGEBASE_PORT}:${KNOWLEDGEBASE_PORT}"
+    restart: unless-stopped
+    environment:
+      MINIO_API_HOST: ${MINIO_API_HOST}
+      MINIO_API_PORT: ${MINIO_API_PORT}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+      CORE_HOST: ${CORE_HOST}
+      CORE_PORT: ${CORE_PORT}
+
+      SECRET_KEY: ${SECRET_KEY}
+    networks:
+      - network-bridge
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${KNOWLEDGEBASE_PORT}/test" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
