@@ -16,7 +16,7 @@ async def auth_middleware(request: Request, call_next):
                    'Authorization': request.headers['token-authorization']}
         params = {}
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"http://auth:{load_var_from_toml('services', 'auth_port')}/api/Accounts/Me",
+            async with session.get(f"http://{load_var_from_toml('services', 'auth_host')}:{load_var_from_toml('services', 'auth_port')}/api/Accounts/Me",
                                    headers=headers, params=params) as response:
                 response_text = await response.text()
                 if not str(response.status).startswith('2'):

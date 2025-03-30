@@ -10,7 +10,7 @@ url = URL.create(
     drivername="postgresql+asyncpg",
     username=config['postgres_user'],
     password=config['postgres_password'],
-    host="postgres",
+    host=config['postgres_host'],
     port=config['postgres_port'],
     database=config['postgres_db']
 )

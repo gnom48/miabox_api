@@ -1,27 +1,6 @@
 import os
 import toml
 
-"""
-В сервисе CORE необходимы:
-
-- POSTGRES_PORT
-- POSTGRES_DB
-- POSTGRES_PASSWORD
-- POSTGRES_USER
-
-- AUTH_PORT
-- WHISPER_PORT
-- MINIO_API_PORT
-- MINIO_ROOT_USER
-- MINIO_ROOT_PASSWORD
-- RABBITMQ_PORT
-- RABBITMQ_DEFAULT_USER
-- RABBITMQ_DEFAULT_PASS
-
-- SECRET_KEY
-
-- LOG_LEVEL
-"""
 
 TOML_PATH = r'app/config/config.toml'
 
@@ -35,13 +14,16 @@ def dump_env_to_toml(filepath: str):
             "postgres_password": os.getenv("POSTGRES_PASSWORD")
         },
         "services": {
+            "auth_host": os.getenv("AUTH_HOST"),
             "auth_port": os.getenv("AUTH_PORT"),
+            "whisper_host": os.getenv("WHISPER_HOST"),
             "whisper_port": os.getenv("WHISPER_PORT"),
-            "minio_port": os.getenv("MINIO_API_PORT"),
+            "minio_api_host": os.getenv("MINIO_API_HOST"),
+            "minio_api_port": os.getenv("MINIO_API_PORT"),
             "minio_api_port": os.getenv("MINIO_API_PORT"),
             "minio_access_key": os.getenv("MINIO_ROOT_USER"),
             "minio_secret_key": os.getenv("MINIO_ROOT_PASSWORD"),
-            "minio_api_ip": os.getenv("MINIO_API_IP"),
+            "rabbitmq_host": os.getenv("RABBITMQ_HOST"),
             "rabbitmq_port": os.getenv("RABBITMQ_PORT"),
             "rabbitmq_user": os.getenv("RABBITMQ_DEFAULT_USER"),
             "rabbitmq_password": os.getenv("RABBITMQ_DEFAULT_PASS"),

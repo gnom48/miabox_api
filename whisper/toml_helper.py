@@ -1,21 +1,6 @@
 import os
 import toml
 
-"""
-В сервисе WHISPER необходимы:
-
-- RABBITMQ_PORT
-- CORE_PORT
-
-- MINIO_API_PORT
-- MINIO_ACCESS_KEY
-- MINIO_SECRET_KEY
-
-- SECRET_KEY
-
-- MODEL
-- LOG_LEVEL
-"""
 
 TOML_PATH = r'whisper/app/config/config.toml'
 
@@ -23,13 +8,13 @@ TOML_PATH = r'whisper/app/config/config.toml'
 def dump_env_to_toml(filepath: str):
     config_data = {
         "services": {
-            "core_port": os.getenv("CORE_PORT"),
+            "rabbitmq_host": os.getenv("RABBITMQ_HOST"),
             "rabbitmq_port": os.getenv("RABBITMQ_PORT"),
             "rabbitmq_user": os.getenv("RABBITMQ_DEFAULT_USER"),
             "rabbitmq_password": os.getenv("RABBITMQ_DEFAULT_PASS"),
         },
         "minio": {
-            "minio_api_ip": os.getenv("MINIO_API_IP"),
+            "minio_api_host": os.getenv("MINIO_API_HOST"),
             "minio_api_port": os.getenv("MINIO_API_PORT"),
             "minio_access_key": os.getenv("MINIO_ROOT_USER"),
             "minio_secret_key": os.getenv("MINIO_ROOT_PASSWORD")

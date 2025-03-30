@@ -58,7 +58,7 @@ class MinioClient:
     def minio_client_factory():
         config = load_data_from_toml()["services"]
         return MinioClient(
-            endpoint=config["minio_api_ip"],
+            endpoint=f"{config["minio_api_host"]}:{config["minio_api_port"]}",
             access_key=config["minio_access_key"],
             secret_key=config["minio_secret_key"]
         )

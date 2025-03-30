@@ -11,7 +11,7 @@ async def lifespan():
     logging.debug("Старт")
 
     minio_client = MinioClient(
-        f"minio:{load_var_from_toml("minio", "minio_api_port")}",
+        f"{load_var_from_toml("minio", "minio_api_host")}:{load_var_from_toml("minio", "minio_api_port")}",
         load_var_from_toml("minio", "minio_access_key"),
         load_var_from_toml("minio", "minio_secret_key")
     )

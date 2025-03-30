@@ -20,7 +20,7 @@ async def send_message_to_queue(
     try:
         rabbitmq_data = load_data_from_toml()
         connection = await connect_robust(
-            host="rabbitmq",
+            host=rabbitmq_data["services"]["rabbitmq_host"],
             port=rabbitmq_data["services"]["rabbitmq_port"],
             login=rabbitmq_data["services"]["rabbitmq_user"],
             password=rabbitmq_data["services"]["rabbitmq_password"]
