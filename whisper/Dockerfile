@@ -16,6 +16,6 @@ RUN apt-get update && apt-get install -y portaudio19-dev ffmpeg
 COPY requirements.txt requirements.txt
 RUN pip install --upgrade -r requirements.txt
 
-COPY ./ ./
+COPY . .
 
 CMD ["sh", "-c", "python app/toml_helper.py && python app/main.py"]
