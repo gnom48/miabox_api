@@ -18,4 +18,4 @@ RUN pip install --upgrade -r requirements.txt
 
 COPY ./ ./
 
-CMD ["sh", "-c", "python app/toml_helper.py && python app/set_workdir.py && python app/main.py"]
+CMD ["sh", "-c", "python app/toml_helper.py && python set_workdir.py && python app/main.py"]
