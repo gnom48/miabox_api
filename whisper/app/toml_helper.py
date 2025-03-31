@@ -2,7 +2,7 @@ import os
 import toml
 
 
-TOML_PATH = r'whisper/app/config/config.toml'
+TOML_PATH = r'app/config/config.toml'
 
 
 def dump_env_to_toml(filepath: str):

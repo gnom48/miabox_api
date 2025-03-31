@@ -5,8 +5,6 @@ WORKDIR /whisper
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-COPY requirements.txt requirements.txt
-
 # RUN pip install --no-cache torch==2.3.1
 RUN pip install torch==2.3.1
 # RUN pip install --no-cache nvidia-cudnn-cu12==8.9.2.26
@@ -14,10 +12,11 @@ RUN pip install nvidia-cudnn-cu12==8.9.2.26
 RUN apt-get update && apt-get install -y portaudio19-dev ffmpeg
 # RUN pip install --no-cache --upgrade -r requirements.txt
 
+COPY requirements.txt requirements.txt
 RUN pip install --upgrade -r requirements.txt
 
-COPY ./ whisper
+COPY ./ ./
 
 ARG WHISPER_PORT
 
-CMD ["sh", "-c", "python toml_helper.py && uvicorn whisper.app.main:app --host 0.0.0.0 --port ${WHISPER_PORT} --reload"]
+CMD ["sh", "-c", "python app/toml_helper.py && python app/main.py"]

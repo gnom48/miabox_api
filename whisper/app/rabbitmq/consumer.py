@@ -1,5 +1,5 @@
 from aio_pika import connect_robust, Message, Queue, Channel, IncomingMessage
-from whisper.toml_helper import load_data_from_toml
+from whisper.app.toml_helper import load_data_from_toml
 from ..minio_client import MinioClient, TMP_PATH
 from ..transcription import AsyncWhisper
 import json

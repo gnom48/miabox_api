@@ -1,9 +1,10 @@
+import asyncio
 from .transcription import AsyncWhisper, Models
 from contextlib import asynccontextmanager
 import logging
 from .rabbitmq import listen
 from minio_client import MinioClient
-from ..toml_helper import load_var_from_toml
+from .toml_helper import load_var_from_toml
 
 
 @asynccontextmanager
@@ -27,3 +28,14 @@ async def lifespan():
     yield
 
     logging.debug("Выключение")
+
+
+async def main():
+    async with lifespan() as _:
+        while True:
+            await asyncio.sleep(3600)
+
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
