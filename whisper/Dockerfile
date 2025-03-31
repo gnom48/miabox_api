@@ -17,6 +17,4 @@ RUN pip install --upgrade -r requirements.txt
 
 COPY ./ ./
 
-ARG WHISPER_PORT
-
 CMD ["sh", "-c", "python app/toml_helper.py && python app/main.py"]

@@ -3,10 +3,6 @@ services:
     container_name: whisper-service
     build: 
       context: ../whisper
-      args:
-        WHISPER_PORT: ${WHISPER_PORT}
-    ports:
-      - "${WHISPER_PORT}:${WHISPER_PORT}"
     restart: unless-stopped
     networks:
       - network-bridge
