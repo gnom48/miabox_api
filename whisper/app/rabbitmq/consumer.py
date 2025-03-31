@@ -1,15 +1,13 @@
 from aio_pika import connect_robust, Message, Queue, Channel, IncomingMessage
 from whisper.app.toml_helper import load_data_from_toml
-from ..minio_client import MinioClient, TMP_PATH
-from ..transcription import AsyncWhisper
+from app.minio_client import MinioClient, TMP_PATH
+from app.transcription import AsyncWhisper
 import json
 import os
 import asyncio
 import logging
 from uuid import uuid4
-from .msg_queued import MsgQueued
-from .msg_procces import MsgProccess
-from .msg_complete import MsgComplete
+from .models import MsgQueued, MsgProccess, MsgComplete
 
 __minio_client: MinioClient
 __async_whisper_model: AsyncWhisper

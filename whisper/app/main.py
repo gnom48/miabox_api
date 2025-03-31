@@ -1,10 +1,10 @@
 import asyncio
-from .transcription import AsyncWhisper, Models
+from app.transcription import AsyncWhisper
 from contextlib import asynccontextmanager
 import logging
-from .rabbitmq import listen
+from app.rabbitmq import listen
 from minio_client import MinioClient
-from .toml_helper import load_var_from_toml
+from app.toml_helper import load_var_from_toml
 
 
 @asynccontextmanager
