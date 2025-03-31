@@ -1,4 +1,5 @@
-FROM python:3.10-slim
+FROM python:3.10
+# потому что в 3.10-slim нету gcc
 
 WORKDIR /whisper
 
