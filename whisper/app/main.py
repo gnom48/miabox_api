@@ -3,7 +3,7 @@ from app.transcription import AsyncWhisper
 from contextlib import asynccontextmanager
 import logging
 from app.rabbitmq import listen
-from minio_client import MinioClient
+from app.minio_client import MinioClient
 from app.toml_helper import load_var_from_toml
 
 
