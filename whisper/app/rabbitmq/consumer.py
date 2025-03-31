@@ -84,7 +84,7 @@ async def listen(minio_client: MinioClient, async_whisper_model: AsyncWhisper):
 
     connection = await connect_robust(
         host=rabbitmq_data["services"]["rabbitmq_host"],
-        port=rabbitmq_data["services"]["rabbitmq_port"],
+        port=int(rabbitmq_data["services"]["rabbitmq_port"]),
         login=rabbitmq_data["services"]["rabbitmq_user"],
         password=rabbitmq_data["services"]["rabbitmq_password"]
     )
