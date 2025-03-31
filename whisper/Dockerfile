@@ -14,7 +14,7 @@ RUN pip install nvidia-cudnn-cu12==8.9.2.26
 RUN apt-get update && apt-get install -y portaudio19-dev ffmpeg
 # RUN pip install --no-cache --upgrade -r requirements.txt
 
-RUN apt-get update && apt-get install -y python3-distutils && python3 -c "import distutils; print('distutils installed')"
+RUN apt-get update && apt-get install -y python3.12-distutils && python -c "import distutils; print('distutils installed')"
 
 RUN pip install --upgrade -r requirements.txt
 
