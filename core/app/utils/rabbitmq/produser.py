@@ -3,9 +3,7 @@ from app.toml_helper import load_data_from_toml
 import os
 import asyncio
 import logging
-from .msg_queued import MsgQueued
-from .msg_procces import MsgProccess
-from .msg_complete import MsgComplete
+from .models import MsgQueued, MsgProccess, MsgComplete
 from app.database.repositories import CallsRepository
 
 __queues_names = ["queued", "process", "complete"]
