@@ -3,9 +3,9 @@ services:
     container_name: nginx-service
     image: nginx:latest
     volumes:
-      - ./nginx/logs:/var/log/nginx
-      - ./nginx/templates:/etc/nginx/templates
-      - ./nginx/res:/usr/share/nginx/html
+      - ../nginx/logs:/var/log/nginx
+      - ../nginx/templates:/etc/nginx/templates
+      - ../nginx/res:/usr/share/nginx/html
     ports:
       - "${NGINX_OUTER_PORT}:${NGINX_INNER_PORT}"
     environment:
