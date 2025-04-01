@@ -5,7 +5,7 @@ import json
 @dataclass
 class MsgComplete:
     call_id: str
-    result: str
+    result: dict
 
     @classmethod
     def from_json(cls, json_str: str):

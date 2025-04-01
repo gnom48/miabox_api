@@ -1,9 +1,13 @@
+import asyncio
 from datetime import datetime
+import logging
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import RedirectResponse
 from contextlib import asynccontextmanager
 from app.database import create_tables, drop_tables, BaseRepository
 from app.api import auth_middleware, error_middleware, router_files, router_users, router_addresses, router_calls, router_notes, router_tasks, router_teams, router_statistics
+from app.utils.rabbitmq import listen
+from app.toml_helper import load_var_from_toml
 # from apscheduler.schedulers.asyncio import AsyncIOScheduler
 # from apscheduler.triggers.cron import CronTrigger
 
@@ -12,16 +16,28 @@ from app.api import auth_middleware, error_middleware, router_files, router_user
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logging.basicConfig(level=logging._nameToLevel[str(
+        load_var_from_toml("app", "log_level")).upper()])
     # main_scheduler.add_job(func=Repository.clear_day_statistics, trigger=CronTrigger(hour=3-3, minute=0))
     # main_scheduler.add_job(func=Repository.clear_week_statistics, trigger='cron', day_of_week='sun', hour=3-3, minute=5)
     # main_scheduler.add_job(func=Repository.clear_month_statistics, trigger='cron', day='last', hour=3-3, minute=10)
     # main_scheduler.start()
     # print("Планировщики запущены")
-    print("Сервер запущен")
+    logging.debug("Сервер запущен")
     # await drop_tables()
     # await create_tables()
+
+    listen_task = asyncio.create_task(listen())
+    logging.debug("Слушатель сообщений запущен")
+
     yield
-    print("Сервер выключен")
+    listen_task.cancel()
+    try:
+        await listen_task
+    except asyncio.CancelledError:
+        logging.debug("Слушатель сообщений остановлен")
+
+    logging.debug("Сервер выключен")
 
 
 app = FastAPI(lifespan=lifespan,

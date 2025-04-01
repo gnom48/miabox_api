@@ -8,6 +8,7 @@ TOML_PATH = r'app/config/config.toml'
 def dump_env_to_toml(filepath: str):
     config_data = {
         "database": {
+            "postgres_host": os.getenv("POSTGRES_HOST"),
             "postgres_port": os.getenv("POSTGRES_PORT"),
             "postgres_db": os.getenv("POSTGRES_DB"),
             "postgres_user": os.getenv("POSTGRES_USER"),

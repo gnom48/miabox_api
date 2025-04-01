@@ -15,7 +15,7 @@ __encoding_to = "utf-8"
 
 
 async def on_message_proccess(incoming_message: IncomingMessage):
-    async with incoming_message.process():
+    async with incoming_message.process(ignore_processed=True):
         logging.debug(
             f"Получено сообщение в process: {incoming_message.body.decode(__encoding_to)}")
         try:
@@ -45,7 +45,7 @@ async def on_message_proccess(incoming_message: IncomingMessage):
 
 
 async def on_message_queued(incoming_message: IncomingMessage):
-    async with incoming_message.process():
+    async with incoming_message.process(ignore_processed=True):
         logging.debug(
             f"Получено сообщение в queued: {incoming_message.body.decode(__encoding_to)}")
         try:

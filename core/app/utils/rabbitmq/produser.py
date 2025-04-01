@@ -49,18 +49,19 @@ async def send_message_to_queue(
 
 
 async def on_message_complete(incoming_message: IncomingMessage):
-    async with incoming_message.process():
+    async with incoming_message.process(ignore_processed=True):
         logging.debug(
             f"Получено сообщение в complete: {incoming_message.body.decode(__encoding_to)}")
         try:
             msg_data = MsgComplete.from_json(
                 incoming_message.body.decode(__encoding_to))
-
             calls_repo = CallsRepository.repository_factory()
             async with calls_repo:
-                calls_repo.update_transcription(
-                    msg_data.call_id, msg_data.result)
-
+                success = await calls_repo.update_transcription(
+                    msg_data.call_id, msg_data.result.get('text', None))
+            if not success:
+                # WARNING: если будет ошибка, то при requeue=True получится бесконечный цикл
+                await incoming_message.reject(requeue=False)
             await incoming_message.ack()
         except Exception as e:
             logging.error("Ошибка обработки сообщения", exc_info=True)
@@ -72,8 +73,8 @@ async def listen():
 
     rabbitmq_data = load_data_from_toml()
     connection = await connect_robust(
-        host="rabbitmq",
-        port=rabbitmq_data["services"]["rabbitmq_port"],
+        host=rabbitmq_data["services"]["rabbitmq_host"],
+        port=int(rabbitmq_data["services"]["rabbitmq_port"]),
         login=rabbitmq_data["services"]["rabbitmq_user"],
         password=rabbitmq_data["services"]["rabbitmq_password"]
     )

@@ -95,7 +95,7 @@ async def order_call_transcription(
             if not file_info:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
-            return rabbitmq.send_message_to_queue(call_id=call_id, object_name=file_info.obj_name, bucket_name=file_info.bucket_name)
+            return await rabbitmq.send_message_to_queue(call_id=call_id, object_name=file_info.obj_name, bucket_name=file_info.bucket_name)
 
 # TODO: не убрать - раскомментировать и переписать
 # @router_calls.get("/transcription/status", status_code=status.HTTP_200_OK)

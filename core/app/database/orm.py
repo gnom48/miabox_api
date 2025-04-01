@@ -11,7 +11,7 @@ url = URL.create(
     username=config['postgres_user'],
     password=config['postgres_password'],
     host=config['postgres_host'],
-    port=config['postgres_port'],
+    port=int(config['postgres_port']),
     database=config['postgres_db']
 )
 

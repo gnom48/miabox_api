@@ -1,10 +1,23 @@
 name: miabox-server
 
 x-postgres-config: &postgres-config
+  POSTGRES_HOST: ${POSTGRES_PORT}
   POSTGRES_USER: ${POSTGRES_USER}
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   POSTGRES_PORT: ${POSTGRES_PORT}
   POSTGRES_DB: ${POSTGRES_DB}
+
+x-rabbitmq-config: &rabbitmq-config
+  RABBITMQ_HOST: ${RABBITMQ_HOST}
+  RABBITMQ_PORT: ${RABBITMQ_PORT}
+  RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+  RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+x-minio-config: &minio-config
+  MINIO_API_HOST: ${MINIO_API_HOST}
+  MINIO_API_PORT: ${MINIO_API_PORT}
+  MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+  MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
 
 services:
   nginx:
@@ -54,8 +67,12 @@ services:
       context: ./auth
       args:
         <<: *postgres-config
+
         AUTH_PORT: ${AUTH_PORT}
+        
         LOG_LEVEL: ${LOG_LEVEL}
+
+        SECRET_KEY: ${SECRET_KEY}
     ports:
       - "${AUTH_PORT}:${AUTH_PORT}"
     volumes:
@@ -75,16 +92,23 @@ services:
         CORE_PORT: ${CORE_PORT}
     environment:
       <<: *postgres-config
-      AUTH_PORT: ${AUTH_PORT}
+
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+      MINIO_API_HOST: ${MINIO_API_HOST}
       MINIO_API_PORT: ${MINIO_API_PORT}
-      MINIO_API_IP: ${MINIO_API_IP}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      WHISPER_PORT: ${WHISPER_PORT}
+
+      AUTH_HOST: ${AUTH_HOST}
+      AUTH_PORT: ${AUTH_PORT}
+
       LOG_LEVEL: ${LOG_LEVEL}
+
+      SECRET_KEY: ${SECRET_KEY}
     ports:
       - "${CORE_PORT}:${CORE_PORT}"
     restart: unless-stopped
@@ -113,16 +137,26 @@ services:
     networks:
       - network-bridge
     environment:
+      <<: *postgres-config
+
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+      MINIO_API_HOST: ${MINIO_API_HOST}
       MINIO_API_PORT: ${MINIO_API_PORT}
-      MINIO_API_IP: ${MINIO_API_IP}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+      CORE_HOST: ${CORE_HOST}
       CORE_PORT: ${CORE_PORT}
+
       MODEL: ${MODEL}
+      
       LOG_LEVEL: ${LOG_LEVEL}
+      
+      SECRET_KEY: ${SECRET_KEY}
     volumes:
       - shared-data:/shared
     healthcheck:
@@ -145,10 +179,10 @@ services:
       - "${KNOWLEDGEBASE_PORT}:${KNOWLEDGEBASE_PORT}"
     restart: unless-stopped
     environment:
-      MINIO_API_PORT: ${MINIO_API_PORT}
-      MINIO_API_IP: ${MINIO_API_IP}
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      <<: *minio-config
+
+      CORE_HOST: ${CORE_HOST}
+      CORE_PORT: ${CORE_PORT}
     networks:
       - network-bridge
     healthcheck:
