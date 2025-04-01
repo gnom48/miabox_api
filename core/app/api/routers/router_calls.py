@@ -9,9 +9,6 @@ from app.utils import rabbitmq
 
 router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
 
-# GOOD: проверены add_call и get_all_user_calls
-# TODO: запросы по транскрипции
-
 
 @router_calls.post("/", status_code=status.HTTP_201_CREATED)
 async def add_call(
@@ -74,7 +71,7 @@ async def get_calls(
         return calls
 
 
-@router_calls.get("/transcription/{call_id}", status_code=status.HTTP_200_OK)
+@router_calls.get("/{call_id}/transcription", status_code=status.HTTP_200_OK)
 async def order_call_transcription(
     call_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -97,32 +94,29 @@ async def order_call_transcription(
                     status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
             return await rabbitmq.send_message_to_queue(call_id=call_id, object_name=file_info.obj_name, bucket_name=file_info.bucket_name)
 
-# TODO: не убрать - раскомментировать и переписать
-# @router_calls.get("/transcription/status", status_code=status.HTTP_200_OK)
+
+# BAD: выискивать сообщение в очередях бессмысленно
+# @router_calls.get("/transcription/{call_id}/status", status_code=status.HTTP_200_OK)
 # async def get_order_transcription_status(
-#     task_id: str,
-#     user_credentials: UserCredentials = Depends(get_user_from_request)
-# ):
-#     # Assuming get_task_status_async is a function that retrieves the task status
-#     return await get_task_status_async(task_id)
-
-
-# @router_calls.put("/transcription", status_code=status.HTTP_200_OK)
-# async def update_transcription(
-#     transcription: str,
 #     call_id: str,
 #     user_credentials: UserCredentials = Depends(get_user_from_request),
 #     calls_repository: CallsRepository = Depends(
-#         CallsRepository.repository_factory),
-#     secret_key: str | None = Header(default=None)
+#         CallsRepository.repository_factory)
 # ):
-#     if not secret_key or secret_key != "YOUR_SECRET_KEY":
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+#     return "In proccess"
 
-#     async with calls_repository:
-#         success = await calls_repository.update_transcription(user_credentials.id, call_id, transcription)
-#         if not success:
-#             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-#                                 detail="Unable to update transcription")
-#         return {"detail": "Transcription updated successfully"}
+
+@router_calls.put("/transcription", status_code=status.HTTP_200_OK)
+async def update_transcription(
+    transcription: str,
+    call_id: str,
+    user_credentials: UserCredentials = Depends(get_user_from_request),
+    calls_repository: CallsRepository = Depends(
+        CallsRepository.repository_factory)
+):
+    async with calls_repository:
+        success = await calls_repository.update_transcription(call_id, transcription)
+        if not success:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Unable to update transcription")
+        return {"detail": "Transcription updated successfully"}

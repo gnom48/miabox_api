@@ -5,8 +5,6 @@ from app.api.middlewares import get_user_from_request
 
 router_tasks = APIRouter(prefix="/tasks", tags=["Задачи"])
 
-# GOOD: соответствует потребностям приложения
-
 
 @router_tasks.get("/", status_code=status.HTTP_200_OK)
 async def get_tasks(

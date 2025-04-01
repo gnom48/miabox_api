@@ -8,9 +8,6 @@ from app.utils.minio_client import MinioClient
 
 router_users = APIRouter(prefix="/users", tags=["Пользователи"])
 
-# GOOD: полностью исправно
-# GOOD: соответствует потребностям приложения
-
 
 @router_users.get("/", status_code=status.HTTP_200_OK)
 async def get_user(

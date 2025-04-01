@@ -5,9 +5,6 @@ from app.api.middlewares import get_user_from_request
 
 router_notes = APIRouter(prefix="/notes", tags=["Заметки"])
 
-# GOOD: полностью исправно
-# GOOD: соответствует потребностям приложения
-
 
 @router_notes.get("/", status_code=status.HTTP_200_OK)
 async def get_notes(

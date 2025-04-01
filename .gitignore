@@ -4,10 +4,7 @@
 *.exe
 *config/config.toml
 *.vscode/settings.json
-
-\nginx\logs\*.log
-/nginx/logs/*.log
-
+*.log
 /venv
 /api/venv
 /api/__pycache__
@@ -18,4 +15,3 @@
 /whisper/venv
 /whisper/__pycache__
 /whisper/api/__pycache__
-

@@ -8,8 +8,6 @@ from app.common.models import *
 
 router_teams = APIRouter(prefix="/teams", tags=["Команды"])
 
-# GOOD: соответствует потребностям приложения
-
 
 @router_teams.post("/", status_code=status.HTTP_201_CREATED)
 async def create_team(

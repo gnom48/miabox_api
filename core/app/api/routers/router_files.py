@@ -8,8 +8,6 @@ from app.utils.minio_client import MinioClient
 
 router_files = APIRouter(prefix="/files", tags=["Файлы"])
 
-# GOOD: полностью исправно
-
 
 @router_files.get("/{file_id}", status_code=status.HTTP_200_OK)
 async def get_file_info(
