@@ -75,6 +75,9 @@ class File(BaseModel):
 
 
 class User(BaseModel):
+    class Config:
+        from_attributes = True
+
     id: str
     type: UserTypes | str
     email: str
@@ -114,6 +117,9 @@ class Task(BaseModel):
 
 
 class Team(BaseModel):
+    class Config:
+        from_attributes = True
+
     id: str
     name: str
     created_at: int

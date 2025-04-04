@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional, Dict
+from typing import Any, List, Optional, Dict
 from app.api.models import *
 
 

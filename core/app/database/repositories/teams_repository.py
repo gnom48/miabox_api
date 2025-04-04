@@ -22,6 +22,7 @@ class TeamsRepository(BaseRepository):
     async def get_all_teams_by_user_id(self, user_id: str) -> list['TeamWithInfo'] | None:
         """Возвращает все команды, связанные с пользователем, с дополнительной информацией."""
         from app.common.models import TeamWithInfo, UserWithRole
+        from app.api.models import Team, User, Address, Call, StatisticAggregated, Kpi
         try:
             async with self.session:
                 query = select(UserTeamOrm).where(
@@ -38,9 +39,9 @@ class TeamsRepository(BaseRepository):
                     result_team_users = await self.session.execute(query_userteam)
                     team_users = result_team_users.scalars().all()
 
-                    teams_with_info.append(TeamWithInfo(team=team, members=[
+                    teams_with_info.append(TeamWithInfo(team=Team.from_orm(team), members=[
                         UserWithRole(
-                            user=await self.session.get(UserOrm, team_user.user_id),
+                            user=User.from_orm(await self.session.get(UserOrm, team_user.user_id)),
                             role=team_user.role.name
                         ) for team_user in team_users
                     ]))
