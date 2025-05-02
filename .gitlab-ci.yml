@@ -7,7 +7,7 @@ build-job:
   stage: build
   script:
     - echo "building..."
-    - docker-compose build
+    - docker-compose -f ./docker/docker-compose.yaml build
 
 test-job:
   stage: test
@@ -19,4 +19,4 @@ deploy-job:
   environment: production
   script:
     - echo "running..."
-    - docker-compose up -d 
+    - docker-compose -f ./docker/docker-compose.yaml up -d 

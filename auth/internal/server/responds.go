@@ -9,6 +9,7 @@ import (
 var tokenError = fmt.Errorf("Invalid token, refresh or sign in to get a new pair")
 
 func (s *ApiServer) Respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	if data != nil {
 		json.NewEncoder(w).Encode(data)

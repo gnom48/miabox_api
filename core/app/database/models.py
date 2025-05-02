@@ -94,6 +94,7 @@ class FileOrm(BaseModelOrm):
         String(36), primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     obj_name: Mapped[str] = mapped_column(String)
     bucket_name: Mapped[str] = mapped_column(String)
+    # public: Mapped[bool] = mapped_column(Boolean, default=True)
 
     # calls: Mapped[list["CallOrm"]] = relationship(
     #     "СallOrm", back_populates="file")

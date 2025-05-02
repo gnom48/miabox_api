@@ -19,20 +19,37 @@ class FilesRepository(BaseRepository):
     def repository_factory():
         return FilesRepository()
 
-    async def add_file(self, obj_name: str, bucket_name: str, user_id: str) -> str:
+    async def add_file(self, obj_name: str, bucket_name: str, user_id: str, file_id: str = None) -> str:
         """Добавляет файл в базу данных и связывает его с пользователем."""
         try:
-            async with self.session:
-                new_file = FileOrm(
-                    obj_name=obj_name,
-                    bucket_name=bucket_name
-                )
-                self.session.add(new_file)
-                await self.session.commit()
+            if not file_id:
+                async with self.session:
+                    new_file = FileOrm(
+                        obj_name=obj_name,
+                        bucket_name=bucket_name
+                    )
+                    self.session.add(new_file)
+                    await self.session.commit()
 
-                await self.add_access_to(user_id, new_file.id)
+                    await self.add_access_to(user_id, new_file.id)
 
-                return new_file.id
+                    return new_file.id
+            else:
+                async with self.session:
+                    old_file = await self.session.get(FileOrm, file_id)
+                    if not old_file:
+                        old_file = FileOrm(
+                            id=file_id,
+                            obj_name=obj_name,
+                            bucket_name=bucket_name
+                        )
+                        self.session.add(old_file)
+                    else:
+                        old_file.obj_name = obj_name
+                        old_file.bucket_name = bucket_name
+                    await self.session.commit()
+
+                    return old_file.id
         except Exception as e:
             logging.error(e.__str__())
             return None

@@ -50,7 +50,7 @@ async def set_avatar(
 ):
     async with files_repository:
         minio_client.upload_file(user_credentials.id, file)
-        new_avatar_file_id = await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id)
+        new_avatar_file_id = await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id, user_credentials.id)
         async with user_repository:
             if await user_repository.update_avatar_only(user_credentials.id, new_avatar_file_id):
                 return new_avatar_file_id

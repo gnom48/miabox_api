@@ -11,10 +11,8 @@ services:
       - "${KNOWLEDGEBASE_PORT}:${KNOWLEDGEBASE_PORT}"
     restart: unless-stopped
     environment:
-      MINIO_API_HOST: ${MINIO_API_HOST}
-      MINIO_API_PORT: ${MINIO_API_PORT}
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      AUTH_HOST: ${AUTH_HOST}
+      AUTH_PORT: ${AUTH_PORT}
 
       CORE_HOST: ${CORE_HOST}
       CORE_PORT: ${CORE_PORT}
