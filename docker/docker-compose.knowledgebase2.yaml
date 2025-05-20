@@ -1,0 +1,27 @@
+services:
+  knowledgebase2:
+    container_name: knowledgebase2-service
+    build: 
+      context: ../knowledgebase2
+      args:
+        KNOWLEDGEBASE_PORT: ${KNOWLEDGEBASE_PORT}
+
+        LOG_LEVEL: ${LOG_LEVEL}
+    ports:
+      - "${KNOWLEDGEBASE_PORT}:${KNOWLEDGEBASE_PORT}"
+    restart: unless-stopped
+    environment:
+      AUTH_HOST: ${AUTH_HOST}
+      AUTH_PORT: ${AUTH_PORT}
+
+      CORE_HOST: ${CORE_HOST}
+      CORE_PORT: ${CORE_PORT}
+
+      SECRET_KEY: ${SECRET_KEY}
+    networks:
+      - network-bridge
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${KNOWLEDGEBASE_PORT}/test" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5

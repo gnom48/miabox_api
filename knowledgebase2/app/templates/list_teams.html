@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>База знаний</title>
+    <link rel="stylesheet" href="/static/css/style_base.css">
+    <link rel="stylesheet" href="/static/css/style_teams.css">
+</head>
+<body>
+    <!-- Верхнее меню -->
+    <div class="menu">
+        <div class="menu-button" onclick="toggleMenu()">☰</div>
+        <div class="menu-content" id="menu">
+        </div>
+    </div>
+
+    <div class="content">
+        <h1>Список доступных команд</h1>
+        <div class="teams-list">
+            {% for team_id, team_info in teams.items() %}
+                <div class="team-item">
+                    <a href="#" class="team-link" id="{{ team_id }}">{{ team_info.name }}</a>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- <div id="teams-data" data-teams="{{ teams | tojson | e }}"></div>-->
+        <div id="teams-data" style="display:none;">{{ teams | tojson | safe }}</div>
+
+    </div>
+
+    <script src="/static/js/script_teams.js"></script>
+</body>
+</html>

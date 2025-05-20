@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация</title>
+    <link rel="stylesheet" href="/static/css/style_autorization.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Авторизация</h2>
+
+        <div class="input-group">
+            <input type="text" id="login" placeholder=" " required>
+            <label for="login">Логин</label>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="password" placeholder=" " required>
+            <label for="password">Пароль</label>
+        </div>
+
+        <button class="login-btn" onclick="login()">Войти</button>
+        <p class="error-message" id="error-message">Неверный логин или пароль</p>
+    </div>
+
+    <script src="/static/js/script_autorization.js"></script>
+</body>
+</html>
