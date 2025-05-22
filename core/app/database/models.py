@@ -3,6 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import DateTime, ForeignKey, String, Float, Boolean, Enum as SqlEnum, Integer, Date
 from enum import Enum
 import uuid
+import time
 
 
 class BaseModelOrm(DeclarativeBase):
@@ -76,6 +77,7 @@ class TokenOrm(BaseModelOrm):
         String, ForeignKey('auth.user_credentials.id'))
     token: Mapped[str] = mapped_column(String, nullable=False)
     is_regular: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[int] = mapped_column(Integer, default=int(time.time()))
 
 
 class VersionOrm(BaseModelOrm):

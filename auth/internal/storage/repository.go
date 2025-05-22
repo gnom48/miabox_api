@@ -65,7 +65,7 @@ func (r *repository) GetTokenById(id string) (*models.Token, error) {
 	if err := r.db.QueryRow(
 		"SELECT * FROM tokens WHERE id = $1",
 		id,
-	).Scan(&token.Id, &token.UserId, &token.Token, &token.IsRegular); err != nil {
+	).Scan(&token.Id, &token.UserId, &token.Token, &token.IsRegular, &token.CreatedAt); err != nil {
 		return nil, err
 	}
 
@@ -74,8 +74,8 @@ func (r *repository) GetTokenById(id string) (*models.Token, error) {
 
 func (r *repository) addToken(token *models.Token) (string, error) {
 	if err := r.db.QueryRow(
-		"INSERT INTO tokens (id, token, user_id, is_regular) VALUES ($1, $2, $3, $4) RETURNING id",
-		token.Id, token.Token, token.UserId, token.IsRegular,
+		"INSERT INTO tokens (id, token, user_id, is_regular) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		token.Id, token.Token, token.UserId, token.IsRegular, token.CreatedAt,
 	).Scan(&token.Id); err != nil {
 		return "", err
 	}
@@ -107,6 +107,7 @@ func (r *repository) SyncToken(tokenId string, userId string, isRegular bool) (s
 		UserId:    userId,
 		Token:     "tokenString",
 		IsRegular: isRegular,
+		CreatedAt: time.Now().Unix(),
 	})
 	if err != nil {
 		return "", err

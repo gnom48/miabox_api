@@ -21,4 +21,5 @@ type Token struct {
 	UserId    string `json:"user_id"`
 	Token     string `json:"token"`
 	IsRegular bool   `json:"is_regular"`
+	CreatedAt int64  `json:"created_at"`
 }
