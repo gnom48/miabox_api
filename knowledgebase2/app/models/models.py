@@ -52,3 +52,10 @@ class TeamResponse(BaseModel):
 
 class TeamsResponse(BaseModel):
     teams: List[TeamResponse]
+
+
+class SessionData(BaseModel):
+    user_id: str
+    access_token: str
+    teams: dict[str, dict[str, Any]]
+    set_at: int

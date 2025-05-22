@@ -36,6 +36,11 @@ services:
       file: docker-compose.knowledgebase2.yaml
       service: knowledgebase2
 
+  redis:
+    extends:
+      file: docker-compose.redis.yaml
+      service: redis
+
   minio:
     extends:
       file: docker-compose.minio.yaml
@@ -50,6 +55,7 @@ volumes:
   postgres-data:
   minio-data:
   rabbitmq-data:
+  redis_data:
 
 networks:
   network-bridge:

@@ -2,7 +2,6 @@ import os
 import toml
 
 TOML_PATH = r'app/config/config.toml'
-# TOML_PATH = r'knowledgebase/app/config/config.toml'
 
 
 def dump_env_to_toml(filepath: str):
@@ -11,7 +10,11 @@ def dump_env_to_toml(filepath: str):
             "auth_host": os.getenv("AUTH_HOST"),
             "auth_port": os.getenv("AUTH_PORT"),
             "core_host": os.getenv("CORE_HOST"),
-            "core_port": os.getenv("CORE_PORT")
+            "core_port": os.getenv("CORE_PORT"),
+            "redis_host": os.getenv("REDIS_HOST"),
+            "redis_port": os.getenv("REDIS_PORT"),
+            "redis_user": os.getenv("REDIS_USER"),
+            "redis_user_password": os.getenv("REDIS_USER_PASSWORD")
         },
         "access": {
             "secret_key": os.getenv("SECRET_KEY")

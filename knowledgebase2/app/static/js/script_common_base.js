@@ -246,7 +246,7 @@ async function postContentWithImages() {
         method: 'POST',
         headers: {
             'Content-Type': 'test/html',
-            'Authorization': localStorage.getItem('Token'),
+            'X-Session-Id': localStorage.getItem('sessionId'),
             'X-Team-Id': document.getElementById('teamId').innerText
         },
         body: htmlContent

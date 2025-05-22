@@ -24,10 +24,10 @@ async function handleTeamClick(teamId, isAdmin) {
         const response = await fetch(`/base/${teamId}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'X-Is-Admin': isAdmin,
-                'Token': localStorage.getItem('Token')
-            }
+                'X-Session-Id': localStorage.getItem('sessionId'),
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include' // обязательно включаем куки
         });
 
         if (response.ok) {

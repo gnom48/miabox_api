@@ -17,6 +17,11 @@ services:
       CORE_HOST: ${CORE_HOST}
       CORE_PORT: ${CORE_PORT}
 
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_USER: ${REDIS_USER}
+      REDIS_USER_PASSWORD: ${REDIS_USER_PASSWORD}
+
       SECRET_KEY: ${SECRET_KEY}
     networks:
       - network-bridge

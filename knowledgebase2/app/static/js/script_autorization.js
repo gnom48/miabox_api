@@ -10,12 +10,13 @@ async function login() {
 
     try {
         // Make the POST request to the /sign_in endpoint
-        const response = await fetch('/main/sign_in', {
+        const response = await fetch('/sign_in', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(authData),
+            credentials: 'include' // обязательно включаем куки
         });
 
         // Check the response status
@@ -24,6 +25,15 @@ async function login() {
             const data = await response.json();
             const token = data.regular_token;
 
+            const sessionId = response.headers.get('X-Session-Id');
+            if (sessionId) {
+                // Сохраняем ID сессии в localStorage
+                localStorage.setItem('sessionId', sessionId);
+                console.log('ID сессии успешно сохранен:', sessionId);
+            } else {
+                console.error('Заголовок X-Session-Id отсутствует.');
+            }
+
             // Store the token in localStorage or a cookie
             localStorage.setItem("Token", token);
 
@@ -31,9 +41,11 @@ async function login() {
             const teamsResponse = await fetch('/base/teams', {
                 method: 'GET',
                 headers: {
+                    'X-Session-Id': localStorage.getItem('sessionId'),
                     'Authorization': token,
                     'Content-Type': 'text/html', // Ensure the response is treated as HTML
                 },
+                credentials: 'include' // обязательно включаем куки
             });
 
             if (teamsResponse.ok) {
@@ -44,6 +56,15 @@ async function login() {
                 document.open();
                 document.write(teamsHtml);
                 document.close();
+
+                const sessionId = response.headers.get('X-Session-Id');
+                if (sessionId) {
+                    // Сохраняем ID сессии в localStorage
+                    localStorage.setItem('sessionId', sessionId);
+                    console.log('ID сессии успешно сохранен:', sessionId);
+                } else {
+                    console.error('Заголовок X-Session-Id отсутствует.');
+                }
             } else {
                 console.error('Failed to load teams page:', teamsResponse.statusText);
             }
