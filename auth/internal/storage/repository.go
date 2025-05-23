@@ -4,6 +4,8 @@ import (
 	models "auth/internal/models"
 	utils "auth/internal/utils"
 	"database/sql"
+	"errors"
+	"fmt"
 	"time"
 )
 
@@ -72,10 +74,50 @@ func (r *repository) GetTokenById(id string) (*models.Token, error) {
 	return &token, nil
 }
 
+func (r *repository) GetTokenByUserId(userId string) (*models.Token, *models.Token, error) {
+	var firstToken, secondToken models.Token
+
+	rows, err := r.db.Query(
+		"SELECT * FROM tokens WHERE user_id = $1 ORDER BY is_regular ASC LIMIT 2",
+		userId,
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	foundTokensCount := 0
+
+	for rows.Next() {
+		switch foundTokensCount {
+		case 0:
+			err = rows.Scan(&firstToken.Id, &firstToken.UserId, &firstToken.Token, &firstToken.IsRegular, &firstToken.CreatedAt)
+		case 1:
+			err = rows.Scan(&secondToken.Id, &secondToken.UserId, &secondToken.Token, &secondToken.IsRegular, &secondToken.CreatedAt)
+		default:
+			break
+		}
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		foundTokensCount++
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, nil, fmt.Errorf("rows iteration failed: %w", err)
+	}
+
+	if foundTokensCount != 2 {
+		return nil, nil, errors.New("not enough or too much records")
+	}
+
+	return &firstToken, &secondToken, nil
+}
+
 func (r *repository) addToken(token *models.Token) (string, error) {
 	if err := r.db.QueryRow(
-		"INSERT INTO tokens (id, token, user_id, is_regular) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-		token.Id, token.Token, token.UserId, token.IsRegular, token.CreatedAt,
+		"INSERT INTO tokens (id, token, user_id, is_regular, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		token.Id, token.Token, token.UserId, token.IsRegular, time.Now(),
 	).Scan(&token.Id); err != nil {
 		return "", err
 	}
@@ -94,7 +136,7 @@ func (r *repository) DeleteTokensPair(userId string) (bool, error) {
 	return true, nil
 }
 
-func (r *repository) SyncToken(tokenId string, userId string, isRegular bool) (string, error) {
+func (r *repository) SyncToken(tokenId string, userId string, isRegular bool, tokenString string) (string, error) {
 	if _, err := r.db.Query(
 		"DELETE FROM tokens WHERE user_id = $1 AND is_regular = $2",
 		userId, isRegular,
@@ -105,9 +147,8 @@ func (r *repository) SyncToken(tokenId string, userId string, isRegular bool) (s
 	res, err := r.addToken(&models.Token{
 		Id:        tokenId,
 		UserId:    userId,
-		Token:     "tokenString",
+		Token:     tokenString,
 		IsRegular: isRegular,
-		CreatedAt: time.Now().Unix(),
 	})
 	if err != nil {
 		return "", err

@@ -66,6 +66,7 @@ class Token(BaseModel):
     user_id: str
     token: str
     is_regular: bool
+    created_at: bool
 
 
 class File(BaseModel):

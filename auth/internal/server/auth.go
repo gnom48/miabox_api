@@ -73,25 +73,34 @@ func (s *ApiServer) HandleAuthenticationSignIn() http.HandlerFunc {
 			return
 		}
 
-		creationToken, creationTokenId, cte := s.tokenSigner.GenerateCreationToken(user)
-		regularToken, regularTokenId, rte := s.tokenSigner.GenerateRegularToken(user)
-		if cte != nil || rte != nil {
-			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("%s", "Errors: "+cte.Error()+"; "+rte.Error()))
-			return
-		}
+		creationToken, regularToken, _ := s.storage.GetRepository().GetTokenByUserId(user.Id) // NOTE: обязательно в таком порядке т.к. сортировка по is_regular ASC
+		if creationToken == nil || regularToken == nil {
+			creationTokenValue, creationTokenId, cte := s.tokenSigner.GenerateCreationToken(user)
+			regularTokenValue, regularTokenId, rte := s.tokenSigner.GenerateRegularToken(user)
+			if cte != nil || rte != nil {
+				s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("%s", "Errors: "+cte.Error()+"; "+rte.Error()))
+				return
+			}
 
-		if _, err := s.storage.GetRepository().SyncToken(creationTokenId, user.Id, false); err != nil {
-			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error srt: %v", err))
-			return
-		}
-		if _, err := s.storage.GetRepository().SyncToken(regularTokenId, user.Id, true); err != nil {
-			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error sct: %v", err))
+			if _, err := s.storage.GetRepository().SyncToken(creationTokenId, user.Id, false, creationTokenValue); err != nil {
+				s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error srt: %v", err))
+				return
+			}
+			if _, err := s.storage.GetRepository().SyncToken(regularTokenId, user.Id, true, regularTokenValue); err != nil {
+				s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error sct: %v", err))
+				return
+			}
+
+			s.Respond(w, r, http.StatusCreated, TokensPairResponseBody{
+				CreationToken: creationTokenValue,
+				RegularToken:  regularTokenValue,
+			})
 			return
 		}
 
 		s.Respond(w, r, http.StatusCreated, TokensPairResponseBody{
-			CreationToken: creationToken,
-			RegularToken:  regularToken,
+			CreationToken: creationToken.Token,
+			RegularToken:  regularToken.Token,
 		})
 	}
 }
@@ -167,11 +176,11 @@ func (s *ApiServer) HandleAuthenticationRefresh() http.HandlerFunc {
 			return
 		}
 
-		if _, err := s.storage.GetRepository().SyncToken(creationTokenId, user.Id, false); err != nil {
+		if _, err := s.storage.GetRepository().SyncToken(creationTokenId, user.Id, false, creationToken); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error: %v", err))
 			return
 		}
-		if _, err := s.storage.GetRepository().SyncToken(regularTokenId, user.Id, true); err != nil {
+		if _, err := s.storage.GetRepository().SyncToken(regularTokenId, user.Id, true, regularToken); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error: %v", err))
 			return
 		}
