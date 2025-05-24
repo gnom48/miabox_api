@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const sessionIdItem = document.getElementById('session_id');
-    localStorage.setItem('sessionId', sessionIdItem.text);
+    localStorage.setItem('sessionId', sessionIdItem.textContent);
     document.removeChild(sessionIdItem);
 });
 
