@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Function to handle team click
 async function handleTeamClick(teamId, isAdmin) {
     try {
-        const response = await fetch(`/base/${teamId}`, {
+        const response = await fetch(`/knowledgebase2/base/${teamId}`, {
             method: 'GET',
             headers: {
                 'X-Session-Id': localStorage.getItem('sessionId'),

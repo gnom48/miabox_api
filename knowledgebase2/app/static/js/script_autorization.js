@@ -10,7 +10,7 @@ async function login() {
 
     try {
         // Make the POST request to the /sign_in endpoint
-        const response = await fetch('/sign_in', {
+        const response = await fetch('/knowledgebase2/sign_in', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ async function login() {
             localStorage.setItem("Token", token);
 
             // Make a GET request to the /base/teams endpoint
-            const teamsResponse = await fetch('/base/teams', {
+            const teamsResponse = await fetch('/knowledgebase2/base/teams', {
                 method: 'GET',
                 headers: {
                     'X-Session-Id': localStorage.getItem('sessionId'),

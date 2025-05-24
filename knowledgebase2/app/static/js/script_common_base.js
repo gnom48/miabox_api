@@ -242,7 +242,7 @@ async function postContentWithImages() {
     const htmlContent = contentDiv.innerHTML; // Получаем обновленный HTML с Base64 изображениями
 
     // Отправляем содержимое на эндпоинт
-    const response = await fetch('/base/upload', {
+    const response = await fetch('/knowledgebase2/base/upload', {
         method: 'POST',
         headers: {
             'Content-Type': 'test/html',
