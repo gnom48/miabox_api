@@ -68,7 +68,8 @@ async def get_teams_page(
             response.headers["X-Session-Id"] = session_id
             return templates.TemplateResponse(
                 request=request, name="list_teams.html", context={
-                    "teams": session_data.teams
+                    "teams": session_data.teams,
+                    "session_id": session_id
                 }
             )
 

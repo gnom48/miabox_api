@@ -16,12 +16,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    const sessionIdItem = document.getElementById('session_id');
+    localStorage.setItem('sessionId', sessionIdItem.text);
+    document.removeChild(sessionIdItem);
 });
 
 // Function to handle team click
 async function handleTeamClick(teamId, isAdmin) {
     try {
-        console.log(localStorage.getItem('sessionId'))
         const response = await fetch(`/knowledgebase2/base/${teamId}`, {
             method: 'GET',
             headers: {
