@@ -74,7 +74,9 @@ func (s *ApiServer) HandleAuthenticationSignIn() http.HandlerFunc {
 		}
 
 		creationToken, regularToken, _ := s.storage.GetRepository().GetTokenByUserId(user.Id) // NOTE: обязательно в таком порядке т.к. сортировка по is_regular ASC
-		if creationToken == nil || regularToken == nil {
+		_, checkCreationTokenError := s.tokenSigner.ValidateCreationToken(creationToken.Token)
+		_, checkRegularTokenError := s.tokenSigner.ValidateRegularToken(regularToken.Token)
+		if creationToken == nil || regularToken == nil || checkCreationTokenError != nil || checkRegularTokenError != nil {
 			creationTokenValue, creationTokenId, cte := s.tokenSigner.GenerateCreationToken(user)
 			regularTokenValue, regularTokenId, rte := s.tokenSigner.GenerateRegularToken(user)
 			if cte != nil || rte != nil {
