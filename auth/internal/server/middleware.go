@@ -51,7 +51,7 @@ func (s *ApiServer) AuthCreationTokenMiddleware(next http.HandlerFunc) http.Hand
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
 		if tokenString == "" {
-			http.Error(w, "Authorization header is empty", http.StatusUnauthorized)
+			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("Authorization header is empty"))
 			return
 		}
 
