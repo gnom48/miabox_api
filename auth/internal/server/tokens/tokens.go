@@ -102,12 +102,15 @@ func (t *TokenSign) ValidateRegularToken(tokenString string) (*RegularClaims, er
 }
 
 func (t *TokenSign) ValidateCreationToken(tokenString string) (*CreationClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &CreationClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(SecretKey), nil
-	})
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&CreationClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			}
+			return []byte(SecretKey), nil
+		})
 
 	if err != nil {
 		return nil, err
@@ -116,6 +119,9 @@ func (t *TokenSign) ValidateCreationToken(tokenString string) (*CreationClaims, 
 	if claims, ok := token.Claims.(*CreationClaims); ok && token.Valid {
 		if claims.Subject != creationTokenType {
 			return nil, fmt.Errorf("Invalid token type")
+		}
+		if claims.ExpiresAt.Unix() < time.Now().Unix() {
+			return nil, fmt.Errorf("Token has expired, refresh it")
 		}
 		return claims, nil
 	}

@@ -27,7 +27,7 @@ func (s *ApiServer) AuthRegularTokenMiddleware(next http.HandlerFunc) http.Handl
 
 		claims, err := s.tokenSigner.ValidateRegularToken(tokenString)
 		if err != nil {
-			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
+			s.ErrorRespond(w, r, http.StatusUnauthorized, err)
 			return
 		}
 
@@ -57,7 +57,7 @@ func (s *ApiServer) AuthCreationTokenMiddleware(next http.HandlerFunc) http.Hand
 
 		claims, err := s.tokenSigner.ValidateCreationToken(tokenString)
 		if err != nil {
-			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
+			s.ErrorRespond(w, r, http.StatusUnauthorized, err)
 			return
 		}
 
@@ -67,7 +67,7 @@ func (s *ApiServer) AuthCreationTokenMiddleware(next http.HandlerFunc) http.Hand
 			return
 		}
 
-		user, err := s.storage.GetRepository().GetUserByUsernamePassword(claims.Login, claims.Password)
+		user, err := s.storage.GetRepository().GetUserByUsernamePassword(claims.Login, claims.Password, true)
 		if err != nil {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
 			return

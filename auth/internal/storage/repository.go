@@ -33,8 +33,11 @@ func (r *repository) AddUser(user *models.UserCredentials) (*models.UserCredenti
 	return user, nil
 }
 
-func (r *repository) GetUserByUsernamePassword(login string, password string) (*models.UserCredentials, error) {
-	hashed_password_base64 := utils.EncryptString(password)
+func (r *repository) GetUserByUsernamePassword(login string, password string, checkWithoutHash bool) (*models.UserCredentials, error) {
+	hashed_password_base64 := password
+	if !checkWithoutHash {
+		hashed_password_base64 = utils.EncryptString(password)
+	}
 
 	user := models.UserCredentials{}
 

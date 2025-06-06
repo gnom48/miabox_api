@@ -67,7 +67,7 @@ func (s *ApiServer) HandleAuthenticationSignIn() http.HandlerFunc {
 			return
 		}
 
-		user, err := s.storage.GetRepository().GetUserByUsernamePassword(requestBody.Login, requestBody.Password)
+		user, err := s.storage.GetRepository().GetUserByUsernamePassword(requestBody.Login, requestBody.Password, false)
 		if err != nil {
 			s.ErrorRespond(w, r, http.StatusNotFound, fmt.Errorf("User not found"))
 			return
