@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime
 import logging
 from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from contextlib import asynccontextmanager
 from app.database import create_tables, drop_tables, BaseRepository
 from app.api import auth_middleware, error_middleware, router_files, router_users, router_addresses, router_calls, router_notes, router_tasks, router_teams, router_statistics
@@ -43,6 +43,11 @@ app.middleware("http")(auth_middleware)
 @app.get("/", include_in_schema=False)
 async def redirect_to_swagger():
     return RedirectResponse("/swagger")
+
+
+@app.get("/openapi.json", include_in_schema=False)
+async def redirect_to_swagger():
+    return FileResponse(r"app/api/docs/openapi.json")
 
 
 @app.get("/config", status_code=status.HTTP_200_OK)
