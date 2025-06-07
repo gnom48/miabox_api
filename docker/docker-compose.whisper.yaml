@@ -1,0 +1,41 @@
+services:
+  whisper:
+    container_name: whisper-service
+    build: 
+      context: ../whisper
+    restart: unless-stopped
+    networks:
+      - network-bridge
+    environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      
+      MINIO_API_HOST: ${MINIO_API_HOST}
+      MINIO_API_PORT: ${MINIO_API_PORT}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      
+      CORE_HOST: ${CORE_HOST}
+      CORE_PORT: ${CORE_PORT}
+
+      MODEL: ${MODEL}
+      
+      LOG_LEVEL: ${LOG_LEVEL}
+      
+      SECRET_KEY: ${SECRET_KEY}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${WHISPER_PORT}/transcription/config" ]
+      interval: 2s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1.2G  
+        reservations:
+          memory: 1G
+    mem_limit: 1.2g
+    memswap_limit: 2g
+  
