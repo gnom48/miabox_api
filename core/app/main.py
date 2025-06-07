@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan,
-              openapi_url="/openapi.json",
+              openapi_url="/core/openapi.json",
               docs_url="/swagger"
               )
 
