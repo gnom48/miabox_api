@@ -47,6 +47,7 @@ async def redirect_to_swagger():
 
 @app.get("/openapi.json", include_in_schema=False)
 async def redirect_to_swagger():
+    # REVIEW: теперь в локалке не работает
     return FileResponse(r"app/api/docs/openapi.json")
 
 
