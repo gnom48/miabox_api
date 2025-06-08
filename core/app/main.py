@@ -45,12 +45,6 @@ async def redirect_to_swagger():
     return RedirectResponse("/swagger")
 
 
-@app.get("/openapi.json", include_in_schema=False)
-async def redirect_to_swagger():
-    # REVIEW: теперь в локалке не работает
-    return FileResponse(r"app/api/docs/openapi.json")
-
-
 @app.get("/config", status_code=status.HTTP_200_OK)
 async def server_config_get():
     config = await BaseRepository.get_config()
