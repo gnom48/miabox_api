@@ -3,6 +3,8 @@ server {
 
     location /core/ {
         client_max_body_size 100m;
+        proxy_buffering off;
+        proxy_request_buffering off;
         
         proxy_pass http://core:${CORE_PORT}/;
         proxy_set_header Host $host;
