@@ -45,10 +45,10 @@ async def redirect_to_swagger():
     return RedirectResponse("/swagger")
 
 
-@app.get("/openapi.json", include_in_schema=False)
+@app.get("/core/openapi.json", include_in_schema=False)
 async def get_swagger():
     # REVIEW:
-    return FileResponse(r'/app/api/docs/openapi.json')
+    return FileResponse(r'/core/app/api/docs/openapi.json')
 
 
 @app.get("/config", status_code=status.HTTP_200_OK)
