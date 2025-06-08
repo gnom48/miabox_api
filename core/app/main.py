@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan,
-              openapi_url="/openapi.json",
+              openapi_url="/core/openapi.json",
               docs_url="/swagger"
               )
 
@@ -43,6 +43,12 @@ app.middleware("http")(auth_middleware)
 @app.get("/", include_in_schema=False)
 async def redirect_to_swagger():
     return RedirectResponse("/swagger")
+
+
+@app.get("/openapi.json", include_in_schema=False)
+async def get_swagger():
+    # REVIEW:
+    return FileResponse(r'/app/api/docs/openapi.json')
 
 
 @app.get("/config", status_code=status.HTTP_200_OK)
