@@ -20,7 +20,7 @@ async def auth_middleware(request: Request, call_next):
                                    headers=headers, params=params) as response:
                 response_text = await response.text()
                 if not str(response.status).startswith('2'):
-                    raise HTTPException(status_code=response_text)
+                    raise Exception(response_text)
 
                 auth_response = AuthResponse.model_validate_json(response_text)
 
