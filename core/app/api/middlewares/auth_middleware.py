@@ -31,9 +31,9 @@ async def auth_middleware(request: Request, call_next):
                     'user_credentials', auth_response.user)
                 return await call_next(request)
     except aiohttp.ClientConnectorDNSError as e:
-        return HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Server infrastructure error")
+        return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content="Server infrastructure error", headers={'content-type': 'application/json'})
     except Exception as e:
-        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=e.__str__())
+        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=e.__str__(), headers={'content-type': 'application/json'})
 
 
 def get_user_from_request(request: Request, token_authorization: str = Header(alias='token-authorization')) -> UserCredentials:
