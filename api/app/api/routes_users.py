@@ -13,7 +13,7 @@ router_users = APIRouter(prefix="/user", tags=["Пользователи"])
 
 @router_users.get("/config", status_code=200)
 async def server_config_get():
-    return { "postgres" : await Repository.get_config(), "api_datetime" : datetime.now() }
+    return {"postgres": await Repository.get_config(), "api_datetime": datetime.now()}
 
 
 @router_users.post("/registration", status_code=201)
@@ -34,6 +34,16 @@ async def authorization_secure(auth_data: AuthData, response: Response):
         raise HTTPException(status_code=401, detail="authorization error")
 
 
+@router_users.post("/authorization_hash", status_code=200)
+async def authorization_secure(auth_data: AuthData, response: Response):
+    current_user = await Repository.get_user_by_login_and_hash_password(auth_data.login, auth_data.password)
+    if current_user:
+        response.headers["supported_version"] = str(await Repository.get_supported_version())
+        return create_jwt_token(current_user)
+    else:
+        raise HTTPException(status_code=401, detail="authorization error")
+
+
 @router_users.get("/info", status_code=200)
 async def user_authorization(req: Request, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
@@ -41,7 +51,7 @@ async def user_authorization(req: Request, token_authorization: str | None = Hea
     return await verify_jwt_token(token_authorization)
 
 
-@router_users.put("/edit",status_code=200)
+@router_users.put("/edit", status_code=200)
 async def user_edit(user: User, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
