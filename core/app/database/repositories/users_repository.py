@@ -23,7 +23,7 @@ class UsersRepository(BaseRepository):
             async with self.session:
                 user_to_update = await self.session.get(UserOrm, data.id)
                 if user_to_update:
-                    user_to_update.type = UserTypesOrm[data.type.name]
+                    user_to_update.type = UserTypesOrm[data.type]
                     user_to_update.birthday = data.birthday
                     user_to_update.gender = data.gender
                     user_to_update.name = data.name
