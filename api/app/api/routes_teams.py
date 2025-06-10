@@ -28,7 +28,7 @@ async def team_delete(team_id: str, token_authorization: str | None = Header(def
 
 
 @router_teams.post("/join")
-async def team_join(team_id: str, joined_by: int, token_authorization: str | None = Header(default=None)):
+async def team_join(team_id: str, joined_by: str, token_authorization: str | None = Header(default=None)):
     if not token_authorization:
         raise HTTPException(status_code=401, detail="Unauthorized")
     user = await verify_jwt_token(token_authorization)
