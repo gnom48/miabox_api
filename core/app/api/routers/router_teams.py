@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, Depends, Query, status
 from app.database.repositories import TeamsRepository, UsersRepository, StatisticsRepository, AddressesRepository, CallsRepository
 from app.api.models import Team, UserTeam, UserStatuses
@@ -32,6 +33,9 @@ async def delete_team(
         TeamsRepository.repository_factory)
 ):
     async with teams_repository:
+        if not teams_repository.is_user_team_owner(user_id=user_credentials.id, team_id=team_id):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found!")
         success = await teams_repository.delete_team(team_id)
         if not success:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -48,7 +52,7 @@ async def join_team(
         TeamsRepository.repository_factory)
 ):
     async with teams_repository:
-        if not teams_repository.can_user_invite(user_id=user_credentials.id, team_id=team_id):
+        if not teams_repository.is_user_team_owner(user_id=joined_by, team_id=team_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found!")
 
@@ -86,6 +90,9 @@ async def set_user_role_in_team(
         TeamsRepository.repository_factory)
 ):
     async with teams_repository:
+        if not teams_repository.is_user_team_owner(user_id=user_credentials.id, team_id=team_id):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found!")
         success = await teams_repository.move_team_user_role(team_id, user_id, role)
         if not success:
             raise HTTPException(
@@ -115,15 +122,15 @@ async def get_my_teams(
                 status_code=status.HTTP_404_NOT_FOUND, detail="No teams found")
         if show_stats:
             async with statistics_repository:
-                now = datetime.datetime.now()
-                first_day_of_month = datetime.datetime(now.year, now.month, 1)
+                now = datetime.now()
+                first_day_of_month = datetime(now.year, now.month, 1)
                 start_unix = int(time.mktime(first_day_of_month.timetuple()))
                 if now.month == 12:
-                    last_day_of_month = datetime.datetime(
-                        now.year + 1, 1, 1) - datetime.timedelta(days=1)
+                    last_day_of_month = datetime(
+                        now.year + 1, 1, 1) - timedelta(days=1)
                 else:
-                    last_day_of_month = datetime.datetime(
-                        now.year, now.month + 1, 1) - datetime.timedelta(days=1)
+                    last_day_of_month = datetime(
+                        now.year, now.month + 1, 1) - timedelta(days=1)
                 end_unix = int(time.mktime(last_day_of_month.timetuple()))
                 # NOTE: здесь start и end - это первое и последнее число текущего календарного месяца
                 for t in teams:

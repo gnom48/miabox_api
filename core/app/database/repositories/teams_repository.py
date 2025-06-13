@@ -50,7 +50,7 @@ class TeamsRepository(BaseRepository):
             logging.error(e.__str__())
             return None
 
-    async def can_user_invite(self, user_id: str, team_id: str) -> bool:
+    async def is_user_team_owner(self, user_id: str, team_id: str) -> bool:
         """Может ли пользователь пригласить пользователя в команду."""
         try:
             async with self.session:
