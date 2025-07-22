@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -78,6 +79,7 @@ type createAccountRequestBody struct {
 	Login      string                `json:"login"`
 	Password   string                `json:"password"`
 	Privileges models.AuthPrivileges `json:"privileges"`
+	UserExtras models.UserExtras     `json:"extras"`
 }
 
 // @Summary Create a new account
@@ -112,7 +114,9 @@ func (s *ApiServer) HandleCreateAccount() http.HandlerFunc {
 			Password:   requestBody.Password,
 		}
 
-		if returning, err := s.storage.GetRepository().AddUser(newUser); err != nil {
+		requestBody.UserExtras.SetDefaultsIfNil()
+
+		if returning, err := s.storage.GetRepository().AddUser(context.Background(), newUser, &requestBody.UserExtras); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, err)
 			return
 		} else {

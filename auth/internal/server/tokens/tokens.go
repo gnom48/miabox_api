@@ -5,6 +5,7 @@ import (
 	"time"
 
 	models "auth/internal/models"
+	utils "auth/internal/utils"
 
 	"github.com/dgrijalva/jwt-go/v4"
 )
@@ -36,7 +37,7 @@ const regularTokenType string = "regular"
 const creationTokenType string = "creation"
 
 func (t *TokenSign) GenerateRegularToken(user *models.UserCredentials) (string, string, error) {
-	tokenId, _ := models.GenerateUuid32()
+	tokenId, _ := utils.GenerateUuid32()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &RegularClaims{
 		UserId: user.Id,
 		StandardClaims: jwt.StandardClaims{
@@ -54,7 +55,7 @@ func (t *TokenSign) GenerateRegularToken(user *models.UserCredentials) (string, 
 }
 
 func (t *TokenSign) GenerateCreationToken(user *models.UserCredentials) (string, string, error) {
-	tokenId, _ := models.GenerateUuid32()
+	tokenId, _ := utils.GenerateUuid32()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &CreationClaims{
 		UserId:   user.Id,
 		Login:    user.Login,

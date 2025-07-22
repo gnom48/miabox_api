@@ -33,7 +33,8 @@ def dump_env_to_toml(filepath: str):
             "secret_key": os.getenv("SECRET_KEY")
         },
         "app": {
-            "log_level": os.getenv("LOG_LEVEL", default="INFO")
+            "log_level": os.getenv("LOG_LEVEL", default="INFO"),
+            "create_database": os.getenv("CREATE_DATABASE", default=False)
         }
     }
 

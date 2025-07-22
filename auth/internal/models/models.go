@@ -16,6 +16,24 @@ type UserCredentials struct {
 	IsActive   bool           `json:"is_active"`
 }
 
+type UserExtras struct {
+	Type     string `json:"type,omitempty"`
+	Name     string `json:"fio,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Gender   string `json:"gender,omitempty"`
+	Birthday int    `json:"birthday,omitempty"`
+	Phone    string `json:"phone,omitempty"`
+}
+
+func (u *UserExtras) SetDefaultsIfNil() {
+	if u.Type == "" {
+		u.Type = "PRIVATE"
+	}
+	if u.Name == "" {
+		u.Name = "Пользователь"
+	}
+}
+
 type Token struct {
 	Id        string `json:"id"`
 	UserId    string `json:"user_id"`

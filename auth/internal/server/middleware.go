@@ -9,8 +9,6 @@ import (
 	"strings"
 
 	_ "auth/internal/server/docs"
-
-	models "auth/internal/models"
 )
 
 type StringContextKey string
@@ -76,12 +74,6 @@ func (s *ApiServer) AuthCreationTokenMiddleware(next http.HandlerFunc) http.Hand
 		ctx := context.WithValue(r.Context(), UserContextKey, *user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
-}
-
-var PrivilegesContextKey StringContextKey = "privileges"
-
-type userPrivilegesResponseBody struct {
-	Privileges []models.AuthPrivileges `json:"privileges"`
 }
 
 func (s *ApiServer) loggingMiddleware(next http.Handler) http.Handler {

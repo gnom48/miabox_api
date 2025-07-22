@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,8 +10,9 @@ import (
 )
 
 type signUpRequestBody struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
+	Login      string            `json:"login"`
+	Password   string            `json:"password"`
+	UserExtras models.UserExtras `json:"extras"`
 }
 
 // @Summary SignUp
@@ -34,7 +36,10 @@ func (s *ApiServer) HandleAuthenticationSignUp() http.HandlerFunc {
 			Privileges: models.USER,
 			IsActive:   true,
 		}
-		if returning, err := s.storage.GetRepository().AddUser(user); err != nil {
+
+		requestBody.UserExtras.SetDefaultsIfNil()
+
+		if returning, err := s.storage.GetRepository().AddUser(context.Background(), user, &requestBody.UserExtras); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, err)
 		} else {
 			s.Respond(w, r, http.StatusCreated, returning.Id)

@@ -18,7 +18,7 @@ cd internal/server
 swag init -g server.go account.go auth.go
 */
 
-var conficFilePath = "./internal/config/config.toml"
+const conficFilePath = "./internal/config/config.toml"
 
 func main() {
 	defer func() {

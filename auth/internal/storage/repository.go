@@ -3,6 +3,7 @@ package storage
 import (
 	models "auth/internal/models"
 	utils "auth/internal/utils"
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -19,14 +20,42 @@ func NewAuthRepository(dbConnection *sql.DB) AuthRepository {
 	}
 }
 
-func (r *repository) AddUser(user *models.UserCredentials) (*models.UserCredentials, error) {
-	user.Password = utils.EncryptString(user.Password)
-	user.Id, _ = models.GenerateUuid32()
+func (r *repository) AddUser(ctx context.Context, user *models.UserCredentials, userExtras *models.UserExtras) (*models.UserCredentials, error) {
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
 
-	if err := r.db.QueryRow(
-		"INSERT INTO user_credentials (id, login, password, privileges, created_at, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			err = fmt.Errorf("SQL error; Rollback success;")
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	user.Password = utils.EncryptString(user.Password)
+	user.Id, _ = utils.GenerateUuid32()
+
+	var insertedId string
+	if err := tx.QueryRowContext(
+		ctx,
+		`INSERT INTO user_credentials (id, login, password, privileges, created_at, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
 		user.Id, user.Login, user.Password, user.Privileges, time.Now(), true,
-	).Scan(&user.Id); err != nil {
+	).Scan(&insertedId); err != nil {
+		return nil, err
+	}
+
+	// NOTE: это заменяет триггер (плохо что у сервиса auth теперь есть доступ к обоим схемам, но транзакция надежнее триггера)
+	_, err = tx.ExecContext(
+		ctx,
+		`INSERT INTO public.users(id, "type", email, "name", gender, birthday, phone, image) VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
+		insertedId, userExtras.Type, userExtras.Email, userExtras.Name, userExtras.Gender, userExtras.Birthday, userExtras.Phone, nil,
+	)
+	if err != nil {
 		return nil, err
 	}
 

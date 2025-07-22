@@ -1,9 +1,12 @@
 package storage
 
-import models "auth/internal/models"
+import (
+	models "auth/internal/models"
+	"context"
+)
 
 type AuthRepository interface {
-	AddUser(user *models.UserCredentials) (*models.UserCredentials, error)
+	AddUser(ctx context.Context, user *models.UserCredentials, userExtras *models.UserExtras) (*models.UserCredentials, error)
 	DeleteTokensPair(userId string) (bool, error)
 	GetAllAccounts(from int, count int) ([]models.UserCredentials, error)
 	GetTokenById(id string) (*models.Token, error)

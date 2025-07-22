@@ -40,28 +40,28 @@ async def drop_tables():
 async def pre_create_actions(conn: AsyncConnection):
     await conn.execute(text("CREATE SCHEMA IF NOT EXISTS auth"))
 
-# GOOD: работает
-
 
 async def after_create_actions(conn: AsyncConnection):
-    commands = [
-        "DROP TRIGGER IF EXISTS insert_empty_user_info ON auth.user_credentials;",
-        "DROP FUNCTION IF EXISTS insert_empty_user_info();",
-        """
-        CREATE FUNCTION insert_empty_user_info() RETURNS trigger AS $$
-        BEGIN
-            INSERT INTO public.users(id, "type", email, "name", gender, birthday, phone, image)
-            VALUES(NEW.id, 'PRIVATE', '', 'Пользователь', '', 0, '', null);
-            RETURN NULL;
-        END;
-        $$ LANGUAGE plpgsql;
-        """,
-        """
-        CREATE TRIGGER insert_empty_user_info
-        AFTER INSERT ON auth.user_credentials
-        FOR EACH ROW EXECUTE PROCEDURE insert_empty_user_info();
-        """
-    ]
+    ...
+    # DEPRECATED:
+    # commands = [
+    #     "DROP TRIGGER IF EXISTS insert_empty_user_info ON auth.user_credentials;",
+    #     "DROP FUNCTION IF EXISTS insert_empty_user_info();",
+    #     """
+    #     CREATE FUNCTION insert_empty_user_info() RETURNS trigger AS $$
+    #     BEGIN
+    #         INSERT INTO public.users(id, "type", email, "name", gender, birthday, phone, image)
+    #         VALUES(NEW.id, 'PRIVATE', '', 'Пользователь', '', 0, '', null);
+    #         RETURN NULL;
+    #     END;
+    #     $$ LANGUAGE plpgsql;
+    #     """,
+    #     """
+    #     CREATE TRIGGER insert_empty_user_info
+    #     AFTER INSERT ON auth.user_credentials
+    #     FOR EACH ROW EXECUTE PROCEDURE insert_empty_user_info();
+    #     """
+    # ]
 
-    for command in commands:
-        await conn.execute(text(command))
+    # for command in commands:
+    #     await conn.execute(text(command))

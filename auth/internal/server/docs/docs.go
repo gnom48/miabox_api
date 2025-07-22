@@ -381,9 +381,9 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "gnom48.ru/auth",
+	Host:             "localhost:8081",
 	BasePath:         "/",
-	Schemes:          []string{"https"},
+	Schemes:          []string{"http"},
 	Title:            "Auth",
 	Description:      "Account API (Auth microservice) documentation. Отвечает за авторизацию и данные о пользователях. Все остальные сервисы зависят от него, ведь именно он выпускает JWT токен и проводит интроспекцию.",
 	InfoInstanceName: "swagger",
