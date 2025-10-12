@@ -29,7 +29,7 @@ ENV LOG_LEVEL="info"
 # ENV LOG_LEVEL=${LOG_LEVEL}
 ENV AUTH_PORT=${AUTH_PORT}
 
-RUN ./toml_helper.sh
+RUN /bin/sh ./toml_helper.sh
 
 RUN go build -o ./auth-service ./cmd/auth
 
