@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -39,10 +38,16 @@ func (s *ApiServer) HandleAuthenticationSignUp() http.HandlerFunc {
 
 		requestBody.UserExtras.SetDefaultsIfNil()
 
-		if returning, err := s.storage.GetRepository().AddUser(context.Background(), user, &requestBody.UserExtras); err != nil {
-			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, err)
-		} else {
-			s.Respond(w, r, http.StatusCreated, returning.Id)
+		ch := s.storage.GetUsecase().AddUser(user, &requestBody.UserExtras)
+		select {
+		case user := <-ch:
+			if user != nil {
+				s.logger.Debug("Получен пользователь: %+v\n", user)
+				s.Respond(w, r, http.StatusCreated, user.Id)
+			} else {
+				s.logger.Warn("Ошибка при получении пользователя.")
+				s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Ошибка при получении пользователя."))
+			}
 		}
 	}
 }
@@ -72,13 +77,13 @@ func (s *ApiServer) HandleAuthenticationSignIn() http.HandlerFunc {
 			return
 		}
 
-		user, err := s.storage.GetRepository().GetUserByUsernamePassword(requestBody.Login, requestBody.Password, false)
+		user, err := s.storage.GetUsecase().GetUserByUsernamePassword(requestBody.Login, requestBody.Password, false)
 		if err != nil {
 			s.ErrorRespond(w, r, http.StatusNotFound, fmt.Errorf("User not found"))
 			return
 		}
 
-		creationToken, regularToken, no_tokens_error := s.storage.GetRepository().GetTokenByUserId(user.Id) // NOTE: обязательно в таком порядке т.к. сортировка по is_regular ASC
+		creationToken, regularToken, no_tokens_error := s.storage.GetUsecase().GetTokenByUserId(user.Id) // NOTE: обязательно в таком порядке т.к. сортировка по is_regular ASC
 
 		if creationToken != nil && regularToken != nil {
 			_, creationTokenValidateError := s.tokenSigner.ValidateCreationToken(creationToken.Token)
@@ -96,11 +101,11 @@ func (s *ApiServer) HandleAuthenticationSignIn() http.HandlerFunc {
 				return
 			}
 
-			if _, err := s.storage.GetRepository().SyncToken(creationTokenId, user.Id, false, creationTokenValue); err != nil {
+			if _, err := s.storage.GetUsecase().SyncToken(creationTokenId, user.Id, false, creationTokenValue); err != nil {
 				s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error srt: %v", err))
 				return
 			}
-			if _, err := s.storage.GetRepository().SyncToken(regularTokenId, user.Id, true, regularTokenValue); err != nil {
+			if _, err := s.storage.GetUsecase().SyncToken(regularTokenId, user.Id, true, regularTokenValue); err != nil {
 				s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error sct: %v", err))
 				return
 			}
@@ -133,7 +138,7 @@ func (s *ApiServer) HandleAuthenticationSignOut() http.HandlerFunc {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("User not found"))
 		}
 
-		res, err := s.storage.GetRepository().DeleteTokensPair(user.Id)
+		res, err := s.storage.GetUsecase().DeleteTokensPair(user.Id)
 		if !res {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, err)
 		}
@@ -159,7 +164,7 @@ func (s *ApiServer) HandleAuthenticationValidate() http.HandlerFunc {
 			return
 		}
 
-		if token, err := s.storage.GetRepository().GetTokenById(data.ID); err != nil || token == nil {
+		if token, err := s.storage.GetUsecase().GetTokenById(data.ID); err != nil || token == nil {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, fmt.Errorf("Token revoked"))
 			return
 		}
@@ -189,11 +194,11 @@ func (s *ApiServer) HandleAuthenticationRefresh() http.HandlerFunc {
 			return
 		}
 
-		if _, err := s.storage.GetRepository().SyncToken(creationTokenId, user.Id, false, creationToken); err != nil {
+		if _, err := s.storage.GetUsecase().SyncToken(creationTokenId, user.Id, false, creationToken); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error: %v", err))
 			return
 		}
-		if _, err := s.storage.GetRepository().SyncToken(regularTokenId, user.Id, true, regularToken); err != nil {
+		if _, err := s.storage.GetUsecase().SyncToken(regularTokenId, user.Id, true, regularToken); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, fmt.Errorf("Error: %v", err))
 			return
 		}

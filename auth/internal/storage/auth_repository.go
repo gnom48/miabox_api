@@ -16,5 +16,4 @@ type AuthRepository interface {
 	SoftDeleteUser(userId string) error
 	SyncToken(tokenId string, userId string, isRegular bool, tokenString string) (string, error)
 	UpdateUser(user *models.UserCredentials) error
-	addToken(token *models.Token) (string, error)
 }

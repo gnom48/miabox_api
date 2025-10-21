@@ -4,17 +4,21 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 )
 
 type Storage struct {
+	logger     *logrus.Logger
 	config     *Config
 	db         *sql.DB
 	repository AuthRepository
+	usecase    *AuthUsecase
 }
 
 func New(config *Config) *Storage {
 	return &Storage{
 		config: config,
+		logger: logrus.New(),
 	}
 }
 
@@ -42,11 +46,20 @@ func (s *Storage) Close() {
 	}
 }
 
-func (s *Storage) GetRepository() AuthRepository {
+func (s *Storage) getRepository() AuthRepository {
 	if s.repository == nil {
 		s.repository = NewAuthRepository(s.GetDbConnection())
 	} else {
 		_ = s.GetDbConnection()
 	}
 	return s.repository
+}
+
+func (s *Storage) GetUsecase() *AuthUsecase {
+	if s.usecase == nil {
+		s.usecase = &AuthUsecase{
+			repository: s.getRepository(),
+		}
+	}
+	return s.usecase
 }

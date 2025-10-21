@@ -29,12 +29,12 @@ func (s *ApiServer) AuthRegularTokenMiddleware(next http.HandlerFunc) http.Handl
 			return
 		}
 
-		if token, err := s.storage.GetRepository().GetTokenById(claims.ID); err != nil || token == nil {
+		if token, err := s.storage.GetUsecase().GetTokenById(claims.ID); err != nil || token == nil {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
 			return
 		}
 
-		user, err := s.storage.GetRepository().GetUserById(claims.UserId)
+		user, err := s.storage.GetUsecase().GetUserById(claims.UserId)
 		if err != nil {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
 			return
@@ -59,13 +59,13 @@ func (s *ApiServer) AuthCreationTokenMiddleware(next http.HandlerFunc) http.Hand
 			return
 		}
 
-		token, err := s.storage.GetRepository().GetTokenById(claims.ID)
+		token, err := s.storage.GetUsecase().GetTokenById(claims.ID)
 		if err != nil || token == nil {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
 			return
 		}
 
-		user, err := s.storage.GetRepository().GetUserByUsernamePassword(claims.Login, claims.Password, true)
+		user, err := s.storage.GetUsecase().GetUserByUsernamePassword(claims.Login, claims.Password, true)
 		if err != nil {
 			s.ErrorRespond(w, r, http.StatusUnauthorized, tokenError)
 			return
