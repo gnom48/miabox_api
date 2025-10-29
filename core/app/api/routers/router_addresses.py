@@ -7,7 +7,7 @@ from app.utils.osm import reverse_geocoding_by_coords
 router_addresses = APIRouter(prefix="/addresses", tags=["Адреса"])
 
 
-@router_addresses.post("/", status_code=status.HTTP_201_CREATED)
+@router_addresses.post("/", status_code=status.HTTP_201_CREATED, description="Добавляет посещенную локацию для текущего пользователя")
 async def add_address(
     address_info: Address,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -31,7 +31,7 @@ async def add_address(
         return address_id
 
 
-@router_addresses.get("/user/{user_id}", status_code=status.HTTP_200_OK)
+@router_addresses.get("/user/{user_id}", status_code=status.HTTP_200_OK, description="Возвращает список почещенных локаций пользователем по его Id с фильтром по дате")
 async def get_addresses(
     user_id: str,
     date_start: int | None = None,

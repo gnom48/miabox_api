@@ -6,7 +6,7 @@ from app.api.middlewares import get_user_from_request
 router_tasks = APIRouter(prefix="/tasks", tags=["Задачи"])
 
 
-@router_tasks.get("/", status_code=status.HTTP_200_OK)
+@router_tasks.get("/", status_code=status.HTTP_200_OK, description="Возвращяет все задачи текущего пользователя")
 async def get_tasks(
     user_credentials: UserCredentials = Depends(get_user_from_request),
     tasks_repository: TasksRepository = Depends(
@@ -20,7 +20,7 @@ async def get_tasks(
         return tasks
 
 
-@router_tasks.get("/completed", status_code=status.HTTP_200_OK)
+@router_tasks.get("/completed", status_code=status.HTTP_200_OK, description="Возвращяет только выполненные задачи текущего пользователя")
 async def get_completed_tasks(
     user_credentials: UserCredentials = Depends(get_user_from_request),
     tasks_repository: TasksRepository = Depends(
@@ -34,7 +34,7 @@ async def get_completed_tasks(
         return tasks
 
 
-@router_tasks.post("/", status_code=status.HTTP_201_CREATED)
+@router_tasks.post("/", status_code=status.HTTP_201_CREATED, description="Создает задачу для текущего пользователя")
 async def add_task(
     task: Task,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -49,7 +49,7 @@ async def add_task(
         return task_id
 
 
-@router_tasks.delete("/{task_id}", status_code=status.HTTP_200_OK)
+@router_tasks.delete("/{task_id}", status_code=status.HTTP_200_OK, description="Удаляет задачу по Id для текущего пользователя")
 async def delete_task(
     task_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),

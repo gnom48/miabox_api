@@ -6,7 +6,7 @@ from app.api.middlewares import get_user_from_request
 router_notes = APIRouter(prefix="/notes", tags=["Заметки"])
 
 
-@router_notes.get("/", status_code=status.HTTP_200_OK)
+@router_notes.get("/", status_code=status.HTTP_200_OK, description="Возвращает все заметки текущего пользователя")
 async def get_notes(
     user_credentials: UserCredentials = Depends(get_user_from_request),
     notes_repository: NotesRepository = Depends(
@@ -20,7 +20,7 @@ async def get_notes(
         return notes
 
 
-@router_notes.post("/", status_code=status.HTTP_201_CREATED)
+@router_notes.post("/", status_code=status.HTTP_201_CREATED, description="Создает заметку для текущего пользователя")
 async def add_note(
     note: Note,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -35,7 +35,7 @@ async def add_note(
         return note_id
 
 
-@router_notes.delete("/{note_id}", status_code=status.HTTP_200_OK)
+@router_notes.delete("/{note_id}", status_code=status.HTTP_200_OK, description="Удаляет заметку по Id")
 async def delete_note(
     note_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -50,7 +50,7 @@ async def delete_note(
         return {"detail": "Note deleted successfully"}
 
 
-@router_notes.put("/", status_code=status.HTTP_200_OK)
+@router_notes.put("/", status_code=status.HTTP_200_OK, description="Обновляет заметку по Id")
 async def update_note(
     note: Note,
     user_credentials: UserCredentials = Depends(get_user_from_request),

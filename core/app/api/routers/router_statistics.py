@@ -10,7 +10,7 @@ import datetime
 router_statistics = APIRouter(prefix="/statistics", tags=["Статистика"])
 
 
-@router_statistics.post("/", status_code=status.HTTP_201_CREATED)
+@router_statistics.post("/", status_code=status.HTTP_201_CREATED, description="Вносит новую запись об изменениях в статистике у текущего пользователя")
 async def add_statistic(
     record: Statistic,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -24,7 +24,7 @@ async def add_statistic(
         return record_id
 
 
-@router_statistics.get("/{user_id}/aggregated", status_code=status.HTTP_200_OK)
+@router_statistics.get("/{user_id}/aggregated", status_code=status.HTTP_200_OK, description="Возвращает агрегированную информацию о статистике для текущего пользователя с фильтрами")
 async def get_user_statistics_aggregated(
     user_id: str,
     start: int,

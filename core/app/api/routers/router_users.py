@@ -9,7 +9,7 @@ from app.utils.minio_client import MinioClient
 router_users = APIRouter(prefix="/users", tags=["Пользователи"])
 
 
-@router_users.get("/", status_code=status.HTTP_200_OK)
+@router_users.get("/", status_code=status.HTTP_200_OK, description="Возвращает текущего пользователя")
 async def get_user(
     user_credentials: UserCredentials = Depends(get_user_from_request),
     user_repository: UsersRepository = Depends(
@@ -19,7 +19,7 @@ async def get_user(
         return await user_repository.get_user_by_id(user_credentials.id)
 
 
-@router_users.put("/", status_code=status.HTTP_200_OK)
+@router_users.put("/", status_code=status.HTTP_200_OK, description="Редактирует данные только текущего пользователя")
 async def update_user(
     user: User,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -33,11 +33,11 @@ async def update_user(
         res = await user_repository.update_user(user)
         if not res:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="update error")
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Update error")
         return res
 
 
-@router_users.post("/{user_id}/avatar", status_code=status.HTTP_200_OK)
+@router_users.post("/{user_id}/avatar", status_code=status.HTTP_200_OK, description="Устанавливает новый аватар текущего пользователя")
 async def set_avatar(
     user_id: str,
     file: UploadFile,

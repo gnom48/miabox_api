@@ -10,7 +10,7 @@ from app.utils import rabbitmq
 router_calls = APIRouter(prefix="/calls", tags=["Звонки"])
 
 
-@router_calls.post("/", status_code=status.HTTP_201_CREATED)
+@router_calls.post("/", status_code=status.HTTP_201_CREATED, description="Добавляет новую запись о совершённом текущим пользователем звонке; можно добавить аудиозапись звонка")
 async def add_call(
     file: Optional[UploadFile] = None,
     date_time: int = Form(...),
@@ -55,7 +55,7 @@ async def add_call(
         return record_id
 
 
-@router_calls.get("/user/{user_id}", status_code=status.HTTP_200_OK)
+@router_calls.get("/user/{user_id}", status_code=status.HTTP_200_OK, description="Возвращает все звонки пользователя по его Id")
 async def get_calls(
     user_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -71,7 +71,7 @@ async def get_calls(
         return calls
 
 
-@router_calls.get("/{call_id}/transcription", status_code=status.HTTP_200_OK)
+@router_calls.get("/{call_id}/transcription", status_code=status.HTTP_200_OK, description="Запускает расшифровку аудиозаписи звонка по его Id, если она была прикреплена (работать не будет, нейронка не поднята)")
 async def order_call_transcription(
     call_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -106,7 +106,7 @@ async def order_call_transcription(
 #     return "In proccess"
 
 
-@router_calls.put("/transcription", status_code=status.HTTP_200_OK)
+@router_calls.put("/transcription", status_code=status.HTTP_200_OK, description="Обновляет расшифровку звонка")
 async def update_transcription(
     transcription: str,
     call_id: str,

@@ -10,7 +10,7 @@ from app.common.models import *
 router_teams = APIRouter(prefix="/teams", tags=["Команды"])
 
 
-@router_teams.post("/", status_code=status.HTTP_201_CREATED)
+@router_teams.post("/", status_code=status.HTTP_201_CREATED, description="Создает команду и делает текущего пользователя ее Owner")
 async def create_team(
     team: Team,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -25,7 +25,7 @@ async def create_team(
         return team_id
 
 
-@router_teams.delete("/{team_id}", status_code=status.HTTP_200_OK)
+@router_teams.delete("/{team_id}", status_code=status.HTTP_200_OK, description="Удаляет команду по Id, если текущий пользователь явялется в ней Owner")
 async def delete_team(
     team_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -43,7 +43,7 @@ async def delete_team(
         return {"detail": "Team deleted successfully"}
 
 
-@router_teams.post("/{team_id}/join", status_code=status.HTTP_200_OK)
+@router_teams.post("/{team_id}/join", status_code=status.HTTP_200_OK, description="Присоединиться к команде по Id с ролью User; приграсить в команду может только пользователь с ролью Owner")
 async def join_team(
     team_id: str,
     joined_by: str,
@@ -65,7 +65,7 @@ async def join_team(
         return {"detail": "Joined team successfully"}
 
 
-@router_teams.put("/{team_id}/leave", status_code=status.HTTP_200_OK)
+@router_teams.put("/{team_id}/leave", status_code=status.HTTP_200_OK, description="Покинуть команду")
 async def leave_team(
     team_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -80,7 +80,7 @@ async def leave_team(
         return {"detail": "Left team successfully"}
 
 
-@router_teams.put("/{team_id}/user/{user_id}/role", status_code=status.HTTP_200_OK)
+@router_teams.put("/{team_id}/user/{user_id}/role", status_code=status.HTTP_200_OK, description="Назначить участнику команды новую роль; для этого действия текущий пользователь должен являться Owner в этой команде")
 async def set_user_role_in_team(
     team_id: str,
     user_id: str,
@@ -100,7 +100,7 @@ async def set_user_role_in_team(
         return {"detail": "Role changed successfully"}
 
 
-@router_teams.get("/", status_code=status.HTTP_200_OK)
+@router_teams.get("/", status_code=status.HTTP_200_OK, description="Возвращяет полную информацию обо всех командах, в которых состоит текущий пользователь; также об их участниках и статистиках (пока только статистики), если текущий пользователь является Owner")
 async def get_my_teams(
     show_stats: bool = Query(default=False),
     show_addresses: bool = Query(default=False),
