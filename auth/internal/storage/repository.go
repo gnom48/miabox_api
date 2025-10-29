@@ -44,7 +44,7 @@ func (r *repository) AddUser(ctx context.Context, user *models.UserCredentials, 
 	if err := tx.QueryRowContext(
 		ctx,
 		`INSERT INTO user_credentials (id, login, password, privileges, created_at, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-		user.Id, user.Login, user.Password, user.Privileges, time.Now().Unix(), true,
+		user.Id, user.Login, user.Password, user.Privileges, time.Now(), true,
 	).Scan(&insertedId); err != nil {
 		return nil, err
 	}
