@@ -23,7 +23,7 @@ definitions:
       password:
         type: string
     type: object
-host: localhost:8081
+host: gnom48.ru/auth
 info:
   contact: {}
   description: Account API (Auth microservice) documentation. Отвечает за авторизацию
@@ -253,5 +253,5 @@ paths:
       tags:
       - Authentication
 schemes:
-- http
+- https
 swagger: "2.0"
