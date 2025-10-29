@@ -1,0 +1,4 @@
+bind_address = "0.0.0.0:8081"
+log_level = "debug"
+secret_key = "5W8uN9hswPRwfi3dTfELAgGahRJJTM2QEmR0guoJ"
+database_url = "host=postgres port=5432 dbname=postgres sslmode=disable user=postgres password=fbM849INe17RPxy search_path=auth"
