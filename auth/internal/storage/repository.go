@@ -44,7 +44,7 @@ func (r *repository) AddUser(ctx context.Context, user *models.UserCredentials, 
 	if err := tx.QueryRowContext(
 		ctx,
 		`INSERT INTO user_credentials (id, login, password, privileges, created_at, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-		user.Id, user.Login, user.Password, user.Privileges, time.Now(), true,
+		user.Id, user.Login, user.Password, user.Privileges, time.Now().Unix(), true,
 	).Scan(&insertedId); err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func (r *repository) GetTokenByUserId(userId string) (*models.Token, *models.Tok
 func (r *repository) addToken(token *models.Token) (string, error) {
 	if err := r.db.QueryRow(
 		"INSERT INTO tokens (id, token, user_id, is_regular, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-		token.Id, token.Token, token.UserId, token.IsRegular, time.Now(),
+		token.Id, token.Token, token.UserId, token.IsRegular, time.Now().Unix(),
 	).Scan(&token.Id); err != nil {
 		return "", err
 	}
