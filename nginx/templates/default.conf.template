@@ -25,15 +25,15 @@ server {
         proxy_redirect http://auth:${AUTH_PORT}/ /auth/;
     }
 
-    #location /knowledgebase2/ {
-    #    proxy_pass http://knowledgebase2:${KNOWLEDGEBASE_PORT}/;
-    #    proxy_set_header Host $host;
-    #    proxy_set_header X-Real-IP $remote_addr;
-    #    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    #    proxy_set_header X-Forwarded-Proto $scheme;
-    #    
-    #    proxy_redirect http://knowledgebase2:${KNOWLEDGEBASE_PORT}/ /knowledgebase2/;
-    #}
+    location /knowledgebase2/ {
+        proxy_pass http://knowledgebase2:${KNOWLEDGEBASE_PORT}/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        proxy_redirect http://knowledgebase2:${KNOWLEDGEBASE_PORT}/ /knowledgebase2/;
+    }
 
     #location /static/ {
     #    proxy_pass http://knowledgebase2:${KNOWLEDGEBASE_PORT}/static/;
