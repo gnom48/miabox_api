@@ -73,12 +73,14 @@ class TeamsRepository(BaseRepository):
                 self.session.add(new_team)
                 await self.session.commit()
 
-                user_team = UserTeam(
+                self.session.add(UserTeam(
                     role=UserStatuses.OWNER,
                     team_id=new_team.id,
                     user_id=user_id
-                )
-                await self.join_to_team(user_team)
+                ))
+                await self.session.commit()
+                # await self.join_to_team(user_team)
+
                 return new_team.id
         except SQLAlchemyError as e:
             logging.error(e.__str__())
