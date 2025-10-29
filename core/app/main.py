@@ -15,11 +15,11 @@ async def lifespan(app: FastAPI):
     logging.basicConfig(level=logging._nameToLevel[str(
         load_var_from_toml("app", "log_level")).upper()])
     logging.debug("Сервер запущен")
-    if bool(load_var_from_toml("app", "create_database")):
-        await drop_tables()
-        logging.debug("Таблицы БД сброшены")
-        await create_tables()
-        logging.debug("Таблицы БД созданы")
+    # if bool(load_var_from_toml("app", "create_database")):
+    #     await drop_tables()
+    #     logging.debug("Таблицы БД сброшены")
+    #     await create_tables()
+    #     logging.debug("Таблицы БД созданы")
     listen_task = asyncio.create_task(listen())
     logging.debug("Слушатель сообщений запущен")
 
