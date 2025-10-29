@@ -73,7 +73,7 @@ class TeamsRepository(BaseRepository):
                 self.session.add(new_team)
                 await self.session.commit()
 
-                self.session.add(UserTeam(
+                self.session.add(UserTeamOrm(
                     role=UserStatuses.OWNER,
                     team_id=new_team.id,
                     user_id=user_id
