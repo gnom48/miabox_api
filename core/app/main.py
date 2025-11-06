@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan,
-              openapi_url="/core/core/openapi.json",    # REVIEW: откатить
+              openapi_url="/core/core/openapi2.json",    # REVIEW: откатить
               docs_url="/swagger"
               )
 
@@ -47,7 +47,7 @@ async def redirect_to_swagger():
     return RedirectResponse("/swagger")
 
 
-@app.get("/core/openapi.json", include_in_schema=False)
+@app.get("/core/openapi2.json", include_in_schema=False)
 async def get_swagger():
     # REVIEW: откатить
     return FileResponse(r'/core/app/api/docs/openapi2.json')
