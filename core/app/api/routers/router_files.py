@@ -10,7 +10,7 @@ from app.utils.minio_client import MinioClient
 router_files = APIRouter(prefix="/files", tags=["Файлы"])
 
 
-@router_files.get("/{file_id}", status_code=status.HTTP_200_OK, description="Возвращает информацию о файле по Id")
+@router_files.get("/{file_id}", status_code=status.HTTP_200_OK, description="Возвращает информацию о файле по Id [без прав доступа]")
 async def get_file_info(
     file_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -21,7 +21,7 @@ async def get_file_info(
         return await files_repository.get_file_info_by_id(file_id)
 
 
-@router_files.post("/", status_code=status.HTTP_201_CREATED, description="Подгрузить файл")
+@router_files.post("/", status_code=status.HTTP_201_CREATED, description="Подгрузить файл [без прав доступа]")
 async def upload_file(
     file: UploadFile,
     file_id: Optional[str] = Form(...),
@@ -35,7 +35,7 @@ async def upload_file(
         return await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id, file_id)
 
 
-@router_files.get("/{file_id}/download", status_code=status.HTTP_200_OK, description="Скачать файл в прямом виде (возвращает реально поток, без имени файла, мб перевернутый и тд) - не стоит пользоваться")
+@router_files.get("/{file_id}/download", status_code=status.HTTP_200_OK, description="Скачать файл в прямом виде (возвращает реально байты, без имени файла и расширения, мб перевернутый и тд) - не стоит пользоваться [без прав доступа]")
 async def download_file_stream(
     file_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -51,7 +51,7 @@ async def download_file_stream(
         return minio_client.download_file(file_info.bucket_name, file_info.obj_name)
 
 
-@router_files.get("/{file_id}/presigned_url", status_code=status.HTTP_200_OK, description="Возвращает ссылку для скачивания файла")
+@router_files.get("/{file_id}/presigned_url", status_code=status.HTTP_200_OK, description="Возвращает ссылку для скачивания файла [без прав доступа]")
 async def get_presigned_file(
     file_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
@@ -63,15 +63,21 @@ async def get_presigned_file(
         # if not await files_repository.check_access(FileAccessMode.READ, user_credentials.id, file_id):
         #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
         file_info = await files_repository.get_file_info_by_id(file_id)
-        if user_credentials.id in list(map(lambda item: item.user_id, await files_repository.get_file_access(file_id))):
+        # if user_credentials.id in list(map(lambda item: item.user_id, await files_repository.get_file_access(file_id))):
+        #     url = minio_client.get_presigned_url(
+        #         file_info.bucket_name, file_info.obj_name)
+        #     return {"url": url}
+        # else:
+        #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+        try:
             url = minio_client.get_presigned_url(
                 file_info.bucket_name, file_info.obj_name)
             return {"url": url}
-        else:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+        except Exception:
+            raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
 
 
-@router_files.delete("/{file_id}", status_code=status.HTTP_202_ACCEPTED, description="удаляет файл по Id")
+@router_files.delete("/{file_id}", status_code=status.HTTP_202_ACCEPTED, description="удаляет файл по Id [без прав доступа]")
 async def delete_file(
     file_id: str,
     user_credentials: UserCredentials = Depends(get_user_from_request),
