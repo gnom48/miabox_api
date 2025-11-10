@@ -5,7 +5,7 @@
         "version": "0.1.0"
     },
     "paths": {
-        "/core/config": {
+        "/config": {
             "get": {
                 "summary": "Server Config Get",
                 "operationId": "server_config_get_config_get",
@@ -21,7 +21,7 @@
                 }
             }
         },
-        "/core/supported_versions": {
+        "/supported_versions": {
             "get": {
                 "summary": "Get Supported Versions",
                 "operationId": "get_supported_versions_supported_versions_get",
@@ -37,12 +37,13 @@
                 }
             }
         },
-        "/core/files/{file_id}": {
+        "/files/{file_id}": {
             "get": {
                 "tags": [
                     "Файлы"
                 ],
                 "summary": "Get File Info",
+                "description": "Возвращает информацию о файле по Id [без прав доступа]",
                 "operationId": "get_file_info_files__file_id__get",
                 "parameters": [
                     {
@@ -90,6 +91,7 @@
                     "Файлы"
                 ],
                 "summary": "Delete File",
+                "description": "удаляет файл по Id [без прав доступа]",
                 "operationId": "delete_file_files__file_id__delete",
                 "parameters": [
                     {
@@ -133,12 +135,13 @@
                 }
             }
         },
-        "/core/files/": {
+        "/files/": {
             "post": {
                 "tags": [
                     "Файлы"
                 ],
                 "summary": "Upload File",
+                "description": "Подгрузить файл [без прав доступа]",
                 "operationId": "upload_file_files__post",
                 "parameters": [
                     {
@@ -183,12 +186,13 @@
                 }
             }
         },
-        "/core/files/{file_id}/download": {
+        "/files/{file_id}/download": {
             "get": {
                 "tags": [
                     "Файлы"
                 ],
                 "summary": "Download File Stream",
+                "description": "Скачать файл в прямом виде (возвращает реально байты, без имени файла и расширения, мб перевернутый и тд) - не стоит пользоваться [без прав доступа]",
                 "operationId": "download_file_stream_files__file_id__download_get",
                 "parameters": [
                     {
@@ -232,12 +236,13 @@
                 }
             }
         },
-        "/core/files/{file_id}/presigned_url": {
+        "/files/{file_id}/presigned_url": {
             "get": {
                 "tags": [
                     "Файлы"
                 ],
                 "summary": "Get Presigned File",
+                "description": "Возвращает ссылку для скачивания файла [без прав доступа]",
                 "operationId": "get_presigned_file_files__file_id__presigned_url_get",
                 "parameters": [
                     {
@@ -281,12 +286,13 @@
                 }
             }
         },
-        "/core/teams/": {
+        "/teams/": {
             "post": {
                 "tags": [
                     "Команды"
                 ],
                 "summary": "Create Team",
+                "description": "Создает команду и делает текущего пользователя ее Owner",
                 "operationId": "create_team_teams__post",
                 "parameters": [
                     {
@@ -335,6 +341,7 @@
                     "Команды"
                 ],
                 "summary": "Get My Teams",
+                "description": "Возвращяет полную информацию обо всех командах, в которых состоит текущий пользователь; также об их участниках и статистиках (пока только статистики), если текущий пользователь является Owner",
                 "operationId": "get_my_teams_teams__get",
                 "parameters": [
                     {
@@ -399,12 +406,13 @@
                 }
             }
         },
-        "/core/teams/{team_id}": {
+        "/teams/{team_id}": {
             "delete": {
                 "tags": [
                     "Команды"
                 ],
                 "summary": "Delete Team",
+                "description": "Удаляет команду по Id, если текущий пользователь явялется в ней Owner",
                 "operationId": "delete_team_teams__team_id__delete",
                 "parameters": [
                     {
@@ -448,12 +456,13 @@
                 }
             }
         },
-        "/core/teams/{team_id}/join": {
+        "/teams/{team_id}/join": {
             "post": {
                 "tags": [
                     "Команды"
                 ],
                 "summary": "Join Team",
+                "description": "Присоединиться к команде по Id с ролью User; приграсить в команду может только пользователь с ролью Owner",
                 "operationId": "join_team_teams__team_id__join_post",
                 "parameters": [
                     {
@@ -506,12 +515,13 @@
                 }
             }
         },
-        "/core/teams/{team_id}/leave": {
+        "/teams/{team_id}/leave": {
             "put": {
                 "tags": [
                     "Команды"
                 ],
                 "summary": "Leave Team",
+                "description": "Покинуть команду",
                 "operationId": "leave_team_teams__team_id__leave_put",
                 "parameters": [
                     {
@@ -555,12 +565,13 @@
                 }
             }
         },
-        "/core/teams/{team_id}/user/{user_id}/role": {
+        "/teams/{team_id}/user/{user_id}/role": {
             "put": {
                 "tags": [
                     "Команды"
                 ],
                 "summary": "Set User Role In Team",
+                "description": "Назначить участнику команды новую роль; для этого действия текущий пользователь должен являться Owner в этой команде",
                 "operationId": "set_user_role_in_team_teams__team_id__user__user_id__role_put",
                 "parameters": [
                     {
@@ -621,12 +632,13 @@
                 }
             }
         },
-        "/core/notes/": {
+        "/notes/": {
             "get": {
                 "tags": [
                     "Заметки"
                 ],
                 "summary": "Get Notes",
+                "description": "Возвращает все заметки текущего пользователя",
                 "operationId": "get_notes_notes__get",
                 "parameters": [
                     {
@@ -665,6 +677,7 @@
                     "Заметки"
                 ],
                 "summary": "Add Note",
+                "description": "Создает заметку для текущего пользователя",
                 "operationId": "add_note_notes__post",
                 "parameters": [
                     {
@@ -713,6 +726,7 @@
                     "Заметки"
                 ],
                 "summary": "Update Note",
+                "description": "Обновляет заметку по Id",
                 "operationId": "update_note_notes__put",
                 "parameters": [
                     {
@@ -757,12 +771,13 @@
                 }
             }
         },
-        "/core/notes/{note_id}": {
+        "/notes/{note_id}": {
             "delete": {
                 "tags": [
                     "Заметки"
                 ],
                 "summary": "Delete Note",
+                "description": "Удаляет заметку по Id",
                 "operationId": "delete_note_notes__note_id__delete",
                 "parameters": [
                     {
@@ -806,12 +821,13 @@
                 }
             }
         },
-        "/core/tasks/": {
+        "/tasks/": {
             "get": {
                 "tags": [
                     "Задачи"
                 ],
                 "summary": "Get Tasks",
+                "description": "Возвращяет все задачи текущего пользователя",
                 "operationId": "get_tasks_tasks__get",
                 "parameters": [
                     {
@@ -850,6 +866,7 @@
                     "Задачи"
                 ],
                 "summary": "Add Task",
+                "description": "Создает задачу для текущего пользователя",
                 "operationId": "add_task_tasks__post",
                 "parameters": [
                     {
@@ -894,12 +911,13 @@
                 }
             }
         },
-        "/core/tasks/completed": {
+        "/tasks/completed": {
             "get": {
                 "tags": [
                     "Задачи"
                 ],
                 "summary": "Get Completed Tasks",
+                "description": "Возвращяет только выполненные задачи текущего пользователя",
                 "operationId": "get_completed_tasks_tasks_completed_get",
                 "parameters": [
                     {
@@ -934,12 +952,13 @@
                 }
             }
         },
-        "/core/tasks/{task_id}": {
+        "/tasks/{task_id}": {
             "delete": {
                 "tags": [
                     "Задачи"
                 ],
                 "summary": "Delete Task",
+                "description": "Удаляет задачу по Id для текущего пользователя",
                 "operationId": "delete_task_tasks__task_id__delete",
                 "parameters": [
                     {
@@ -983,12 +1002,13 @@
                 }
             }
         },
-        "/core/users/": {
+        "/users/": {
             "get": {
                 "tags": [
                     "Пользователи"
                 ],
                 "summary": "Get User",
+                "description": "Возвращает текущего пользователя",
                 "operationId": "get_user_users__get",
                 "parameters": [
                     {
@@ -1027,6 +1047,7 @@
                     "Пользователи"
                 ],
                 "summary": "Update User",
+                "description": "Редактирует данные только текущего пользователя",
                 "operationId": "update_user_users__put",
                 "parameters": [
                     {
@@ -1071,12 +1092,13 @@
                 }
             }
         },
-        "/core/users/{user_id}/avatar": {
+        "/users/{user_id}/avatar": {
             "post": {
                 "tags": [
                     "Пользователи"
                 ],
                 "summary": "Set Avatar",
+                "description": "Устанавливает новый аватар текущего пользователя",
                 "operationId": "set_avatar_users__user_id__avatar_post",
                 "parameters": [
                     {
@@ -1130,12 +1152,13 @@
                 }
             }
         },
-        "/core/addresses/": {
+        "/addresses/": {
             "post": {
                 "tags": [
                     "Адреса"
                 ],
                 "summary": "Add Address",
+                "description": "Добавляет посещенную локацию для текущего пользователя",
                 "operationId": "add_address_addresses__post",
                 "parameters": [
                     {
@@ -1180,12 +1203,13 @@
                 }
             }
         },
-        "/core/addresses/user/{user_id}": {
+        "/addresses/user/{user_id}": {
             "get": {
                 "tags": [
                     "Адреса"
                 ],
                 "summary": "Get Addresses",
+                "description": "Возвращает список почещенных локаций пользователем по его Id с фильтром по дате",
                 "operationId": "get_addresses_addresses_user__user_id__get",
                 "parameters": [
                     {
@@ -1261,12 +1285,13 @@
                 }
             }
         },
-        "/core/statistics/": {
+        "/statistics/": {
             "post": {
                 "tags": [
                     "Статистика"
                 ],
                 "summary": "Add Statistic",
+                "description": "Вносит новую запись об изменениях в статистике у текущего пользователя",
                 "operationId": "add_statistic_statistics__post",
                 "parameters": [
                     {
@@ -1311,12 +1336,13 @@
                 }
             }
         },
-        "/core/statistics/{user_id}/aggregated": {
+        "/statistics/{user_id}/aggregated": {
             "get": {
                 "tags": [
                     "Статистика"
                 ],
                 "summary": "Get User Statistics Aggregated",
+                "description": "Возвращает агрегированную информацию о статистике для текущего пользователя с фильтрами",
                 "operationId": "get_user_statistics_aggregated_statistics__user_id__aggregated_get",
                 "parameters": [
                     {
@@ -1378,7 +1404,7 @@
                 }
             }
         },
-        "/core/statistics/{user_id}/kpi": {
+        "/statistics/{user_id}/kpi": {
             "get": {
                 "tags": [
                     "Статистика"
@@ -1484,12 +1510,13 @@
                 }
             }
         },
-        "/core/calls/": {
+        "/calls/": {
             "post": {
                 "tags": [
                     "Звонки"
                 ],
                 "summary": "Add Call",
+                "description": "Добавляет новую запись о совершённом текущим пользователем звонке; можно добавить аудиозапись звонка",
                 "operationId": "add_call_calls__post",
                 "parameters": [
                     {
@@ -1534,12 +1561,13 @@
                 }
             }
         },
-        "/core/calls/user/{user_id}": {
+        "/calls/user/{user_id}": {
             "get": {
                 "tags": [
                     "Звонки"
                 ],
                 "summary": "Get Calls",
+                "description": "Возвращает все звонки пользователя по его Id",
                 "operationId": "get_calls_calls_user__user_id__get",
                 "parameters": [
                     {
@@ -1583,12 +1611,13 @@
                 }
             }
         },
-        "/core/calls/{call_id}/transcription": {
+        "/calls/{call_id}/transcription": {
             "get": {
                 "tags": [
                     "Звонки"
                 ],
                 "summary": "Order Call Transcription",
+                "description": "Запускает расшифровку аудиозаписи звонка по его Id, если она была прикреплена (работать не будет, нейронка не поднята)",
                 "operationId": "order_call_transcription_calls__call_id__transcription_get",
                 "parameters": [
                     {
@@ -1632,12 +1661,13 @@
                 }
             }
         },
-        "/core/calls/transcription": {
+        "/calls/transcription": {
             "put": {
                 "tags": [
                     "Звонки"
                 ],
                 "summary": "Update Transcription",
+                "description": "Обновляет расшифровку звонка",
                 "operationId": "update_transcription_calls_transcription_put",
                 "parameters": [
                     {
