@@ -100,7 +100,7 @@ async def set_user_role_in_team(
         return {"detail": "Role changed successfully"}
 
 
-@router_teams.get("/", status_code=status.HTTP_200_OK, description="Возвращяет полную информацию обо всех командах, в которых состоит текущий пользователь; также об их участниках и статистиках (пока только статистики), если текущий пользователь является Owner")
+@router_teams.get("/", status_code=status.HTTP_200_OK, description="Возвращает полную информацию обо всех командах, в которых состоит текущий пользователь; также об их участниках и статистиках (пока только статистики), если текущий пользователь является Owner")
 async def get_my_teams(
     show_stats: bool = Query(default=False),
     show_addresses: bool = Query(default=False),

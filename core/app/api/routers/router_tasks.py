@@ -6,7 +6,7 @@ from app.api.middlewares import get_user_from_request
 router_tasks = APIRouter(prefix="/tasks", tags=["Задачи"])
 
 
-@router_tasks.get("/", status_code=status.HTTP_200_OK, description="Возвращяет все задачи текущего пользователя")
+@router_tasks.get("/", status_code=status.HTTP_200_OK, description="Возвращает все задачи текущего пользователя")
 async def get_tasks(
     user_credentials: UserCredentials = Depends(get_user_from_request),
     tasks_repository: TasksRepository = Depends(
@@ -20,7 +20,7 @@ async def get_tasks(
         return tasks
 
 
-@router_tasks.get("/completed", status_code=status.HTTP_200_OK, description="Возвращяет только выполненные задачи текущего пользователя")
+@router_tasks.get("/completed", status_code=status.HTTP_200_OK, description="Возвращает только выполненные задачи текущего пользователя")
 async def get_completed_tasks(
     user_credentials: UserCredentials = Depends(get_user_from_request),
     tasks_repository: TasksRepository = Depends(
