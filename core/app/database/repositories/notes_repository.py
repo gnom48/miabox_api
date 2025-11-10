@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.database.models import NoteOrm
 from .base_repository import BaseRepository
 import logging
+import uuid
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -38,6 +39,7 @@ class NotesRepository(BaseRepository):
                 new_note = NoteOrm(
                     **data.model_dump()
                 )
+                new_note.id = None
                 self.session.add(new_note)
                 await self.session.commit()
                 return new_note.id
