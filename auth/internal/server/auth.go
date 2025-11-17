@@ -15,6 +15,10 @@ type signUpRequestBody struct {
 	UserExtras models.UserExtras `json:"extras"`
 }
 
+type signUpResponseBody struct {
+	Id string `json:"id"`
+}
+
 // @Summary SignUp
 // @Description SignUp
 // @Tags Authentication
@@ -42,7 +46,9 @@ func (s *ApiServer) HandleAuthenticationSignUp() http.HandlerFunc {
 		if returning, err := s.storage.GetRepository().AddUser(context.Background(), user, &requestBody.UserExtras); err != nil {
 			s.ErrorRespond(w, r, http.StatusUnprocessableEntity, err)
 		} else {
-			s.Respond(w, r, http.StatusCreated, returning.Id)
+			s.Respond(w, r, http.StatusCreated, signUpResponseBody{
+				Id: returning.Id,
+			})
 		}
 	}
 }
