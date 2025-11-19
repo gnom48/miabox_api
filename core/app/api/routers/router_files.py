@@ -18,7 +18,7 @@ async def get_file_info(
         FilesRepository.repository_factory)
 ):
     async with files_repository:
-        return ResResponse(await files_repository.get_file_info_by_id(file_id))
+        return ResResponse(res=await files_repository.get_file_info_by_id(file_id))
 
 
 @router_files.post("/", status_code=status.HTTP_201_CREATED, description="Подгрузить файл [без прав доступа]")
@@ -32,7 +32,7 @@ async def upload_file(
 ):
     async with files_repository:
         res = minio_client.upload_file(user_credentials.id, file)
-        return IdResponse(await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id, file_id))
+        return IdResponse(id=await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id, file_id))
 
 
 @router_files.get("/{file_id}/download", status_code=status.HTTP_200_OK, description="Скачать файл в прямом виде (возвращает реально байты, без имени файла и расширения, мб перевернутый и тд) - не стоит пользоваться [без прав доступа]")
@@ -92,4 +92,4 @@ async def delete_file(
         delete_success = await files_repository.delete_file(file_id)
         if not delete_success:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
-        return ResResponse(minio_client.delete_file(file_info.bucket_name, file_info.obj_name))
+        return ResResponse(res=minio_client.delete_file(file_info.bucket_name, file_info.obj_name))

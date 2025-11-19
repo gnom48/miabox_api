@@ -17,7 +17,7 @@ async def get_notes(
         if notes is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Notes not found")
-        return ResResponse(notes)
+        return ResResponse(res=notes)
 
 
 @router_notes.post("/", status_code=status.HTTP_201_CREATED, description="Создает заметку для текущего пользователя")
@@ -32,7 +32,7 @@ async def add_note(
         if not note_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to insert note")
-        return IdResponse(note_id)
+        return IdResponse(id=note_id)
 
 
 @router_notes.delete("/{note_id}", status_code=status.HTTP_200_OK, description="Удаляет заметку по Id")
@@ -47,7 +47,7 @@ async def delete_note(
         if not success:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="Note not found or unable to delete")
-        return DetailsResponse("Note deleted successfully")
+        return DetailsResponse(details="Note deleted successfully")
 
 
 @router_notes.put("/", status_code=status.HTTP_200_OK, description="Обновляет заметку по Id")
@@ -62,4 +62,4 @@ async def update_note(
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to update note")
-        return DetailsResponse("Note updated successfully")
+        return DetailsResponse(details="Note updated successfully")

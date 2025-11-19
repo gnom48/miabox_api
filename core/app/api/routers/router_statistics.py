@@ -21,7 +21,7 @@ async def add_statistic(
         record_id = await statistics_repository.add_statistics_record(stat=record)
         if not record_id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
-        return IdResponse(record_id)
+        return IdResponse(id=record_id)
 
 
 @router_statistics.get("/{user_id}/aggregated", status_code=status.HTTP_200_OK, description="Возвращает агрегированную информацию о статистике для текущего пользователя с фильтрами")
@@ -108,4 +108,4 @@ async def set_kpi(
         if not res:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="move level error")
-        return ResResponse(res)
+        return ResResponse(res=res)

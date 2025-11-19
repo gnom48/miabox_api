@@ -28,7 +28,7 @@ async def add_address(
         if not address_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to add address info")
-        return IdResponse(address_id)
+        return IdResponse(id=address_id)
 
 
 @router_addresses.get("/user/{user_id}", status_code=status.HTTP_200_OK, description="Возвращает список почещенных локаций пользователем по его Id с фильтром по дате")
@@ -45,4 +45,4 @@ async def get_addresses(
         if addresses is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Addresses not found")
-        return ResResponse(addresses)
+        return ResResponse(res=addresses)

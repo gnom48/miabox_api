@@ -52,7 +52,7 @@ async def add_call(
         if not record_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to add call record")
-        return IdResponse(record_id)
+        return IdResponse(id=record_id)
 
 
 @router_calls.get("/user/{user_id}", status_code=status.HTTP_200_OK, description="Возвращает все звонки пользователя по его Id")
@@ -68,7 +68,7 @@ async def get_calls(
         if calls is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Calls not found")
-        return ResResponse(calls)
+        return ResResponse(res=calls)
 
 
 @router_calls.get("/{call_id}/transcription", status_code=status.HTTP_200_OK, description="Запускает расшифровку аудиозаписи звонка по его Id, если она была прикреплена (работать не будет, нейронка не поднята)")
@@ -92,7 +92,7 @@ async def order_call_transcription(
             if not file_info:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
-            return ResResponse(await rabbitmq.send_message_to_queue(call_id=call_id, object_name=file_info.obj_name, bucket_name=file_info.bucket_name))
+            return ResResponse(res=await rabbitmq.send_message_to_queue(call_id=call_id, object_name=file_info.obj_name, bucket_name=file_info.bucket_name))
 
 
 # BAD: выискивать сообщение в очередях бессмысленно
@@ -119,4 +119,4 @@ async def update_transcription(
         if not success:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="Unable to update transcription")
-        return DetailsResponse("Transcription updated successfully")
+        return DetailsResponse(details="Transcription updated successfully")

@@ -16,7 +16,7 @@ async def get_user(
         UsersRepository.repository_factory)
 ):
     async with user_repository:
-        return ResResponse(await user_repository.get_user_by_id(user_credentials.id))
+        return ResResponse(res=await user_repository.get_user_by_id(user_credentials.id))
 
 
 @router_users.put("/", status_code=status.HTTP_200_OK, description="Редактирует данные только текущего пользователя")
@@ -34,7 +34,7 @@ async def update_user(
         if not res:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Update error")
-        return ResResponse(res)
+        return ResResponse(res=res)
 
 
 @router_users.post("/{user_id}/avatar", status_code=status.HTTP_200_OK, description="Устанавливает новый аватар текущего пользователя")
@@ -53,5 +53,5 @@ async def set_avatar(
         new_avatar_file_id = await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id, user_credentials.id)
         async with user_repository:
             if await user_repository.update_avatar_only(user_credentials.id, new_avatar_file_id):
-                return ResResponse(new_avatar_file_id)
-            return ResResponse(None)
+                return ResResponse(res=new_avatar_file_id)
+            return ResResponse(res=None)
