@@ -12,6 +12,7 @@ services:
       NGINX_INNER_PORT: ${NGINX_INNER_PORT}
       
       CORE_PORT: ${CORE_PORT}
+      CORE_PORT2: ${CORE_PORT2}
       
       AUTH_PORT: ${AUTH_PORT}
       
