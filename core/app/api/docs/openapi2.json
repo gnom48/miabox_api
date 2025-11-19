@@ -5,7 +5,7 @@
         "version": "0.1.0"
     },
     "paths": {
-        "/core/config": {
+        "/core-hotfix/config": {
             "get": {
                 "summary": "Server Config Get",
                 "operationId": "server_config_get_config_get",
@@ -21,7 +21,7 @@
                 }
             }
         },
-        "/core/supported_versions": {
+        "/core-hotfix/supported_versions": {
             "get": {
                 "summary": "Get Supported Versions",
                 "operationId": "get_supported_versions_supported_versions_get",
@@ -37,7 +37,7 @@
                 }
             }
         },
-        "/core/files/{file_id}": {
+        "/core-hotfix/files/{file_id}": {
             "get": {
                 "tags": [
                     "Файлы"
@@ -135,7 +135,7 @@
                 }
             }
         },
-        "/core/files/": {
+        "/core-hotfix/files/": {
             "post": {
                 "tags": [
                     "Файлы"
@@ -186,7 +186,7 @@
                 }
             }
         },
-        "/core/files/{file_id}/download": {
+        "/core-hotfix/files/{file_id}/download": {
             "get": {
                 "tags": [
                     "Файлы"
@@ -236,7 +236,7 @@
                 }
             }
         },
-        "/core/files/{file_id}/presigned_url": {
+        "/core-hotfix/files/{file_id}/presigned_url": {
             "get": {
                 "tags": [
                     "Файлы"
@@ -286,7 +286,7 @@
                 }
             }
         },
-        "/core/teams/": {
+        "/core-hotfix/teams/": {
             "post": {
                 "tags": [
                     "Команды"
@@ -406,7 +406,7 @@
                 }
             }
         },
-        "/core/teams/{team_id}": {
+        "/core-hotfix/teams/{team_id}": {
             "delete": {
                 "tags": [
                     "Команды"
@@ -456,7 +456,7 @@
                 }
             }
         },
-        "/core/teams/{team_id}/join": {
+        "/core-hotfix/teams/{team_id}/join": {
             "post": {
                 "tags": [
                     "Команды"
@@ -515,7 +515,7 @@
                 }
             }
         },
-        "/core/teams/{team_id}/leave": {
+        "/core-hotfix/teams/{team_id}/leave": {
             "put": {
                 "tags": [
                     "Команды"
@@ -565,7 +565,7 @@
                 }
             }
         },
-        "/core/teams/{team_id}/user/{user_id}/role": {
+        "/core-hotfix/teams/{team_id}/user/{user_id}/role": {
             "put": {
                 "tags": [
                     "Команды"
@@ -632,7 +632,7 @@
                 }
             }
         },
-        "/core/notes/": {
+        "/core-hotfix/notes/": {
             "get": {
                 "tags": [
                     "Заметки"
@@ -771,7 +771,7 @@
                 }
             }
         },
-        "/core/notes/{note_id}": {
+        "/core-hotfix/notes/{note_id}": {
             "delete": {
                 "tags": [
                     "Заметки"
@@ -821,7 +821,7 @@
                 }
             }
         },
-        "/core/tasks/": {
+        "/core-hotfix/tasks/": {
             "get": {
                 "tags": [
                     "Задачи"
@@ -911,7 +911,7 @@
                 }
             }
         },
-        "/core/tasks/completed": {
+        "/core-hotfix/tasks/completed": {
             "get": {
                 "tags": [
                     "Задачи"
@@ -952,7 +952,7 @@
                 }
             }
         },
-        "/core/tasks/{task_id}": {
+        "/core-hotfix/tasks/{task_id}": {
             "delete": {
                 "tags": [
                     "Задачи"
@@ -1002,7 +1002,7 @@
                 }
             }
         },
-        "/core/users/": {
+        "/core-hotfix/users/": {
             "get": {
                 "tags": [
                     "Пользователи"
@@ -1092,7 +1092,7 @@
                 }
             }
         },
-        "/core/users/{user_id}/avatar": {
+        "/core-hotfix/users/{user_id}/avatar": {
             "post": {
                 "tags": [
                     "Пользователи"
@@ -1152,7 +1152,7 @@
                 }
             }
         },
-        "/core/addresses/": {
+        "/core-hotfix/addresses/": {
             "post": {
                 "tags": [
                     "Адреса"
@@ -1203,7 +1203,7 @@
                 }
             }
         },
-        "/core/addresses/user/{user_id}": {
+        "/core-hotfix/addresses/user/{user_id}": {
             "get": {
                 "tags": [
                     "Адреса"
@@ -1285,7 +1285,7 @@
                 }
             }
         },
-        "/core/statistics/": {
+        "/core-hotfix/statistics/": {
             "post": {
                 "tags": [
                     "Статистика"
@@ -1336,7 +1336,7 @@
                 }
             }
         },
-        "/core/statistics/{user_id}/aggregated": {
+        "/core-hotfix/statistics/{user_id}/aggregated": {
             "get": {
                 "tags": [
                     "Статистика"
@@ -1404,7 +1404,7 @@
                 }
             }
         },
-        "/core/statistics/{user_id}/kpi": {
+        "/core-hotfix/statistics/{user_id}/kpi": {
             "get": {
                 "tags": [
                     "Статистика"
@@ -1510,7 +1510,7 @@
                 }
             }
         },
-        "/core/calls/": {
+        "/core-hotfix/calls/": {
             "post": {
                 "tags": [
                     "Звонки"
@@ -1561,7 +1561,7 @@
                 }
             }
         },
-        "/core/calls/user/{user_id}": {
+        "/core-hotfix/calls/user/{user_id}": {
             "get": {
                 "tags": [
                     "Звонки"
@@ -1611,7 +1611,7 @@
                 }
             }
         },
-        "/core/calls/{call_id}/transcription": {
+        "/core-hotfix/calls/{call_id}/transcription": {
             "get": {
                 "tags": [
                     "Звонки"
@@ -1661,7 +1661,7 @@
                 }
             }
         },
-        "/core/calls/transcription": {
+        "/core-hotfix/calls/transcription": {
             "put": {
                 "tags": [
                     "Звонки"
