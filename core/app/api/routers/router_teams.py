@@ -2,7 +2,7 @@ import time
 from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, Depends, Query, status
 from app.database.repositories import TeamsRepository, UsersRepository, StatisticsRepository, AddressesRepository, CallsRepository
-from app.api.models import Team, UserTeam, UserStatuses
+from app.api.models import Team, UserTeam, UserStatuses, IdResponse, ResResponse
 from app.api.middlewares import get_user_from_request
 from app.api.models import UserCredentials
 from app.common.models import *
@@ -22,7 +22,7 @@ async def create_team(
         if not team_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to create team")
-        return team_id
+        return IdResponse(team_id)
 
 
 @router_teams.delete("/{team_id}", status_code=status.HTTP_200_OK, description="Удаляет команду по Id, если текущий пользователь явялется в ней Owner")
@@ -40,7 +40,7 @@ async def delete_team(
         if not success:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="Team not found or unable to delete")
-        return {"detail": "Team deleted successfully"}
+        return DetailsResponse("Team deleted successfully")
 
 
 @router_teams.post("/{team_id}/join", status_code=status.HTTP_200_OK, description="Присоединиться к команде по Id с ролью User; приграсить в команду может только пользователь с ролью Owner")
@@ -62,7 +62,7 @@ async def join_team(
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to join team")
-        return {"detail": "Joined team successfully"}
+        return DetailsResponse("Joined team successfully")
 
 
 @router_teams.put("/{team_id}/leave", status_code=status.HTTP_200_OK, description="Покинуть команду")
@@ -77,7 +77,7 @@ async def leave_team(
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to leave team")
-        return {"detail": "Left team successfully"}
+        return DetailsResponse("Left team successfully")
 
 
 @router_teams.put("/{team_id}/user/{user_id}/role", status_code=status.HTTP_200_OK, description="Назначить участнику команды новую роль; для этого действия текущий пользователь должен являться Owner в этой команде")
@@ -97,7 +97,7 @@ async def set_user_role_in_team(
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to change role")
-        return {"detail": "Role changed successfully"}
+        return DetailsResponse("Role changed successfully")
 
 
 @router_teams.get("/", status_code=status.HTTP_200_OK, description="Возвращает полную информацию обо всех командах, в которых состоит текущий пользователь; также об их участниках и статистиках (пока только статистики), если текущий пользователь является Owner")
@@ -145,4 +145,4 @@ async def get_my_teams(
             async with address_repository:
                 # TODO: потом дописать
                 ...
-        return teams
+        return ResResponse(teams)

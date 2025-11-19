@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Any
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass
@@ -190,3 +190,15 @@ class Call(BaseModel):
     call_type: int
     transcription: Optional[str]
     file_id: Optional[str]
+
+
+class IdResponse(BaseModel):
+    id: str
+
+
+class ResResponse(BaseModel):
+    res: Any
+
+
+class DetailsResponse(BaseModel):
+    details: str

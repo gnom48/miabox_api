@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from app.database.repositories import TasksRepository
-from app.api.models import Task, UserCredentials
+from app.api.models import Task, UserCredentials, IdResponse, ResResponse, DetailsResponse
 from app.api.middlewares import get_user_from_request
 
 router_tasks = APIRouter(prefix="/tasks", tags=["Задачи"])
@@ -17,7 +17,7 @@ async def get_tasks(
         if tasks is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Tasks not found")
-        return tasks
+        return ResResponse(tasks)
 
 
 @router_tasks.get("/completed", status_code=status.HTTP_200_OK, description="Возвращает только выполненные задачи текущего пользователя")
@@ -31,7 +31,7 @@ async def get_completed_tasks(
         if tasks is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Completed tasks not found")
-        return tasks
+        return ResResponse(tasks)
 
 
 @router_tasks.post("/", status_code=status.HTTP_201_CREATED, description="Создает задачу для текущего пользователя")
@@ -46,7 +46,7 @@ async def add_task(
         if not task_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to insert task")
-        return task_id
+        return IdResponse(task_id)
 
 
 @router_tasks.delete("/{task_id}", status_code=status.HTTP_200_OK, description="Удаляет задачу по Id для текущего пользователя")
@@ -61,4 +61,4 @@ async def delete_task(
         if not success:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="Task not found or unable to delete")
-        return {"detail": "Task deleted successfully"}
+        return DetailsResponse("Task deleted successfully")

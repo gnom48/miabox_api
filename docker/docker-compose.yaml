@@ -21,6 +21,11 @@ services:
       file: docker-compose.core.yaml
       service: core
 
+  core-hotfix:
+    extends:
+      file: docker-compose.core.yaml
+      service: core-hotfix
+
   whisper:
     extends:
       file: docker-compose.whisper.yaml

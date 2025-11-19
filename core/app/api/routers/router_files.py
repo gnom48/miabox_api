@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Form, UploadFile, status, HTTPException
 from fastapi.responses import FileResponse
 from app.database.repositories import FilesRepository
-from app.api.models import UserCredentials, FileAccessMode
+from app.api.models import UserCredentials, FileAccessMode, IdResponse, ResResponse
 from app.api.middlewares import get_user_from_request
 from app.utils.minio_client import MinioClient
 
@@ -18,7 +18,7 @@ async def get_file_info(
         FilesRepository.repository_factory)
 ):
     async with files_repository:
-        return await files_repository.get_file_info_by_id(file_id)
+        return ResResponse(await files_repository.get_file_info_by_id(file_id))
 
 
 @router_files.post("/", status_code=status.HTTP_201_CREATED, description="Подгрузить файл [без прав доступа]")
@@ -32,7 +32,7 @@ async def upload_file(
 ):
     async with files_repository:
         res = minio_client.upload_file(user_credentials.id, file)
-        return await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id, file_id)
+        return IdResponse(await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id, file_id))
 
 
 @router_files.get("/{file_id}/download", status_code=status.HTTP_200_OK, description="Скачать файл в прямом виде (возвращает реально байты, без имени файла и расширения, мб перевернутый и тд) - не стоит пользоваться [без прав доступа]")
@@ -92,4 +92,4 @@ async def delete_file(
         delete_success = await files_repository.delete_file(file_id)
         if not delete_success:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
-        return minio_client.delete_file(file_info.bucket_name, file_info.obj_name)
+        return ResResponse(minio_client.delete_file(file_info.bucket_name, file_info.obj_name))

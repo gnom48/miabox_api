@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from app.database.repositories import NotesRepository
-from app.api.models import Note, UserCredentials
+from app.api.models import Note, UserCredentials, IdResponse, ResResponse, DetailsResponse
 from app.api.middlewares import get_user_from_request
 
 router_notes = APIRouter(prefix="/notes", tags=["Заметки"])
@@ -17,7 +17,7 @@ async def get_notes(
         if notes is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Notes not found")
-        return notes
+        return ResResponse(notes)
 
 
 @router_notes.post("/", status_code=status.HTTP_201_CREATED, description="Создает заметку для текущего пользователя")
@@ -32,7 +32,7 @@ async def add_note(
         if not note_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to insert note")
-        return note_id
+        return IdResponse(note_id)
 
 
 @router_notes.delete("/{note_id}", status_code=status.HTTP_200_OK, description="Удаляет заметку по Id")
@@ -47,7 +47,7 @@ async def delete_note(
         if not success:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="Note not found or unable to delete")
-        return {"detail": "Note deleted successfully"}
+        return DetailsResponse("Note deleted successfully")
 
 
 @router_notes.put("/", status_code=status.HTTP_200_OK, description="Обновляет заметку по Id")
@@ -62,4 +62,4 @@ async def update_note(
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to update note")
-        return {"detail": "Note updated successfully"}
+        return DetailsResponse("Note updated successfully")

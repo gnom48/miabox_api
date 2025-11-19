@@ -1,7 +1,7 @@
 import time
 from fastapi import APIRouter, HTTPException, Header, Depends, status
 from app.api.middlewares import get_user_from_request
-from app.api.models import UserCredentials, Statistic, StatisticAggregated, KpiSummary, Kpi, WorkTypes
+from app.api.models import UserCredentials, Statistic, StatisticAggregated, KpiSummary, Kpi, WorkTypes, IdResponse, ResResponse
 from app.database.repositories import StatisticsRepository, UsersRepository
 from app.utils.kpi_calculator import KpiCalculator
 import datetime
@@ -21,7 +21,7 @@ async def add_statistic(
         record_id = await statistics_repository.add_statistics_record(stat=record)
         if not record_id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
-        return record_id
+        return IdResponse(record_id)
 
 
 @router_statistics.get("/{user_id}/aggregated", status_code=status.HTTP_200_OK, description="Возвращает агрегированную информацию о статистике для текущего пользователя с фильтрами")
@@ -108,4 +108,4 @@ async def set_kpi(
         if not res:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="move level error")
-        return res
+        return ResResponse(res)

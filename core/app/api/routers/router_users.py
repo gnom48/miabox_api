@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response, UploadFile, status
 from fastapi.responses import RedirectResponse
-from app.api.models import User, UserCredentials
+from app.api.models import User, UserCredentials, IdResponse, ResResponse
 from app.database import BaseRepository, UsersRepository, FilesRepository
 from app.api.middlewares import get_user_from_request
 from app.utils.minio_client import MinioClient
@@ -16,7 +16,7 @@ async def get_user(
         UsersRepository.repository_factory)
 ):
     async with user_repository:
-        return await user_repository.get_user_by_id(user_credentials.id)
+        return ResResponse(await user_repository.get_user_by_id(user_credentials.id))
 
 
 @router_users.put("/", status_code=status.HTTP_200_OK, description="Редактирует данные только текущего пользователя")
@@ -34,7 +34,7 @@ async def update_user(
         if not res:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Update error")
-        return res
+        return ResResponse(res)
 
 
 @router_users.post("/{user_id}/avatar", status_code=status.HTTP_200_OK, description="Устанавливает новый аватар текущего пользователя")
@@ -53,5 +53,5 @@ async def set_avatar(
         new_avatar_file_id = await files_repository.add_file(file.filename, user_credentials.id, user_credentials.id, user_credentials.id)
         async with user_repository:
             if await user_repository.update_avatar_only(user_credentials.id, new_avatar_file_id):
-                return new_avatar_file_id
-            return None
+                return ResResponse(new_avatar_file_id)
+            return ResResponse(None)
