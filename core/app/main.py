@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan,
-              openapi_url="/core/core/openapi2.json",    # REVIEW: откатить
+              openapi_url="/core-hotfix/core/openapi2.json",    # REVIEW: откатить x2
               docs_url="/swagger"
               )
 
